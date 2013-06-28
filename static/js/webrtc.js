@@ -273,8 +273,16 @@ var rtc = (function()
         if (!pc[peer]) {
           self.createPeerConnection(peer);
         }
-        if (localStream && !pc[peer].getLocalStreams().length) {
-          pc[peer].addStream(localStream);
+        if(localStream) {
+            if (pc[peer].getLocalStreams) {
+                if (!pc[peer].getLocalStreams().length) {
+                  pc[peer].addStream(localStream);
+                }
+            } else if (pc[peer].localStreams) {
+                if (!pc[peer].localStreams.length) {
+                    pc[peer].addStream(localStream);
+                }
+            }
         }
         pc[peer].setRemoteDescription(new RTCSessionDescription(data.offer), function() {
           pc[peer].createAnswer(function(desc) {
@@ -475,6 +483,7 @@ var rtc = (function()
           return [];
         };
     };
+
   } else if (navigator.webkitGetUserMedia) {
 
     webrtcDetectedBrowser = "chrome";
