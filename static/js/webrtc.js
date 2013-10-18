@@ -28,13 +28,9 @@ var rtc = (function()
         : "stun:stun.l.google.com:19302"
     }]
   };
-  // DtlsSrtpKeyAgreement must be true for better security
-  // and Chrome / Firefox interoperability
-  // https://code.google.com/p/webrtc/issues/detail?id=1718
-  // http://www.webrtc.org/interop
   var pc_constraints = {
     optional: [{
-      DtlsSrtpKeyAgreement: false
+      DtlsSrtpKeyAgreement: true
     }]
   };
   var sdpConstraints = {
@@ -73,7 +69,7 @@ var rtc = (function()
     aceSetAuthorStyle: function(hook, context, callback)
     {
       if (context.author && context.info && context.info.bgcolor) {
-        $('#video_' + context.author.replace(/\./, '_')).css({
+        $('#video_' + context.author.replace(/\./g, '_')).css({
           'border-color': context.info.bgcolor
         });
       }
@@ -82,9 +78,10 @@ var rtc = (function()
     userJoinOrUpdate: function(hook, context, callback)
     {
       //console.log(hook, arguments);
-      var info = context.userInfo;
-      if (!pc[info.userId]) {
-        self.call(info.userId);
+      var userId = context.userInfo.userId;
+      if (userId && pc[userId]) {
+        //console.log('remove stale peer connection', info.userId);
+        self.hangup(userId, false);
       }
       callback();
     },
@@ -147,13 +144,31 @@ var rtc = (function()
       var videoTrack = localStream.getVideoTracks()[0];
       if(videoTrack) {
         videoTrack.enabled = !videoTrack.enabled;
+        var $interface = $('#interface_video_' + self.getUserId().replace(/\./g, '_'));
+        if (!videoTrack.enabled) {
+          $('<div>')
+            .attr('id', 'disabled_video_' + self.getUserId().replace(/\./g, '_'))
+            .css({
+             'z-index': 400,
+              position: 'fixed',
+              top: $interface.position().top + 'px',
+              left: $interface.position().left + 'px',
+              width: $interface.width() + 'px',
+              height: $interface.height() + 'px',
+              'background-color': 'rgb(0,0,0)',
+              opacity: 1
+            })
+            .appendTo($('body'));
+        } else {
+            $('#disabled_video_' + self.getUserId().replace(/\./g, '_')).remove();
+        }
         return !videoTrack.enabled;
       }
     },
     setStream: function(userId, stream)
     {
       var isLocal = userId == self.getUserId();
-      var videoId = 'video_' + userId.replace(/\./, '_');
+      var videoId = 'video_' + userId.replace(/\./g, '_');
       var video = $('#' + videoId)[0];
       var colorId = self._pad.collabClient.getConnectedUsers()
         .filter(function(user) { return user.userId == userId; })
@@ -189,7 +204,7 @@ var rtc = (function()
     addInterface: function(userId)
     {
       var isLocal = userId == self.getUserId();
-      var videoId = 'video_' + userId.replace(/\./, '_');
+      var videoId = 'video_' + userId.replace(/\./g, '_');
       var $video = $('#' + videoId);
       var offset = $video.offset();
       var size = {width: $video.width(), height: $video.height()};
@@ -270,8 +285,11 @@ var rtc = (function()
       if (type == "hangup") {
         self.hangup(peer, false);
       } else if (type == "offer") {
-        if (!pc[peer]) {
-          self.createPeerConnection(peer);
+        if (pc[peer]) {
+            //console.log('ignore offer?', pc[peer].localDescription);
+            return;
+        } else {
+            self.createPeerConnection(peer);
         }
         if(localStream) {
             if (pc[peer].getLocalStreams) {
@@ -326,7 +344,7 @@ var rtc = (function()
     call: function(userId)
     {
       if (pc[userId]) {
-        //console.log('already connected, hangup first');
+        self.createOffer(userId);
         return;
       }
       if (!localStream) {
@@ -347,7 +365,10 @@ var rtc = (function()
       pc[userId] = new RTCPeerConnection(pc_config, pc_constraints);
       pc[userId].onicecandidate = function(event) {
         if (event.candidate) {
-          self.sendMessage(userId, {type: "icecandidate", candidate: event.candidate});
+          self.sendMessage(userId, {
+              type: "icecandidate",
+              candidate: event.candidate
+          });
         }
       };
       pc[userId].onaddstream = function(event) {
@@ -363,10 +384,10 @@ var rtc = (function()
       };
       /*
       pc[userId].onnsignalingstatechange = function(event) {
-        console.log('nsignalingstatechange;', event);
+        console.log('onsignalingstatechange;', event);
       };
       pc[userId].oniceconnectionstatechange = function(event) {
-        console.log(' oniceconnectionstatechange', event);
+        console.log('oniceconnectionstatechange', event);
       };
       */
     },
@@ -392,30 +413,25 @@ var rtc = (function()
     getUserMedia: function()
     {
       // Setup Camera and Microphone
-      var constraints = {audio: true, video: {mandatory: {
-        maxWidth: 320, maxHeight: 240
-      }}};
-      getUserMedia(constraints, function(stream) {
+      var mediaConstraints = {
+        audio: true,
+        video: {
+          optional: [],
+          mandatory: {
+            maxWidth: 320,
+            maxHeight: 240
+          }
+        }
+      };
+      getUserMedia(mediaConstraints, function(stream) {
         localStream = stream;
         self.setStream(self._pad.getUserId(), stream);
-        // Add Stream to existing connections
-        Object.keys(pc).forEach(function(userId) {
-          // Work around Firefox Bug 840728
-          // on support for renegotiating streams
-          if (webrtcDetectedBrowser == "firefox") {
-            self.hangup(userId);
-            if (callQueue.indexOf(userId) == -1) {
-              callQueue.push(userId);
-            }
-          } else {
-            pc[userId].addStream(stream);
+        self._pad.collabClient.getConnectedUsers().forEach(function(user) {
+          if (pc[user.userId]) {
+            self.hangup(user.userId);
           }
+          self.call(user.userId);
         });
-        // Call queued users that are not yet connected
-        callQueue.filter(function(userId) {
-          return !pc[userId];
-        }).forEach(self.call);
-        callQueue = [];
       }, logError);
     },
     init: function(pad)
@@ -430,6 +446,12 @@ var rtc = (function()
         self.toggleActive(true);
       } else {
         $('#options-enablertc').prop('checked', false);
+      }
+      if (isActive) {
+        $(window).unload(function () {
+            self.hangupAll();
+        });
+
       }
     }
   }
