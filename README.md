@@ -7,7 +7,7 @@ active users of the pad using WebRTC.
 
 # installing
 
-    npm install git://github.com/bit/ep_webrtc (from your etherpad-lite folder)
+    npm install git://r-w-x.org/ep_webrtc (from your etherpad-lite folder)
 
 # settings
 To disable the chat by default, append this to your settings.json:
@@ -17,6 +17,5 @@ To disable the chat by default, append this to your settings.json:
 
 # contributing
 
-Please use Github to report bugs or send patches.
-More at https://github.com/bit/ep_webrtc
+Please send bug reports or patches to j@mailb.org
 
