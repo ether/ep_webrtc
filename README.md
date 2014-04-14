@@ -27,6 +27,6 @@ To disable the chat by default, append this to your settings.json:
 
 # contributing
 
-Please submit bug reports or patches at https://github.com/bit/ep\_webrtc/issues
-or send them to ep\_webrtc@lists.mailb.org
+Please submit bug reports or patches at https://github.com/bit/ep_webrtc/issues
+or send them to ep_webrtc@lists.mailb.org
 
