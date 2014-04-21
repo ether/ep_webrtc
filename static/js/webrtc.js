@@ -447,6 +447,9 @@ var rtc = (function()
       } else {
         $('#options-enablertc').prop('checked', false);
       }
+      $('#options-enablertc').on('change', function() {
+        self.toggleActive();
+      })
       if (isActive) {
         $(window).unload(function () {
             self.hangupAll();
