@@ -25,6 +25,14 @@ To disable the chat by default, append this to your settings.json:
     "enabled" : false
 }`
 
+To set a custom stun server, set `ep_webrtc.iceServer` in your settings.json:
+
+  `"ep_webrtc" : {
+"iceServers":[
+    {"url": "stun:stun.l.google.com:19302"}
+]
+}`
+
 # contributing
 
 Please submit bug reports or patches at https://github.com/bit/ep_webrtc/issues

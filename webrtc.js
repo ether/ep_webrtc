@@ -50,6 +50,15 @@ function handleRTCMessage(client, payload)
   }
 }
 
+exports.clientVars = function(hook, context, callback)
+{
+  return callback({
+    webrtc: {
+      iceServers: settings.ep_webrtc.iceServers
+    }
+  });
+};
+
 exports.handleMessage = function ( hook, context, callback )
 {
   if (context.message.type == 'COLLABROOM' && context.message.data.type == 'RTC_MESSAGE') {

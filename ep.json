@@ -3,6 +3,7 @@
         {
             "name": "ep_webrtc",
             "hooks": {
+                "clientVars": "ep_webrtc/webrtc:clientVars",
                 "handleMessage" : "ep_webrtc/webrtc:handleMessage",
                 "socketio" : "ep_webrtc/webrtc:setSocketIO",
                 "eejsBlock_mySettings": "ep_webrtc/webrtc:settings"

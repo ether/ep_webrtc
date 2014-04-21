@@ -20,14 +20,7 @@ var hooks = require('ep_etherpad-lite/static/js/pluginfw/hooks');
 var rtc = (function()
 {
   var isActive = false;
-
-  var pc_config = {
-    iceServers:[{
-      url: webrtcDetectedBrowser == "firefox"
-        ? "stun:23.21.150.121"
-        : "stun:stun.l.google.com:19302"
-    }]
-  };
+  var pc_config = {};
   var pc_constraints = {
     optional: [{
       DtlsSrtpKeyAgreement: true
@@ -63,6 +56,13 @@ var rtc = (function()
         'display': 'none',
       }).appendTo($('body'));
 
+      pc_config.iceServers = clientVars.webrtc && clientVars.webrtc.iceServers
+        ? clientVars.webrtc.iceServers
+        : [{
+          url: webrtcDetectedBrowser == "firefox"
+            ? "stun:23.21.150.121"
+            : "stun:stun.l.google.com:19302"
+        }];
       self.init(context.pad);
       callback();
     },
