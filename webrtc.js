@@ -52,13 +52,26 @@ function handleRTCMessage(client, payload)
 
 exports.clientVars = function(hook, context, callback)
 {
+  var enabled = true;
+  if(settings.ep_webrtc && settings.ep_webrtc.enabled === false){
+    enabled = settings.ep_webrtc.enabled;
+  }
+
   var iceServers = [ {"url": "stun:stun.l.google.com:19302"} ];
   if(settings.ep_webrtc && settings.ep_webrtc.iceServers){
     iceServers = settings.ep_webrtc.iceServers;
   }
+
+  var listenClass = false;
+  if(settings.ep_webrtc && settings.ep_webrtc.listenClass){
+    listenClass = settings.ep_webrtc.listenClass;
+  }
+
   return callback({
     webrtc: {
-      "iceServers": iceServers
+      "iceServers": iceServers,
+      "enabled": enabled,
+      "listenClass": listenClass
     }
   });
 };

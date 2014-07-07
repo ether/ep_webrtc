@@ -441,20 +441,28 @@ var rtc = (function()
       if (typeof rtcEnabled == 'undefined') {
         rtcEnabled = $('#options-enablertc').prop('checked');
       }
-      if (rtcEnabled) {
-        $('#options-enablertc').prop('checked', true);
-        self.toggleActive(true);
-      } else {
-        $('#options-enablertc').prop('checked', false);
+
+      if(clientVars.webrtc.listenClass){
+        $(clientVars.webrtc.listenClass).on('click', function(){
+          self.toggleActive(true);
+        });
+      }
+ 
+      if(clientVars.webrtc.enabled){
+        if (rtcEnabled) {
+          $('#options-enablertc').prop('checked', true);
+          self.toggleActive(true);
+        } else {
+          $('#options-enablertc').prop('checked', false);
+        }
       }
       $('#options-enablertc').on('change', function() {
         self.toggleActive();
       })
       if (isActive) {
         $(window).unload(function () {
-            self.hangupAll();
+          self.hangupAll();
         });
-
       }
     }
   }
