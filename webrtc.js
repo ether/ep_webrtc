@@ -52,11 +52,18 @@ function handleRTCMessage(client, payload)
 
 exports.clientVars = function(hook, context, callback)
 {
+  var enabled = true;
+  if(settings.ep_webrtc && settings.ep_webrtc.enabled === false){
+    enabled = settings.ep_webrtc.enabled;
+  }
+
   return callback({
     webrtc: {
-      iceServers: settings.ep_webrtc.iceServers
+      iceServers: settings.ep_webrtc.iceServers,
+      "enabled": enabled
     }
   });
+
 };
 
 exports.handleMessage = function ( hook, context, callback )
