@@ -33,6 +33,13 @@ To set a custom stun server, set `ep_webrtc.iceServer` in your settings.json:
 ]
 }`
 
+To set an element or class to listen for an init event set `ep_webrtc.listenClass` in your settings.json.  This is often stabled with ``"enabled":false`` and a button to provide a button to begin video sessions
+
+  `"ep_webrtc" : {
+"listenClass": "#chatLabel"
+}`
+
+
 # contributing
 
 Please submit bug reports or patches at https://github.com/bit/ep_webrtc/issues
