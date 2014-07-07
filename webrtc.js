@@ -62,10 +62,16 @@ exports.clientVars = function(hook, context, callback)
     iceServers = settings.ep_webrtc.iceServers;
   }
 
+  var listenClass = false;
+  if(settings.ep_webrtc && settings.ep_webrtc.listenClass){
+    listenClass = settings.ep_webrtc.listenClass;
+  }
+
   return callback({
     webrtc: {
       "iceServers": iceServers,
-      "enabled": enabled
+      "enabled": enabled,
+      "listenClass": listenClass
     }
   });
 };
