@@ -39,6 +39,7 @@ To set an element or class to listen for an init event set `ep_webrtc.listenClas
 "listenClass": "#chatLabel"
 }`
 
+To enable webrtc with a URL parameter append the following to your pad URL ``?av=YES``
 
 # contributing
 
