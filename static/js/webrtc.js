@@ -434,13 +434,23 @@ var rtc = (function()
         });
       }, logError);
     },
-    init: function(pad)
+    avInURL: function(){
+      if (window.location.search.indexOf('av=YES') > -1) {
+        return true;
+      } else {
+        return false;
+      }      
+    },
+    init: function(pad)	
     {
       self._pad = pad || window.pad;
       var rtcEnabled = padcookie.getPref("rtcEnabled");
       if (typeof rtcEnabled == 'undefined') {
         rtcEnabled = $('#options-enablertc').prop('checked');
       }
+
+      // if a URL Parameter is set then toggleActive
+      if(self.avInURL()) self.toggleActive(true);
 
       if(clientVars.webrtc.listenClass){
         $(clientVars.webrtc.listenClass).on('click', function(){
