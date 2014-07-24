@@ -570,7 +570,7 @@ var rtc = (function()
       };
     }
   } else {
-    // console.log("Browser does not appear to be WebRTC-capable");
+    console.log("Browser does not appear to be WebRTC-capable");
     isSupported = false;
   }
 
