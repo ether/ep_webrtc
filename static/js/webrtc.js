@@ -20,6 +20,7 @@ var hooks = require('ep_etherpad-lite/static/js/pluginfw/hooks');
 var rtc = (function()
 {
   var isActive = false;
+  var isSupported = true;
   var pc_config = {};
   var pc_constraints = {
     optional: [{
@@ -114,21 +115,23 @@ var rtc = (function()
     },
     toggleActive: function(force)
     {
-      if (force === true || !padcookie.getPref("rtcEnabled")) {
-        padcookie.setPref("rtcEnabled", true);
-        self.show();
-        self.getUserMedia();
-        isActive = true;
-      } else {
-        padcookie.setPref("rtcEnabled", false);
-        self.hide();
-        self.hangupAll();
-        if (localStream) {
-          self.setStream(self._pad.getUserId(), '');
-          localStream.stop();
-          localStream = null;
+      if (isSupported) { // We should only allow activation if webRTC is supported
+        if (force === true || !padcookie.getPref("rtcEnabled")) {
+          padcookie.setPref("rtcEnabled", true);
+          self.show();
+          self.getUserMedia();
+          isActive = true;
+        } else {
+          padcookie.setPref("rtcEnabled", false);
+          self.hide();
+          self.hangupAll();
+          if (localStream) {
+            self.setStream(self._pad.getUserId(), '');
+            localStream.stop();
+            localStream = null;
+          }
+          isActive = false;
         }
-        isActive = false;
       }
     },
     toggleMuted: function()
@@ -577,7 +580,8 @@ var rtc = (function()
       };
     }
   } else {
-    console.log("Browser does not appear to be WebRTC-capable");
+    // console.log("Browser does not appear to be WebRTC-capable");
+    isSupported = false;
   }
 
   // Set Opus as the default audio codec if it's present.
