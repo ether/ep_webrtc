@@ -45,7 +45,7 @@ var rtc = (function()
         'left': '0',
         'top': '37px',
         'width': '130px',
-        'z-index': '400',
+        'z-index': '1',
         'border-right': '1px solid #999',
         'border-top': '1px solid #999',
         'padding': '3px',
