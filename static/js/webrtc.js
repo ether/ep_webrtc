@@ -45,7 +45,7 @@ var rtc = (function()
         'left': '0',
         'top': '37px',
         'width': '130px',
-        'z-index': '400',
+        'z-index': '1',
         'border-right': '1px solid #999',
         'border-top': '1px solid #999',
         'padding': '3px',
@@ -152,7 +152,7 @@ var rtc = (function()
           $('<div>')
             .attr('id', 'disabled_video_' + self.getUserId().replace(/\./g, '_'))
             .css({
-             'z-index': 400,
+             'z-index': '1',
               position: 'fixed',
               top: $interface.position().top + 'px',
               left: $interface.position().left + 'px',
@@ -248,7 +248,7 @@ var rtc = (function()
       $('<div>')
         .attr('id', 'interface_' + videoId)
         .css({
-         'z-index': 401,
+         'z-index': '2',
           position: 'fixed',
           top: offset.top + 'px',
           left: (offset.left + 4) + 'px',
