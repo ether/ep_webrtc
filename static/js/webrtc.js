@@ -108,6 +108,18 @@ var rtc = (function()
       right = right == 'auto' ? '0px' : right;
       $('#editorcontainer').css({"left":"130px", "width": "auto", "right": right});
     },
+    showNotSupported: function()
+    {
+      $("#rtcbox").empty().append($('<div>').css({
+        "padding": "8px",
+        "padding-top": "32px"
+      }).html(
+          'Sorry, your browser does not support WebRTC.'
+        + '<br><br>'
+        + 'To participate in this audio/video chat you have to user a browser with WebRTC support like Chrome, Firefox or Opera.'
+        + ' <a href="http://www.webrtc.org/" target="_new">Find out more</a>'
+      ));
+    },
     hide: function ()
     {
       $("#rtcbox").hide();
@@ -121,6 +133,8 @@ var rtc = (function()
         if (isSupported) {
             padcookie.setPref("rtcEnabled", true);
             self.getUserMedia();
+        } else {
+          self.showNotSupported();
         }
         isActive = true;
     },
