@@ -39,11 +39,12 @@ var rtc = (function()
     //API HOOKS
     postAceInit: function(hook, context, callback)
     {
+      var top = $('div#editbar').offset().top + $('div#editbar').height() + 5;
       $('<div>').attr({'id': 'rtcbox'}).css({
         'position': 'absolute',
         'bottom': '0',
         'left': '0',
-        'top': '37px',
+        'top': top + 'px',
         'width': '130px',
         'z-index': '1',
         'border-right': '1px solid #999',
