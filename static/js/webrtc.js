@@ -113,26 +113,32 @@ var rtc = (function()
       $("#rtcbox").hide();
       $('#editorcontainer').css({"left":"0"});
     },
-    toggleActive: function(force)
+    activate: function()
     {
-      if (isSupported) { // We should only allow activation if webRTC is supported
-        if (force === true || !padcookie.getPref("rtcEnabled")) {
-          padcookie.setPref("rtcEnabled", true);
-          self.show();
-          self.getUserMedia();
-          isActive = true;
-        } else {
+        $('#options-enablertc').prop('checked', true);
+        if (isActive) return;
+        self.show();
+        if (isSupported) {
+            padcookie.setPref("rtcEnabled", true);
+            self.getUserMedia();
+        }
+        isActive = true;
+    },
+    deactivate: function()
+    {
+        $('#options-enablertc').prop('checked', false);
+        if (!isActive) return;
+        self.hide();
+        if (isSupported) {
           padcookie.setPref("rtcEnabled", false);
-          self.hide();
           self.hangupAll();
           if (localStream) {
             self.setStream(self._pad.getUserId(), '');
             localStream.stop();
             localStream = null;
           }
-          isActive = false;
         }
-      }
+        isActive = false;
     },
     toggleMuted: function()
     {
@@ -452,25 +458,28 @@ var rtc = (function()
         rtcEnabled = $('#options-enablertc').prop('checked');
       }
 
-      // if a URL Parameter is set then toggleActive
-      if(self.avInURL()) self.toggleActive(true);
+      // if a URL Parameter is set then activate
+      if(self.avInURL()) self.activate();
 
       if(clientVars.webrtc.listenClass){
         $(clientVars.webrtc.listenClass).on('click', function(){
-          self.toggleActive(true);
+          self.activate();
         });
       }
  
       if(clientVars.webrtc.enabled){
         if (rtcEnabled) {
-          $('#options-enablertc').prop('checked', true);
-          self.toggleActive(true);
+          self.activate();
         } else {
-          $('#options-enablertc').prop('checked', false);
+          self.deactivate();
         }
       }
       $('#options-enablertc').on('change', function() {
-        self.toggleActive();
+          if (this.checked) {
+              self.activate()
+          } else {
+              self.deactivate()
+          }
       })
       if (isActive) {
         $(window).unload(function () {
