@@ -29,8 +29,8 @@ var rtc = (function()
   };
   var sdpConstraints = {
     mandatory: {
-      'OfferToReceiveAudio': true,
-      'OfferToReceiveVideo': true
+      OfferToReceiveAudio: true,
+      OfferToReceiveVideo: true
     }
   };
   var localStream, remoteStream = {}, pc = {}, callQueue = [];
@@ -328,9 +328,9 @@ var rtc = (function()
         }
         pc[peer].setRemoteDescription(new RTCSessionDescription(data.offer), function() {
           pc[peer].createAnswer(function(desc) {
-            desc.sdp = preferOpus(desc.sdp);
+            desc.sdp = cleanupSdp(desc.sdp);
             pc[peer].setLocalDescription(desc, function() {
-              self.sendMessage(peer, {type: "answer", answer: pc[peer].localDescription});
+              self.sendMessage(peer, {type: "answer", answer: desc});
             }, logError);
           }, logError, sdpConstraints);
         }, logError);
@@ -428,9 +428,9 @@ var rtc = (function()
       }
       constraints = mergeConstraints(constraints, sdpConstraints);
       pc[userId].createOffer(function(desc) {
-        desc.sdp = preferOpus(desc.sdp);
+        desc.sdp = cleanupSdp(desc.sdp);
         pc[userId].setLocalDescription(desc, function() {
-          self.sendMessage(userId, {type: "offer", offer: pc[userId].localDescription});
+          self.sendMessage(userId, {type: "offer", offer: desc});
         }, logError);
       }, logError, constraints);
     },
@@ -506,23 +506,28 @@ var rtc = (function()
 
   // Normalize RTC implementation between browsers
 
-  var RTCPeerConnection = null;
   var getUserMedia = null;
   var attachMediaStream = null;
   var reattachMediaStream = null;
   var webrtcDetectedBrowser = null;
 
-  if (navigator.mozGetUserMedia) {
+  if (navigator.mozGetUserMedia && window.mozRTCPeerConnection) {
     webrtcDetectedBrowser = "firefox";
 
     // The RTCPeerConnection object.
-    RTCPeerConnection = mozRTCPeerConnection;
+    if (!window.RTCPeerConnection) {
+        window.RTCPeerConnection = mozRTCPeerConnection;
+    }
 
     // The RTCSessionDescription object.
-    RTCSessionDescription = mozRTCSessionDescription;
+    if (!window.RTCSessionDescription) {
+        window.RTCSessionDescription = mozRTCSessionDescription;
+    }
 
     // The RTCIceCandidate object.
-    RTCIceCandidate = mozRTCIceCandidate;
+    if (!window.RTCIceCandidate) {
+        window.RTCIceCandidate = mozRTCIceCandidate;
+    }
 
     // Get UserMedia (only difference is the prefix).
     // Code from Adam Barth.
@@ -530,8 +535,16 @@ var rtc = (function()
 
     // Attach a media stream to an element.
     attachMediaStream = function(element, stream) {
-      element.mozSrcObject = stream;
-      element.play();
+      if (typeof element.srcObject !== 'undefined') {
+        element.srcObject = stream;
+      } else if (typeof element.mozSrcObject !== 'undefined') {
+        element.mozSrcObject = stream;
+        element.play();
+      }  else if (typeof element.src !== 'undefined') {
+        element.src = URL.createObjectURL(stream);
+      } else {
+        console.log('Error attaching stream to element.', element);
+      }
     };
 
     reattachMediaStream = function(to, from) {
@@ -554,12 +567,71 @@ var rtc = (function()
         };
     };
 
-  } else if (navigator.webkitGetUserMedia) {
+  } else if (navigator.webkitGetUserMedia && window.webkitRTCPeerConnection) {
 
     webrtcDetectedBrowser = "chrome";
 
     // The RTCPeerConnection object.
-    RTCPeerConnection = webkitRTCPeerConnection;
+    window.RTCPeerConnection = function(pcConfig, pcConstraints) {
+      // Translate iceTransportPolicy to iceTransports,
+      // see https://code.google.com/p/webrtc/issues/detail?id=4869
+      if (pcConfig && pcConfig.iceTransportPolicy) {
+        pcConfig.iceTransports = pcConfig.iceTransportPolicy;
+      }
+
+      var pc = new webkitRTCPeerConnection(pcConfig, pcConstraints); // jscs:ignore requireCapitalizedConstructors
+      var origGetStats = pc.getStats.bind(pc);
+      pc.getStats = function(selector, successCallback, errorCallback) { // jshint ignore: line
+        var self = this;
+        var args = arguments;
+
+        // If selector is a function then we are in the old style stats so just
+        // pass back the original getStats format to avoid breaking old users.
+        if (arguments.length > 0 && typeof selector === 'function') {
+          return origGetStats(selector, successCallback);
+        }
+
+        var fixChromeStats = function(response) {
+          var standardReport = {};
+          var reports = response.result();
+          reports.forEach(function(report) {
+            var standardStats = {
+              id: report.id,
+              timestamp: report.timestamp,
+              type: report.type
+            };
+            report.names().forEach(function(name) {
+              standardStats[name] = report.stat(name);
+            });
+            standardReport[standardStats.id] = standardStats;
+          });
+
+          return standardReport;
+        };
+
+        if (arguments.length >= 2) {
+          var successCallbackWrapper = function(response) {
+            args[1](fixChromeStats(response));
+          };
+
+          return origGetStats.apply(this, [successCallbackWrapper, arguments[0]]);
+        }
+
+        // promise-support
+        return new Promise(function(resolve, reject) {
+          if (args.length === 1 && selector === null) {
+            origGetStats.apply(self, [
+                function(response) {
+                  resolve.apply(null, [fixChromeStats(response)]);
+                }, reject]);
+          } else {
+            origGetStats.apply(self, [resolve, reject]);
+          }
+        });
+      };
+
+      return pc;
+    };
 
     // Get UserMedia (only difference is the prefix).
     // Code from Adam Barth.
@@ -573,7 +645,6 @@ var rtc = (function()
         element.mozSrcObject = stream;
       }  else if (typeof element.src !== 'undefined') {
         element.src = URL.createObjectURL(stream);
-        //element.src = webkitURL.createObjectURL(stream);
       } else {
         console.log('Error attaching stream to element.', element);
       }
@@ -711,6 +782,18 @@ var rtc = (function()
     sdpLines[mLineIndex] = mLineElements.join(' ');
     return sdpLines;
   }
+
+  function sdpRate(sdp, rate) {
+    rate = rate || 1638400;
+    return sdp.replace(/b=AS:\d+\r/g, 'b=AS:' + rate + '\r');
+  }
+
+  function cleanupSdp(sdp) {
+    sdp = preferOpus(sdp);
+    sdp = sdpRate(sdp);
+    return sdp;
+  }
+
   function mergeConstraints(cons1, cons2) {
     var merged = cons1;
     for (var name in cons2.mandatory) {

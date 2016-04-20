@@ -1,12 +1,10 @@
 {
-	"name": "ep_webrtc",
-	"version": "0.0.6",
-	"description": "WebRTC based audio/video chat to Etherpad",
-	"author": "j <j@mailb.org>",
-	"contributors": [],
-	"dependencies": {
-    },
-	"engines": {
+    "name": "ep_webrtc",
+    "version": "0.0.7",
+    "description": "WebRTC based audio/video chat to Etherpad",
+    "author": "j <j@mailb.org>",
+    "contributors": [],
+    "engines": {
         "node": ">=0.6.3"
     }
 }
