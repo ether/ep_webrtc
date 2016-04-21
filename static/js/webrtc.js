@@ -348,11 +348,14 @@ var rtc = (function()
       } else if (type == "icecandidate") {
         if (pc[peer]) {
           var candidate = new RTCIceCandidate(data.candidate);
-          pc[peer].addIceCandidate(candidate).then(function() {
-            // Do stuff when the candidate is successfully passed to the ICE agent
-          }).catch(function() {
-            console.log("Error: Failure during addIceCandidate()", data);
-          });
+          var p = pc[peer].addIceCandidate(candidate);
+          if (p) {
+              p.then(function() {
+                // Do stuff when the candidate is successfully passed to the ICE agent
+              }).catch(function() {
+                console.log("Error: Failure during addIceCandidate()", data);
+              });
+          }
         }
       } else {
         console.log('unknown message', data);
