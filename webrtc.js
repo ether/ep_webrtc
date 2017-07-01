@@ -32,8 +32,8 @@ function handleRTCMessage(client, payload)
   var room = socketio.sockets.adapter.rooms[padId];
   var clients = [];
 
-  if (room) {
-    for (var id in room) {
+  if (room && room.sockets) {
+    for (var id in room.sockets) {
       clients.push(socketio.sockets.adapter.nsp.connected[id]);
     }
   }
