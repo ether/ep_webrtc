@@ -443,18 +443,19 @@ var rtc = (function()
     },
     getUserMedia: function()
     {
+
       // Setup Camera and Microphone
       var mediaConstraints = {
         audio: true,
         video: {
-          optional: [],
           mandatory: {
             maxWidth: 320,
             maxHeight: 240
           }
         }
       };
-      getUserMedia(mediaConstraints, function(stream) {
+
+      navigator.getUserMedia(mediaConstraints, function(stream) {
         localStream = stream;
         self.setStream(self._pad.getUserId(), stream);
         self._pad.collabClient.getConnectedUsers().forEach(function(user) {
@@ -540,7 +541,7 @@ var rtc = (function()
 
     // Get UserMedia (only difference is the prefix).
     // Code from Adam Barth.
-    getUserMedia = navigator.mozGetUserMedia.bind(navigator);
+    navigator.getUserMedia = navigator.mozGetUserMedia.bind(navigator);
 
     // Attach a media stream to an element.
     attachMediaStream = function(element, stream) {
@@ -577,7 +578,7 @@ var rtc = (function()
     };
 
   } else if (navigator.webkitGetUserMedia && window.webkitRTCPeerConnection) {
-
+console.log("Chrome");
     webrtcDetectedBrowser = "chrome";
 
     // The RTCPeerConnection object.
@@ -645,6 +646,7 @@ var rtc = (function()
     // Get UserMedia (only difference is the prefix).
     // Code from Adam Barth.
     getUserMedia = navigator.webkitGetUserMedia.bind(navigator);
+    // navigator.getUserMedia = navigator.webkitGetUserMedia;
 
     // Attach a media stream to an element.
     attachMediaStream = function(element, stream) {
@@ -683,10 +685,42 @@ var rtc = (function()
         return this.remoteStreams;
       };
     }
-  } else {
-    // console.log("Browser does not appear to be WebRTC-capable");
+  } 
+
+  /*
+  else {
+    console.log("Browser does not appear to be Moz/FF WebRTC-capable"); // Moz or FF..  Not Edge / Safari
     isSupported = false;
   }
+  */
+
+  else if(navigator.mediaDevices.getUserMedia) {
+    // Edge
+    isSupported = true;
+    getUserMedia = navigator.mediaDevices.getUserMedia;
+
+    // Attach a media stream to an element.
+    attachMediaStream = function(element, stream) {
+      if (typeof element.srcObject !== 'undefined') {
+        element.srcObject = stream;
+      } else if (typeof element.srcObject !== 'undefined') {
+        element.srcObject = stream;
+        element.play();
+      }  else if (typeof element.src !== 'undefined') {
+        element.src = URL.createObjectURL(stream);
+      } else {
+        console.log('Error attaching stream to element.', element);
+      }
+    };
+
+    reattachMediaStream = function(to, from){
+      to.srcObject = from.srcObject;
+      to.play();
+    };
+
+  }
+
+
 
   // Set Opus as the default audio codec if it's present.
   function preferOpus(sdp) {
