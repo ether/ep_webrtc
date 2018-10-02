@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+'use strict';
 
 var padcookie = require('ep_etherpad-lite/static/js/pad_cookie').padcookie;
 var hooks = require('ep_etherpad-lite/static/js/pluginfw/hooks');
@@ -20,6 +21,7 @@ var hooks = require('ep_etherpad-lite/static/js/pluginfw/hooks');
 var rtc = (function()
 {
   var isActive = false;
+  var isSupported = true;
   var pc_config = {};
   var pc_constraints = {
     optional: [{
@@ -28,8 +30,8 @@ var rtc = (function()
   };
   var sdpConstraints = {
     mandatory: {
-      'OfferToReceiveAudio': true,
-      'OfferToReceiveVideo': true
+      OfferToReceiveAudio: true,
+      OfferToReceiveVideo: true
     }
   };
   var localStream, remoteStream = {}, pc = {}, callQueue = [];
@@ -38,13 +40,14 @@ var rtc = (function()
     //API HOOKS
     postAceInit: function(hook, context, callback)
     {
+      var top = $('div#editbar').offset().top + $('div#editbar').height() + 5;
       $('<div>').attr({'id': 'rtcbox'}).css({
         'position': 'absolute',
         'bottom': '0',
         'left': '0',
-        'top': '37px',
+        'top': top + 'px',
         'width': '130px',
-        'z-index': '400',
+        'z-index': '1',
         'border-right': '1px solid #999',
         'border-top': '1px solid #999',
         'padding': '3px',
@@ -77,17 +80,16 @@ var rtc = (function()
     },
     userJoinOrUpdate: function(hook, context, callback)
     {
-      //console.log(hook, arguments);
+      /*
       var userId = context.userInfo.userId;
-      if (userId && pc[userId]) {
-        //console.log('remove stale peer connection', info.userId);
-        self.hangup(userId, false);
-      }
+      console.log('userJoinOrUpdate', context, context.userInfo.userId, pc[userId]);
+      */
       callback();
     },
     userLeave: function(hook, context, callback)
     {
       var userId = context.userInfo.userId;
+      //console.log('user left, hang up', userId, context, pc[userId]);
       if (userId && pc[userId]) {
         self.hangup(userId, false);
       }
@@ -107,29 +109,51 @@ var rtc = (function()
       right = right == 'auto' ? '0px' : right;
       $('#editorcontainer').css({"left":"130px", "width": "auto", "right": right});
     },
+    showNotSupported: function()
+    {
+      $("#rtcbox").empty().append($('<div>').css({
+        "padding": "8px",
+        "padding-top": "32px"
+      }).html(
+          'Sorry, your browser does not support WebRTC.'
+        + '<br><br>'
+        + 'To participate in this audio/video chat you have to user a browser with WebRTC support like Chrome, Firefox or Opera.'
+        + ' <a href="http://www.webrtc.org/" target="_new">Find out more</a>'
+      ));
+    },
     hide: function ()
     {
       $("#rtcbox").hide();
       $('#editorcontainer').css({"left":"0"});
     },
-    toggleActive: function(force)
+    activate: function()
     {
-      if (force === true || !padcookie.getPref("rtcEnabled")) {
-        padcookie.setPref("rtcEnabled", true);
+        $('#options-enablertc').prop('checked', true);
+        if (isActive) return;
         self.show();
-        self.getUserMedia();
+        if (isSupported) {
+          padcookie.setPref("rtcEnabled", true);
+          self.getUserMedia();
+        } else {
+          self.showNotSupported();
+        }
         isActive = true;
-      } else {
-        padcookie.setPref("rtcEnabled", false);
+    },
+    deactivate: function()
+    {
+        $('#options-enablertc').prop('checked', false);
+        if (!isActive) return;
         self.hide();
-        self.hangupAll();
-        if (localStream) {
-          self.setStream(self._pad.getUserId(), '');
-          localStream.stop();
-          localStream = null;
+        if (isSupported) {
+          padcookie.setPref("rtcEnabled", false);
+          self.hangupAll();
+          if (localStream) {
+            self.setStream(self._pad.getUserId(), '');
+            localStream.stop();
+            localStream = null;
+          }
         }
         isActive = false;
-      }
     },
     toggleMuted: function()
     {
@@ -149,7 +173,7 @@ var rtc = (function()
           $('<div>')
             .attr('id', 'disabled_video_' + self.getUserId().replace(/\./g, '_'))
             .css({
-             'z-index': 400,
+             'z-index': '1',
               position: 'fixed',
               top: $interface.position().top + 'px',
               left: $interface.position().left + 'px',
@@ -245,7 +269,7 @@ var rtc = (function()
       $('<div>')
         .attr('id', 'interface_' + videoId)
         .css({
-         'z-index': 401,
+         'z-index': '2',
           position: 'fixed',
           top: offset.top + 'px',
           left: (offset.left + 4) + 'px',
@@ -278,6 +302,10 @@ var rtc = (function()
     receiveMessage: function(msg)
     {
       var peer = msg.from, data = msg.data, type = data.type;
+      if (peer == self.getUserId()) {
+        // console.log('ignore own messages');
+        return;
+      }
       /*
       if (type != 'icecandidate')
         console.log('receivedMessage', 'peer', peer, 'type', type, 'data', data);
@@ -286,38 +314,48 @@ var rtc = (function()
         self.hangup(peer, false);
       } else if (type == "offer") {
         if (pc[peer]) {
-            //console.log('ignore offer?', pc[peer].localDescription);
-            return;
+          console.log('existing connection?', pc[peer]);
+          self.hangup(peer, false);
+          self.createPeerConnection(peer);
         } else {
-            self.createPeerConnection(peer);
+          self.createPeerConnection(peer);
         }
         if(localStream) {
-            if (pc[peer].getLocalStreams) {
-                if (!pc[peer].getLocalStreams().length) {
-                  pc[peer].addStream(localStream);
-                }
-            } else if (pc[peer].localStreams) {
-                if (!pc[peer].localStreams.length) {
-                    pc[peer].addStream(localStream);
-                }
+          if (pc[peer].getLocalStreams) {
+            if (!pc[peer].getLocalStreams().length) {
+              pc[peer].addStream(localStream);
             }
+          } else if (pc[peer].localStreams) {
+            if (!pc[peer].localStreams.length) {
+              pc[peer].addStream(localStream);
+            }
+          }
         }
-        pc[peer].setRemoteDescription(new RTCSessionDescription(data.offer), function() {
+        var offer = new RTCSessionDescription(data.offer);
+        pc[peer].setRemoteDescription(offer, function() {
           pc[peer].createAnswer(function(desc) {
-            desc.sdp = preferOpus(desc.sdp);
+            desc.sdp = cleanupSdp(desc.sdp);
             pc[peer].setLocalDescription(desc, function() {
-              self.sendMessage(peer, {type: "answer", answer: pc[peer].localDescription});
+              self.sendMessage(peer, {type: "answer", answer: desc});
             }, logError);
           }, logError, sdpConstraints);
         }, logError);
       } else if (type == "answer") {
         if (pc[peer]) {
-          pc[peer].setRemoteDescription(new RTCSessionDescription(data.answer, function() {
-          }, logError));
+          var answer = new RTCSessionDescription(data.answer);
+          pc[peer].setRemoteDescription(answer, function() {}, logError);
         }
       } else if (type == "icecandidate") {
         if (pc[peer]) {
-          pc[peer].addIceCandidate(new RTCIceCandidate(data.candidate));
+          var candidate = new RTCIceCandidate(data.candidate);
+          var p = pc[peer].addIceCandidate(candidate);
+          if (p) {
+              p.then(function() {
+                // Do stuff when the candidate is successfully passed to the ICE agent
+              }).catch(function() {
+                console.log("Error: Failure during addIceCandidate()", data);
+              });
+          }
         }
       } else {
         console.log('unknown message', data);
@@ -343,19 +381,31 @@ var rtc = (function()
     },
     call: function(userId)
     {
-      if (pc[userId]) {
-        self.createOffer(userId);
-        return;
-      }
       if (!localStream) {
         callQueue.push(userId);
         return;
       }
-      self.createPeerConnection(userId);
-      pc[userId].addStream(localStream);
-      if (webrtcDetectedBrowser == "firefox") {
-        self.createOffer(userId);
+      var constraints = {optional: [], mandatory: {}};
+      // temporary measure to remove Moz* constraints in Chrome
+      if (webrtcDetectedBrowser === "chrome") {
+        for (var prop in constraints.mandatory) {
+          if (prop.indexOf("Moz") != -1) {
+            delete constraints.mandatory[prop];
+          }
+        }
       }
+      constraints = mergeConstraints(constraints, sdpConstraints);
+
+      if (!pc[userId]) {
+        self.createPeerConnection(userId);
+      }
+      pc[userId].addStream(localStream);
+      pc[userId].createOffer(function(desc) {
+        desc.sdp = cleanupSdp(desc.sdp);
+        pc[userId].setLocalDescription(desc, function() {
+          self.sendMessage(userId, {type: "offer", offer: desc});
+        }, logError);
+      }, logError, constraints);
     },
     createPeerConnection: function(userId)
     {
@@ -366,8 +416,8 @@ var rtc = (function()
       pc[userId].onicecandidate = function(event) {
         if (event.candidate) {
           self.sendMessage(userId, {
-              type: "icecandidate",
-              candidate: event.candidate
+            type: "icecandidate",
+            candidate: event.candidate
           });
         }
       };
@@ -378,37 +428,18 @@ var rtc = (function()
       pc[userId].onremovestream = function(event) {
         self.setStream(userId, '');
       };
-      pc[userId].onnegotiationneeded = function(event) {
-        //console.log('onnegotiationneeded', userId, event);
-        self.createOffer(userId);
-      };
       /*
       pc[userId].onnsignalingstatechange = function(event) {
         console.log('onsignalingstatechange;', event);
       };
       pc[userId].oniceconnectionstatechange = function(event) {
-        console.log('oniceconnectionstatechange', event);
+        if (event.target.iceConnectionState == 'disconnected'
+            || event.target.iceConnectionState == 'closed') {
+          console.log('hangup due to iceConnectionState', event.target.iceConnectionState);
+          self.hangup(userId, false);
+        }
       };
       */
-    },
-    createOffer: function(userId) {
-      var constraints = {optional: [], mandatory: {MozDontOfferDataChannel: true}};
-      var offer;
-      // temporary measure to remove Moz* constraints in Chrome
-      if (webrtcDetectedBrowser === "chrome") {
-        for (prop in constraints.mandatory) {
-          if (prop.indexOf("Moz") != -1) {
-            delete constraints.mandatory[prop];
-          }
-        }
-      }
-      constraints = mergeConstraints(constraints, sdpConstraints);
-      pc[userId].createOffer(function(desc) {
-        desc.sdp = preferOpus(desc.sdp);
-        pc[userId].setLocalDescription(desc, function() {
-          self.sendMessage(userId, {type: "offer", offer: pc[userId].localDescription});
-        }, logError);
-      }, logError, constraints);
     },
     getUserMedia: function()
     {
@@ -427,14 +458,23 @@ var rtc = (function()
         localStream = stream;
         self.setStream(self._pad.getUserId(), stream);
         self._pad.collabClient.getConnectedUsers().forEach(function(user) {
-          if (pc[user.userId]) {
-            self.hangup(user.userId);
+          if (user.userId != self.getUserId()) {
+            if (pc[user.userId]) {
+              self.hangup(user.userId);
+            }
+            self.call(user.userId);
           }
-          self.call(user.userId);
         });
       }, logError);
     },
-    init: function(pad)
+    avInURL: function(){
+      if (window.location.search.indexOf('av=YES') > -1) {
+        return true;
+      } else {
+        return false;
+      }
+    },
+    init: function(pad)	
     {
       self._pad = pad || window.pad;
       var rtcEnabled = padcookie.getPref("rtcEnabled");
@@ -442,22 +482,28 @@ var rtc = (function()
         rtcEnabled = $('#options-enablertc').prop('checked');
       }
 
+      // if a URL Parameter is set then activate
+      if(self.avInURL()) self.activate();
+
       if(clientVars.webrtc.listenClass){
         $(clientVars.webrtc.listenClass).on('click', function(){
-          self.toggleActive(true);
+          self.activate();
         });
       }
  
       if(clientVars.webrtc.enabled){
         if (rtcEnabled) {
-          $('#options-enablertc').prop('checked', true);
-          self.toggleActive(true);
+          self.activate();
         } else {
-          $('#options-enablertc').prop('checked', false);
+          self.deactivate();
         }
       }
       $('#options-enablertc').on('change', function() {
-        self.toggleActive();
+        if (this.checked) {
+          self.activate()
+        } else {
+          self.deactivate()
+        }
       })
       if (isActive) {
         $(window).unload(function () {
@@ -469,23 +515,28 @@ var rtc = (function()
 
   // Normalize RTC implementation between browsers
 
-  var RTCPeerConnection = null;
   var getUserMedia = null;
   var attachMediaStream = null;
   var reattachMediaStream = null;
   var webrtcDetectedBrowser = null;
 
-  if (navigator.mozGetUserMedia) {
+  if (navigator.mozGetUserMedia && window.mozRTCPeerConnection) {
     webrtcDetectedBrowser = "firefox";
 
     // The RTCPeerConnection object.
-    RTCPeerConnection = mozRTCPeerConnection;
+    if (!window.RTCPeerConnection) {
+      window.RTCPeerConnection = mozRTCPeerConnection;
+    }
 
     // The RTCSessionDescription object.
-    RTCSessionDescription = mozRTCSessionDescription;
+    if (!window.RTCSessionDescription) {
+      window.RTCSessionDescription = mozRTCSessionDescription;
+    }
 
     // The RTCIceCandidate object.
-    RTCIceCandidate = mozRTCIceCandidate;
+    if (!window.RTCIceCandidate) {
+      window.RTCIceCandidate = mozRTCIceCandidate;
+    }
 
     // Get UserMedia (only difference is the prefix).
     // Code from Adam Barth.
@@ -493,8 +544,16 @@ var rtc = (function()
 
     // Attach a media stream to an element.
     attachMediaStream = function(element, stream) {
-      element.mozSrcObject = stream;
-      element.play();
+      if (typeof element.srcObject !== 'undefined') {
+        element.srcObject = stream;
+      } else if (typeof element.mozSrcObject !== 'undefined') {
+        element.mozSrcObject = stream;
+        element.play();
+      }  else if (typeof element.src !== 'undefined') {
+        element.src = URL.createObjectURL(stream);
+      } else {
+        console.log('Error attaching stream to element.', element);
+      }
     };
 
     reattachMediaStream = function(to, from) {
@@ -504,25 +563,84 @@ var rtc = (function()
 
     // Fake get{Video,Audio}Tracks
     if (!MediaStream.prototype.getVideoTracks) {
-        MediaStream.prototype.getVideoTracks = function() {
-          console.log('MediaStream.prototype.getVideoTracks missing');
-          return [];
-        };
+      MediaStream.prototype.getVideoTracks = function() {
+       console.log('MediaStream.prototype.getVideoTracks missing');
+       return [];
+      };
     };
 
     if (!MediaStream.prototype.getAudioTracks) {
-        MediaStream.prototype.getAudioTracks = function() {
-          console.log('MediaStream.prototype.getAudioTracks missing');
-          return [];
-        };
+      MediaStream.prototype.getAudioTracks = function() {
+        console.log('MediaStream.prototype.getAudioTracks missing');
+        return [];
+      };
     };
 
-  } else if (navigator.webkitGetUserMedia) {
+  } else if (navigator.webkitGetUserMedia && window.webkitRTCPeerConnection) {
 
     webrtcDetectedBrowser = "chrome";
 
     // The RTCPeerConnection object.
-    RTCPeerConnection = webkitRTCPeerConnection;
+    window.RTCPeerConnection = function(pcConfig, pcConstraints) {
+      // Translate iceTransportPolicy to iceTransports,
+      // see https://code.google.com/p/webrtc/issues/detail?id=4869
+      if (pcConfig && pcConfig.iceTransportPolicy) {
+        pcConfig.iceTransports = pcConfig.iceTransportPolicy;
+      }
+
+      var pc = new webkitRTCPeerConnection(pcConfig, pcConstraints); // jscs:ignore requireCapitalizedConstructors
+      var origGetStats = pc.getStats.bind(pc);
+      pc.getStats = function(selector, successCallback, errorCallback) { // jshint ignore: line
+        var self = this;
+        var args = arguments;
+
+        // If selector is a function then we are in the old style stats so just
+        // pass back the original getStats format to avoid breaking old users.
+        if (arguments.length > 0 && typeof selector === 'function') {
+          return origGetStats(selector, successCallback);
+        }
+
+        var fixChromeStats = function(response) {
+          var standardReport = {};
+          var reports = response.result();
+          reports.forEach(function(report) {
+            var standardStats = {
+              id: report.id,
+              timestamp: report.timestamp,
+              type: report.type
+            };
+            report.names().forEach(function(name) {
+              standardStats[name] = report.stat(name);
+            });
+            standardReport[standardStats.id] = standardStats;
+          });
+
+          return standardReport;
+        };
+
+        if (arguments.length >= 2) {
+          var successCallbackWrapper = function(response) {
+            args[1](fixChromeStats(response));
+          };
+
+          return origGetStats.apply(this, [successCallbackWrapper, arguments[0]]);
+        }
+
+        // promise-support
+        return new Promise(function(resolve, reject) {
+          if (args.length === 1 && selector === null) {
+            origGetStats.apply(self, [
+              function(response) {
+                resolve.apply(null, [fixChromeStats(response)]);
+              }, reject]);
+          } else {
+            origGetStats.apply(self, [resolve, reject]);
+          }
+        });
+      };
+
+      return pc;
+    };
 
     // Get UserMedia (only difference is the prefix).
     // Code from Adam Barth.
@@ -536,7 +654,6 @@ var rtc = (function()
         element.mozSrcObject = stream;
       }  else if (typeof element.src !== 'undefined') {
         element.src = URL.createObjectURL(stream);
-        //element.src = webkitURL.createObjectURL(stream);
       } else {
         console.log('Error attaching stream to element.', element);
       }
@@ -567,7 +684,8 @@ var rtc = (function()
       };
     }
   } else {
-    console.log("Browser does not appear to be WebRTC-capable");
+    // console.log("Browser does not appear to be WebRTC-capable");
+    isSupported = false;
   }
 
   // Set Opus as the default audio codec if it's present.
@@ -673,6 +791,18 @@ var rtc = (function()
     sdpLines[mLineIndex] = mLineElements.join(' ');
     return sdpLines;
   }
+
+  function sdpRate(sdp, rate) {
+    rate = rate || 1638400;
+    return sdp.replace(/b=AS:\d+\r/g, 'b=AS:' + rate + '\r');
+  }
+
+  function cleanupSdp(sdp) {
+    sdp = preferOpus(sdp);
+    sdp = sdpRate(sdp);
+    return sdp;
+  }
+
   function mergeConstraints(cons1, cons2) {
     var merged = cons1;
     for (var name in cons2.mandatory) {

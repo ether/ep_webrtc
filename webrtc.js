@@ -29,8 +29,15 @@ function handleRTCMessage(client, payload)
   var userId = sessioninfos[client.id].author;
   var to = payload.to;
   var padId = sessioninfos[client.id].padId;
-  var clients = socketio.sockets.clients(padId);
-  var otherClient;
+  var room = socketio.sockets.adapter.rooms[padId];
+  var clients = [];
+
+  if (room && room.sockets) {
+    for (var id in room.sockets) {
+      clients.push(socketio.sockets.sockets[id]);
+    }
+  }
+
   var msg = {
     type: "COLLABROOM",
     data: {
@@ -43,7 +50,8 @@ function handleRTCMessage(client, payload)
   };
   // Lookup recipient and send message
   for(var i = 0; i < clients.length; i++) {
-    if (sessioninfos[clients[i].id].author == to) {
+    var session = sessioninfos[clients[i].id];
+    if(session && session.author == to) {
       clients[i].json.send(msg);
       break;
     }
