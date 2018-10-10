@@ -21,20 +21,8 @@ var hooks = require('ep_etherpad-lite/static/js/pluginfw/hooks');
 var rtc = (function()
 {
   var isActive = false;
-  var isSupported = true;
-  var pc_config = {};
-  var pc_constraints = {
-    optional: [{
-      DtlsSrtpKeyAgreement: true
-    }]
-  };
-  var sdpConstraints = {
-    mandatory: {
-      OfferToReceiveAudio: true,
-      OfferToReceiveVideo: true
-    }
-  };
-  var localStream, remoteStream = {}, pc = {}, callQueue = [];
+  var isSupported = (typeof(navigator.mediaDevices) !== "undefined");
+  var localStream, remoteStream = {}, pc = {}, callQueue = [], pc_config = {};
 
   var self = {
     //API HOOKS
@@ -385,16 +373,6 @@ var rtc = (function()
         callQueue.push(userId);
         return;
       }
-      var constraints = {optional: [], mandatory: {}};
-      // temporary measure to remove Moz* constraints in Chrome
-      if (webrtcDetectedBrowser === "chrome") {
-        for (var prop in constraints.mandatory) {
-          if (prop.indexOf("Moz") != -1) {
-            delete constraints.mandatory[prop];
-          }
-        }
-      }
-      constraints = mergeConstraints(constraints, sdpConstraints);
 
       if (!pc[userId]) {
         self.createPeerConnection(userId);
@@ -405,14 +383,14 @@ var rtc = (function()
         pc[userId].setLocalDescription(desc, function() {
           self.sendMessage(userId, {type: "offer", offer: desc});
         }, logError);
-      }, logError, constraints);
+      }, logError, {}); // Constraits as second param might need fleshing out
     },
     createPeerConnection: function(userId)
     {
       if(pc[userId]) {
         console.log('WARNING creating PC connection even though one exists', userId);
       }
-      pc[userId] = new RTCPeerConnection(pc_config, pc_constraints);
+      pc[userId] = new RTCPeerConnection(pc_config);
       pc[userId].onicecandidate = function(event) {
         if (event.candidate) {
           self.sendMessage(userId, {
@@ -441,32 +419,32 @@ var rtc = (function()
       };
       */
     },
+
     getUserMedia: function()
     {
-
       // Setup Camera and Microphone
       var mediaConstraints = {
         audio: true,
-        video: {
-          mandatory: {
-            maxWidth: 320,
-            maxHeight: 240
-          }
-        }
+        video: true
       };
 
-      navigator.getUserMedia(mediaConstraints, function(stream) {
-        localStream = stream;
-        self.setStream(self._pad.getUserId(), stream);
-        self._pad.collabClient.getConnectedUsers().forEach(function(user) {
-          if (user.userId != self.getUserId()) {
-            if (pc[user.userId]) {
-              self.hangup(user.userId);
+      navigator.mediaDevices
+        .getUserMedia(mediaConstraints)
+        .then(function(stream){
+          localStream = stream;
+          self.setStream(self._pad.getUserId(), stream);
+          self._pad.collabClient.getConnectedUsers().forEach(function(user) {
+            if (user.userId != self.getUserId()) {
+              if (pc[user.userId]) {
+                self.hangup(user.userId);
+              }
+              self.call(user.userId);
             }
-            self.call(user.userId);
-          }
-        });
-      }, logError);
+          });
+        })
+        .catch(e => logError(e, `getUserMedia() error: ${e.name}`)
+      );
+
     },
     avInURL: function(){
       if (window.location.search.indexOf('av=YES') > -1) {
@@ -514,337 +492,23 @@ var rtc = (function()
     }
   }
 
-  // Normalize RTC implementation between browsers
-
-  var getUserMedia = null;
   var attachMediaStream = null;
   var reattachMediaStream = null;
-  var webrtcDetectedBrowser = null;
 
-  if (navigator.mozGetUserMedia && window.mozRTCPeerConnection) {
-    webrtcDetectedBrowser = "firefox";
 
-    // The RTCPeerConnection object.
-    if (!window.RTCPeerConnection) {
-      window.RTCPeerConnection = mozRTCPeerConnection;
+  // Attach a media stream to an element.
+  attachMediaStream = function(element, stream) {
+    if (typeof element.srcObject !== 'undefined') {
+      element.srcObject = stream;
+    } else if (typeof element.srcObject !== 'undefined') {
+      element.srcObject = stream;
     }
+  };
 
-    // The RTCSessionDescription object.
-    if (!window.RTCSessionDescription) {
-      window.RTCSessionDescription = mozRTCSessionDescription;
-    }
+  reattachMediaStream = function(to, from){
+    to.srcObject = from.srcObject;
+  };
 
-    // The RTCIceCandidate object.
-    if (!window.RTCIceCandidate) {
-      window.RTCIceCandidate = mozRTCIceCandidate;
-    }
-
-    // Get UserMedia (only difference is the prefix).
-    // Code from Adam Barth.
-    navigator.getUserMedia = navigator.mozGetUserMedia.bind(navigator);
-
-    // Attach a media stream to an element.
-    attachMediaStream = function(element, stream) {
-      if (typeof element.srcObject !== 'undefined') {
-        element.srcObject = stream;
-      } else if (typeof element.mozSrcObject !== 'undefined') {
-        element.mozSrcObject = stream;
-        element.play();
-      }  else if (typeof element.src !== 'undefined') {
-        element.src = URL.createObjectURL(stream);
-      } else {
-        console.log('Error attaching stream to element.', element);
-      }
-    };
-
-    reattachMediaStream = function(to, from) {
-      to.mozSrcObject = from.mozSrcObject;
-      to.play();
-    };
-
-    // Fake get{Video,Audio}Tracks
-    if (!MediaStream.prototype.getVideoTracks) {
-      MediaStream.prototype.getVideoTracks = function() {
-       console.log('MediaStream.prototype.getVideoTracks missing');
-       return [];
-      };
-    };
-
-    if (!MediaStream.prototype.getAudioTracks) {
-      MediaStream.prototype.getAudioTracks = function() {
-        console.log('MediaStream.prototype.getAudioTracks missing');
-        return [];
-      };
-    };
-
-  } else if (navigator.webkitGetUserMedia && window.webkitRTCPeerConnection) {
-console.log("Chrome");
-    webrtcDetectedBrowser = "chrome";
-
-    // The RTCPeerConnection object.
-    window.RTCPeerConnection = function(pcConfig, pcConstraints) {
-      // Translate iceTransportPolicy to iceTransports,
-      // see https://code.google.com/p/webrtc/issues/detail?id=4869
-      if (pcConfig && pcConfig.iceTransportPolicy) {
-        pcConfig.iceTransports = pcConfig.iceTransportPolicy;
-      }
-
-      var pc = new webkitRTCPeerConnection(pcConfig, pcConstraints); // jscs:ignore requireCapitalizedConstructors
-      var origGetStats = pc.getStats.bind(pc);
-      pc.getStats = function(selector, successCallback, errorCallback) { // jshint ignore: line
-        var self = this;
-        var args = arguments;
-
-        // If selector is a function then we are in the old style stats so just
-        // pass back the original getStats format to avoid breaking old users.
-        if (arguments.length > 0 && typeof selector === 'function') {
-          return origGetStats(selector, successCallback);
-        }
-
-        var fixChromeStats = function(response) {
-          var standardReport = {};
-          var reports = response.result();
-          reports.forEach(function(report) {
-            var standardStats = {
-              id: report.id,
-              timestamp: report.timestamp,
-              type: report.type
-            };
-            report.names().forEach(function(name) {
-              standardStats[name] = report.stat(name);
-            });
-            standardReport[standardStats.id] = standardStats;
-          });
-
-          return standardReport;
-        };
-
-        if (arguments.length >= 2) {
-          var successCallbackWrapper = function(response) {
-            args[1](fixChromeStats(response));
-          };
-
-          return origGetStats.apply(this, [successCallbackWrapper, arguments[0]]);
-        }
-
-        // promise-support
-        return new Promise(function(resolve, reject) {
-          if (args.length === 1 && selector === null) {
-            origGetStats.apply(self, [
-              function(response) {
-                resolve.apply(null, [fixChromeStats(response)]);
-              }, reject]);
-          } else {
-            origGetStats.apply(self, [resolve, reject]);
-          }
-        });
-      };
-
-      return pc;
-    };
-
-    // Get UserMedia (only difference is the prefix).
-    // Code from Adam Barth.
-    getUserMedia = navigator.webkitGetUserMedia.bind(navigator);
-    // navigator.getUserMedia = navigator.webkitGetUserMedia;
-
-    // Attach a media stream to an element.
-    attachMediaStream = function(element, stream) {
-      if (typeof element.srcObject !== 'undefined') {
-        element.srcObject = stream;
-      } else if (typeof element.mozSrcObject !== 'undefined') {
-        element.mozSrcObject = stream;
-      }  else if (typeof element.src !== 'undefined') {
-        element.src = URL.createObjectURL(stream);
-      } else {
-        console.log('Error attaching stream to element.', element);
-      }
-    };
-
-    reattachMediaStream = function(to, from) {
-      to.src = from.src;
-    };
-
-    // The representation of tracks in a stream is changed in M26.
-    // Unify them for earlier Chrome versions in the coexisting period.
-    if (!webkitMediaStream.prototype.getVideoTracks) {
-      webkitMediaStream.prototype.getVideoTracks = function() {
-        return this.videoTracks;
-      };
-      webkitMediaStream.prototype.getAudioTracks = function() {
-        return this.audioTracks;
-      };
-    }
-
-    // New syntax of getXXXStreams method in M26.
-    if (!webkitRTCPeerConnection.prototype.getLocalStreams) {
-      webkitRTCPeerConnection.prototype.getLocalStreams = function() {
-        return this.localStreams;
-      };
-      webkitRTCPeerConnection.prototype.getRemoteStreams = function() {
-        return this.remoteStreams;
-      };
-    }
-  } 
-
-  /*
-  else {
-    console.log("Browser does not appear to be Moz/FF WebRTC-capable"); // Moz or FF..  Not Edge / Safari
-    isSupported = false;
-  }
-  */
-
-  else if(navigator.mediaDevices.getUserMedia) {
-    // Edge
-    isSupported = true;
-    getUserMedia = navigator.mediaDevices.getUserMedia;
-
-    // Attach a media stream to an element.
-    attachMediaStream = function(element, stream) {
-      if (typeof element.srcObject !== 'undefined') {
-        element.srcObject = stream;
-      } else if (typeof element.srcObject !== 'undefined') {
-        element.srcObject = stream;
-        element.play();
-      }  else if (typeof element.src !== 'undefined') {
-        element.src = URL.createObjectURL(stream);
-      } else {
-        console.log('Error attaching stream to element.', element);
-      }
-    };
-
-    reattachMediaStream = function(to, from){
-      to.srcObject = from.srcObject;
-      to.play();
-    };
-
-  }
-
-
-
-  // Set Opus as the default audio codec if it's present.
-  function preferOpus(sdp) {
-    var sdpLines = sdp.split('\r\n');
-
-    // Search for m line.
-    for (var i = 0; i < sdpLines.length; i++) {
-        if (sdpLines[i].search('m=audio') !== -1) {
-          var mLineIndex = i;
-          break;
-        }
-    }
-    if (mLineIndex === null)
-      return sdp;
-
-    // If Opus is available, set it as the default in m line.
-    for (var i = 0; i < sdpLines.length; i++) {
-      if (sdpLines[i].search('opus/48000') !== -1) {
-        var opusPayload = extractSdp(sdpLines[i], /:(\d+) opus\/48000/i);
-        if (opusPayload)
-          sdpLines[mLineIndex] = setDefaultCodec(sdpLines[mLineIndex], opusPayload);
-        break;
-      }
-    }
-
-    // Remove CN in m line and sdp.
-    sdpLines = removeCN(sdpLines, mLineIndex);
-
-    sdp = sdpLines.join('\r\n');
-    return sdp;
-  }
-
-  // Set Opus in stereo if stereo is enabled.
-  function addStereo(sdp) {
-    var sdpLines = sdp.split('\r\n');
-
-    // Find opus payload.
-    for (var i = 0; i < sdpLines.length; i++) {
-      if (sdpLines[i].search('opus/48000') !== -1) {
-        var opusPayload = extractSdp(sdpLines[i], /:(\d+) opus\/48000/i);
-        break;
-      }
-    }
-
-    // Find the payload in fmtp line.
-    for (var i = 0; i < sdpLines.length; i++) {
-      if (sdpLines[i].search('a=fmtp') !== -1) {
-        var payload = extractSdp(sdpLines[i], /a=fmtp:(\d+)/ );
-        if (payload === opusPayload) {
-          var fmtpLineIndex = i;
-          break;
-        }
-      }
-    }
-    // No fmtp line found.
-    if (fmtpLineIndex === null)
-      return sdp;
-
-    // append stereo=1 to fmtp line.
-    sdpLines[fmtpLineIndex] = sdpLines[fmtpLineIndex].concat(' stereo=1');
-
-    sdp = sdpLines.join('\r\n');
-    return sdp;
-  }
-
-  function extractSdp(sdpLine, pattern) {
-    var result = sdpLine.match(pattern);
-    return (result && result.length == 2)? result[1]: null;
-  }
-
-  // Set the selected codec to the first in m line.
-  function setDefaultCodec(mLine, payload) {
-    var elements = mLine.split(' ');
-    var newLine = new Array();
-    var index = 0;
-    for (var i = 0; i < elements.length; i++) {
-      if (index === 3) // Format of media starts from the fourth.
-        newLine[index++] = payload; // Put target payload to the first.
-      if (elements[i] !== payload)
-        newLine[index++] = elements[i];
-    }
-    return newLine.join(' ');
-  }
-
-  // Strip CN from sdp before CN constraints is ready.
-  function removeCN(sdpLines, mLineIndex) {
-    var mLineElements = sdpLines[mLineIndex].split(' ');
-    // Scan from end for the convenience of removing an item.
-    for (var i = sdpLines.length-1; i >= 0; i--) {
-      var payload = extractSdp(sdpLines[i], /a=rtpmap:(\d+) CN\/\d+/i);
-      if (payload) {
-        var cnPos = mLineElements.indexOf(payload);
-        if (cnPos !== -1) {
-          // Remove CN payload from m line.
-          mLineElements.splice(cnPos, 1);
-        }
-        // Remove CN line in sdp
-        sdpLines.splice(i, 1);
-      }
-    }
-
-    sdpLines[mLineIndex] = mLineElements.join(' ');
-    return sdpLines;
-  }
-
-  function sdpRate(sdp, rate) {
-    rate = rate || 1638400;
-    return sdp.replace(/b=AS:\d+\r/g, 'b=AS:' + rate + '\r');
-  }
-
-  function cleanupSdp(sdp) {
-    sdp = preferOpus(sdp);
-    sdp = sdpRate(sdp);
-    return sdp;
-  }
-
-  function mergeConstraints(cons1, cons2) {
-    var merged = cons1;
-    for (var name in cons2.mandatory) {
-      merged.mandatory[name] = cons2.mandatory[name];
-    }
-    merged.optional.concat(cons2.optional);
-    return merged;
-  }
   function logError(error) {
     console.log('WebRTC ERROR:', error);
   }
