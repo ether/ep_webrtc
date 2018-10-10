@@ -322,7 +322,7 @@ var rtc = (function()
         var offer = new RTCSessionDescription(data.offer);
         pc[peer].setRemoteDescription(offer, function() {
           pc[peer].createAnswer(function(desc) {
-            desc.sdp = cleanupSdp(desc.sdp);
+            // desc.sdp = cleanupSdp(desc.sdp);
             pc[peer].setLocalDescription(desc, function() {
               self.sendMessage(peer, {type: "answer", answer: desc});
             }, logError);
@@ -379,7 +379,7 @@ var rtc = (function()
       }
       pc[userId].addStream(localStream);
       pc[userId].createOffer(function(desc) {
-        desc.sdp = cleanupSdp(desc.sdp);
+        // desc.sdp = cleanupSdp(desc.sdp);
         pc[userId].setLocalDescription(desc, function() {
           self.sendMessage(userId, {type: "offer", offer: desc});
         }, logError);
