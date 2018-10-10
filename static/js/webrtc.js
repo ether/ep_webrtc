@@ -326,7 +326,7 @@ var rtc = (function()
             pc[peer].setLocalDescription(desc, function() {
               self.sendMessage(peer, {type: "answer", answer: desc});
             }, logError);
-          }, logError, sdpConstraints);
+          }, logError);
         }, logError);
       } else if (type == "answer") {
         if (pc[peer]) {
