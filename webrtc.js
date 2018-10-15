@@ -65,7 +65,7 @@ exports.clientVars = function(hook, context, callback)
     enabled = settings.ep_webrtc.enabled;
   }
 
-  var iceServers = [ {"url": "stun:stun.l.google.com:19302"} ];
+  var iceServers = [ {"urls": "stun:stun.l.google.com:19302"} ];
   if(settings.ep_webrtc && settings.ep_webrtc.iceServers){
     iceServers = settings.ep_webrtc.iceServers;
   }
