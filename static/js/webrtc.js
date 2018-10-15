@@ -47,13 +47,10 @@ var rtc = (function()
         'display': 'none',
       }).appendTo($('body'));
 
-      pc_config.iceServers = clientVars.webrtc && clientVars.webrtc.iceServers
-        ? clientVars.webrtc.iceServers
-        : [{
-          url: webrtcDetectedBrowser == "firefox"
-            ? "stun:23.21.150.121"
-            : "stun:stun.l.google.com:19302"
-        }];
+      pc_config.iceServers = clientVars.webrtc && clientVars.webrtc.iceServers;
+      if(!pc_config.iceServers){
+        pc_config.iceServers = ["stun:23.21.150.121", "stun:stun.l.google.com:19302"]
+      }
       self.init(context.pad);
       callback();
     },
@@ -202,11 +199,13 @@ var rtc = (function()
           .appendTo($('#rtcbox'))[0];
         video.autoplay = true;
         if (isLocal) {
+console.log("muting video")
           video.muted = true;
         }
         self.addInterface(userId);
       }
       if (stream) {
+console.log(isLocal, stream, video);
         attachMediaStream(video, stream);
       } else if (video) {
         $(video).remove();
@@ -390,7 +389,9 @@ var rtc = (function()
       if(pc[userId]) {
         console.log('WARNING creating PC connection even though one exists', userId);
       }
+console.log("before", pc_config);
       pc[userId] = new RTCPeerConnection(pc_config);
+console.log("after");
       pc[userId].onicecandidate = function(event) {
         if (event.candidate) {
           self.sendMessage(userId, {
@@ -399,9 +400,11 @@ var rtc = (function()
           });
         }
       };
-      pc[userId].onaddstream = function(event) {
-        remoteStream[userId] = event.stream;
-        self.setStream(userId, event.stream);
+      // pc[userId].onaddstream = function(event) {
+      pc[userId].ontrack = function(event) {
+        console.log("ontrack", event);
+        remoteStream[userId] = event.streams[0];
+        self.setStream(userId, event.streams[0]);
       };
       pc[userId].onremovestream = function(event) {
         self.setStream(userId, '');
@@ -517,4 +520,3 @@ var rtc = (function()
 }());
 
 exports.rtc = rtc;
-
