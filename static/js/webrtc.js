@@ -41,6 +41,7 @@ var rtc = (function() {
     remoteStream = {},
     pc = {},
     callQueue = [];
+  var enlargedVideos = new Set();
 
   var self = {
     //API HOOKS
@@ -243,18 +244,18 @@ var rtc = (function() {
       var isLocal = userId == self.getUserId();
       var videoId = "video_" + userId.replace(/\./g, "_");
       var $video = $("#" + videoId);
-      var offset = $video.offset();
-      var size = { width: $video.width(), height: $video.height() };
 
-      var $mute = $("<div>")
+      var $mute = $("<img>")
         .css({
-          "text-align": "right",
-          "margin-top": "48px",
-          color: "white"
+          width: "24px",
+          height: "24px",
+          border: "1px solid #999",
+          "border-radius": "4px",
+          margin: "8px",
+          cursor: "pointer"
         })
-        .html(
-          '<span style="background: black;padding: 2px;cursor:pointer">Mute</span>'
-        )
+        .attr("src", "/static/plugins/ep_webrtc/static/image/mute_on.png")
+        .attr("title", "mute")
         .on({
           click: function(event) {
             var muted;
@@ -264,57 +265,107 @@ var rtc = (function() {
               $video[0].muted = !$video[0].muted;
               muted = $video[0].muted;
             }
-            $mute.find("span").html(muted ? "Unmute" : "Mute");
+            $mute
+              .attr("title", muted ? "mute" : "unmute")
+              .attr(
+                "src",
+                muted
+                  ? "/static/plugins/ep_webrtc/static/image/mute_off.png"
+                  : "/static/plugins/ep_webrtc/static/image/mute_on.png"
+              );
           }
         });
+      var videoEnabled = true;
       var $disableVideo = isLocal
-        ? $("<div>")
+        ? $("<img>")
             .css({
-              "text-align": "right",
-              color: "white",
-              "margin-top": "8px"
+              width: "24px",
+              height: "24px",
+
+              border: "1px solid #999",
+              "border-radius": "4px",
+              margin: "8px",
+              cursor: "pointer"
             })
-            .html(
-              '<span style="background: black;padding: 2px;cursor:pointer">Disable Video</span>'
-            )
+            .attr("src", "/static/plugins/ep_webrtc/static/image/video_on.png")
+            .attr("title", "disable video")
             .on({
               click: function(event) {
-                var disableVideo = self.toggleVideo();
+                self.toggleVideo();
+                videoEnabled = !videoEnabled;
                 $disableVideo
-                  .find("span")
-                  .html(disableVideo ? "Enable Video" : "Disable Video");
+                  .attr(
+                    "title",
+                    videoEnabled ? "disable video" : "enable video"
+                  )
+                  .attr(
+                    "src",
+                    videoEnabled
+                      ? "/static/plugins/ep_webrtc/static/image/video_on.png"
+                      : "/static/plugins/ep_webrtc/static/image/video_off.png"
+                  );
               }
             })
-        : $("<div>");
+        : null;
+
+      var videoEnlarged = false;
+      var $largeVideo = $("<img>")
+        .css({
+          width: "24px",
+          height: "24px",
+
+          border: "1px solid #999",
+          "border-radius": "4px",
+          margin: "8px",
+          cursor: "pointer"
+        })
+        .attr("src", "/static/plugins/ep_webrtc/static/image/large_on.png")
+        .attr("title", "make video larger")
+        .on({
+          click: function(event) {
+            videoEnlarged = !videoEnlarged;
+
+            if (videoEnlarged) {
+              enlargedVideos.add(userId);
+            } else {
+              enlargedVideos.delete(userId);
+            }
+
+            $largeVideo
+              .attr(
+                "title",
+                videoEnlarged ? "make video smaller" : "make video larger"
+              )
+              .attr(
+                "src",
+                videoEnlarged
+                  ? "/static/plugins/ep_webrtc/static/image/large_off.png"
+                  : "/static/plugins/ep_webrtc/static/image/large_on.png"
+              );
+
+            $video.css("max-width", videoEnlarged ? "256px" : "128px");
+            $video.css("max-height", videoEnlarged ? "256px" : "128px");
+            $("#rtcbox").css(
+              "width",
+              enlargedVideos.size > 0 ? "258px" : "130px"
+            );
+            $("#editorcontainer").css(
+              "left",
+              enlargedVideos.size > 0 ? "258px" : "130px"
+            );
+          }
+        });
+
       $("#interface_" + videoId).remove();
       $("<div>")
         .attr("id", "interface_" + videoId)
         .css({
-          "z-index": "2",
-          position: "fixed",
-          top: offset.top + "px",
-          left: offset.left + 4 + "px",
-          width: size.width + "px",
-          height: size.height + "px",
-          //'background-color': $video.css('border-color'),
-          opacity: 0
-        })
-        .on({
-          mouseover: function(event) {
-            $(this).css({
-              //'background-color': $video.css('border-color'),
-              opacity: 1
-            });
-          },
-          mouseout: function(event) {
-            $(this).css({
-              opacity: 0
-            });
-          }
+          display: "flex"
         })
         .append($mute)
         .append($disableVideo)
-        .appendTo($("body"));
+        .append($largeVideo)
+        .insertAfter($video);
     },
     sendMessage: function(to, data) {
       self._pad.collabClient.sendMessage({
