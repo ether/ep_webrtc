@@ -561,7 +561,20 @@ var rtc = (function() {
             }
           });
         })
-        .catch(logError);
+        .catch(() => {
+          $("#rtcbox")
+            .empty()
+            .append(
+              $("<div>")
+                .css({
+                  padding: "8px",
+                  "padding-top": "32px"
+                })
+                .html(
+                  "Sorry, we couldnt't find a suitable camera on your device. If you have a camera, make sure it set up correctly and refresh this website to retry."
+                )
+            );
+        });
     },
     avInURL: function() {
       if (window.location.search.indexOf("av=YES") > -1) {
