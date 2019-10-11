@@ -174,29 +174,6 @@ var rtc = (function() {
       var videoTrack = localStream.getVideoTracks()[0];
       if (videoTrack) {
         videoTrack.enabled = !videoTrack.enabled;
-        var $interface = $(
-          "#interface_video_" + self.getUserId().replace(/\./g, "_")
-        );
-        if (!videoTrack.enabled) {
-          $("<div>")
-            .attr(
-              "id",
-              "disabled_video_" + self.getUserId().replace(/\./g, "_")
-            )
-            .css({
-              "z-index": "1",
-              position: "fixed",
-              top: $interface.position().top + "px",
-              left: $interface.position().left + "px",
-              width: $interface.width() + "px",
-              height: $interface.height() + "px",
-              "background-color": "rgb(0,0,0)",
-              opacity: 1
-            })
-            .appendTo($("body"));
-        } else {
-          $("#disabled_video_" + self.getUserId().replace(/\./g, "_")).remove();
-        }
         return !videoTrack.enabled;
       }
     },
