@@ -13,9 +13,7 @@ active users of the pad using WebRTC.
 
     to get latest version form git:
 
-        npm install https://github.com/bit/ep_webrtc
-    or
-        npm install https://r-w-x.org/ep_webrtc
+        npm install https://github.com/ether/ep_webrtc
 
 ## Post installation
 
@@ -70,6 +68,5 @@ To enable webrtc with a URL parameter append the following to your pad URL ``?av
 
 # contributing
 
-Please submit bug reports or patches at https://github.com/bit/ep_webrtc/issues
-or send them to ep_webrtc@lists.mailb.org
+Please submit bug reports or patches at https://github.com/ether/ep_webrtc/issues
 
