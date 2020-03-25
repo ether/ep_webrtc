@@ -110,3 +110,8 @@ exports.settings = function (hook, context, callback)
     });
     callback();
 };
+
+exports.eejsBlock_editorContainerBox = function (hook_name, args, cb) {
+  args.content = args.content + eejs.require("ep_webrtc/templates/webrtc.ejs", {}, module);
+  return cb();
+}
