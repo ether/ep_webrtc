@@ -46,28 +46,6 @@ var rtc = (function() {
   var self = {
     //API HOOKS
     postAceInit: function(hook, context, callback) {
-      var top = $("div#editbar").offset().top + $("div#editbar").height() + 5;
-      $("<div>")
-        .attr({ id: "rtcbox" })
-        .css({
-          position: "absolute",
-          bottom: "0",
-          left: "0",
-          top: top + "px",
-          width: "130px",
-          "z-index": "1",
-          "border-right": "1px solid #999",
-          "border-top": "1px solid #999",
-          padding: "3px",
-          "padding-bottom": "10px",
-          "background-color": "#f1f1f1",
-          height: "auto",
-          border: "none",
-          "border-right": "1px solid #ccc",
-          display: "none"
-        })
-        .appendTo($("body"));
-
       pc_config.iceServers =
         clientVars.webrtc && clientVars.webrtc.iceServers
           ? clientVars.webrtc.iceServers
@@ -111,9 +89,6 @@ var rtc = (function() {
     //END OF API HOOKS
     show: function() {
       $("#rtcbox").show();
-      var right = $("#editorcontainer").css("right");
-      right = right == "auto" ? "0px" : right;
-      $("#editorcontainer").css({ left: "130px", width: "auto", right: right });
     },
     showNotSupported: function() {
       $("#rtcbox")
@@ -134,7 +109,6 @@ var rtc = (function() {
     },
     hide: function() {
       $("#rtcbox").hide();
-      $("#editorcontainer").css({ left: "0" });
     },
     activate: function() {
       $("#options-enablertc").prop("checked", true);
