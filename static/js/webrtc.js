@@ -46,6 +46,14 @@ var rtc = (function() {
   var self = {
     //API HOOKS
     postAceInit: function(hook, context, callback) {
+      if (!$('#editorcontainerbox').hasClass('flex-layout')) {
+        $.gritter.add({
+          title: "Error",
+          text: "Ep_webrtc: Please upgrade to etherpad 1.9 for this plugin to work correctly",
+          sticky: true,
+          class_name: "error"
+        })
+      }
       pc_config.iceServers =
         clientVars.webrtc && clientVars.webrtc.iceServers
           ? clientVars.webrtc.iceServers
