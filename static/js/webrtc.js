@@ -94,17 +94,15 @@ var rtc = (function() {
       $("#rtcbox").css('display', 'flex');
     },
     showNotSupported: function() {
-      $("#rtcbox")
-        .empty()
-        .append(
-          $("<div class='error-msg'>")
-            .html(
-              "Sorry, your browser does not support WebRTC." +
-                "<br><br>" +
-                "To participate in this audio/video chat you have to user a browser with WebRTC support like Chrome, Firefox or Opera." +
-                ' <a href="http://www.webrtc.org/" target="_new">Find out more</a>'
-            )
-        );
+      $.gritter.add({
+        title: "Error",
+        text: "Sorry, your browser does not support WebRTC.<br><br>" +
+              "To participate in this audio/video chat you have to user a browser with WebRTC support like Chrome, Firefox or Opera." +
+              '<a href="http://www.webrtc.org/" target="_new">Find out more</a>',
+        sticky: true,
+        class_name: "error"
+      })
+      self.hide();
     },
     hide: function() {
       $("#rtcbox").hide();
@@ -467,12 +465,13 @@ var rtc = (function() {
           var reason = "Sorry, we couldnt't find a suitable camera on your device. If you have a camera, make sure it set up correctly and refresh this website to retry.";
           if(location.protocol !== "https:") reason = "Sorry, you need to install SSL certificates for your Etherpad instance to use WebRTC";
 
-          $("#rtcbox")
-            .empty()
-            .append(
-              $("<div class='error-msg'>")
-                .html(reason)
-            );
+          $.gritter.add({
+            title: "Error",
+            text: reason,
+            sticky: true,
+            class_name: "error"
+          })
+          self.hide();
         });
     },
     avInURL: function() {
