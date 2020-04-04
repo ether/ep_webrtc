@@ -51,6 +51,8 @@
   cursor: pointer;
   transition: opacity .2s, background-color .2s;
   color: #333;
+  width: 16px;
+  height: 16px;
 }
 .interface-btn:hover {
   opacity: 1;
@@ -95,4 +97,21 @@
 }
 #rtcbox .video-container:hover .user-name {
   opacity: 1;
+}
+
+@media (max-width: 800px) {
+  #editorcontainerbox {
+    flex-direction: column;
+  }
+  #rtcbox {
+    flex-direction: row;
+    flex-shrink: 0;
+    order: 2;
+    justify-content: start;
+    align-items: baseline;
+  }
+  #rtcbox .video-container:not(:first-child) {
+    margin-top: 0;
+    margin-left: 5px;
+  }
 }
