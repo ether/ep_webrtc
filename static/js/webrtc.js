@@ -538,9 +538,9 @@ var rtc = (function() {
             }
           });
         })
-        .catch(function() {
+        .catch(function(err) {
           var reason = "Sorry, we couldnt't find a suitable camera on your device. If you have a camera, make sure it set up correctly and refresh this website to retry.";
-          if(location.protocol !== "https:") reason = "Sorry, you need to install SSL certificates for your Etherpad instance to use WebRTC";
+          if(err.name !== "NotFoundError") reason = "Sorry, you need to install SSL certificates for your Etherpad instance to use WebRTC";
 
           $("#rtcbox")
             .empty()
