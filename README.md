@@ -67,7 +67,8 @@ To set an element or class to listen for an init event set `ep_webrtc.listenClas
 
 To enable webrtc with a URL parameter append the following to your pad URL ``?av=YES``
 
-# contributing
+# developing and contributing
+
+On your browser, you should use `localhost` instead of `0.0.0.0`. This is because webrtc generally requires a secure connection (https), but [an exception is made](https://w3c.github.io/webappsec-secure-contexts/#localhost) specifically for localhost and domains that end in `.localhost`.
 
 Please submit bug reports or patches at https://github.com/ether/ep_webrtc/issues
-
