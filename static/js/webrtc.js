@@ -156,8 +156,17 @@ var rtc = (function() {
         padcookie.setPref("rtcEnabled", false);
         self.hangupAll();
         if (localStream) {
+          var videoTrack = localStream.getVideoTracks()[0];
+          var audioTrack = localStream.getAudioTracks()[0];
           self.setStream(self._pad.getUserId(), "");
-          localStream.stop();
+          if (videoTrack.stop === undefined) {
+            // deprecated in 2015, probably disabled by 2020
+            // https://developers.google.com/web/updates/2015/07/mediastream-deprecations
+            localStream.stop();
+          } else {
+            videoTrack.stop();
+            audioTrack.stop();
+          }
           localStream = null;
         }
       }
