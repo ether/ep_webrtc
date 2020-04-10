@@ -1,9 +1,5 @@
-// * See if "stop()" removes it
-// * See if "remove()" stops the light?
-// * Try addTrack() - can i create a track?
-
-
-
+// TODO - test with two browsers. Perhaps it'll catch differences in "mute" state.
+// TODO Fix the names. Get rid of "mute". It adds a negative. It's confusing. I found a bug, and the image has the wrong name.
 /**
  * Copyright 2013 j <j@mailb.org>
  *
@@ -27,6 +23,8 @@ var padcookie = require("ep_etherpad-lite/static/js/pad_cookie").padcookie;
 var hooks = require("ep_etherpad-lite/static/js/pluginfw/hooks");
 
 var rtc = (function() {
+  // TODO - Avoid using a global var? That causes problems of course.
+  var isMuted = false; // Necessary for tricky toggleVideo logic where we stop and recreate the connection
   var isActive = false;
   var isSupported = true;
   var pc_config = {};
@@ -122,7 +120,7 @@ var rtc = (function() {
       $("#rtcbox").hide();
     },
     activate: function() {
-      var p = Promise.resolve()
+      var p = Promise.resolve() // TODO - no longer need promise stuff
       $("#options-enablertc").prop("checked", true);
       if (isActive) return;
       self.show();
@@ -159,11 +157,24 @@ var rtc = (function() {
       }
       isActive = false;
     },
-    toggleMuted: function() {
+    initMuteState: function() {
       var audioTrack = localStream.getAudioTracks()[0];
       if (audioTrack) {
+        audioTrack.enabled = !isMuted; // Only use isMuted as source of truth during init
+      }
+    },
+    toggleMuted: function() {
+      // TODO - Possible race condition. This function shouldn't be called after the interface went away and comes back, which it might if you unmute video.
+      //    actually, localStream may save us here. it shouldn't allow us to do this based on the previous state of things
+      // TODO - Make a "mute" and "unmute" function that sets the state and the image?
+      //    No: actually don't; it's fine init. click handles state gracefull already.
+      //        but do leave notes here. I'm sure I'm asking for bugs down the line.
+      var audioTrack = localStream.getAudioTracks()[0];
+      if (audioTrack) {
+        // audioTrack.enabled is source of truth, not isMuted
         audioTrack.enabled = !audioTrack.enabled;
-        return !audioTrack.enabled;
+        isMuted = !audioTrack.enabled;
+        return !audioTrack.enabled; // returns whether it's "muted", which is the opposite of enabled
       }
     },
     toggleVideo: function() {
@@ -175,16 +186,9 @@ var rtc = (function() {
           return false
         } else {
           var audioTrack = localStream.getAudioTracks()[0];
-          console.log(1, audioTrack)
-          var audioTrackEnabled = audioTrack.enabled;
-          self.deactivate()
+          self.deactivate() // video was stopped above
           self.activate()
-          .then(() => {
-            // new one, now that we've reactivated
-            audioTrack = localStream.getAudioTracks()[0];
-            console.log(2, audioTrack)
-            audioTrack.enabled = audioTrackEnabled // TODO - this may not work yet. also needs to change the icon
-          })
+          // TODO - do it here instead of init? probably not.
           return true
         }
       }
@@ -227,7 +231,7 @@ var rtc = (function() {
         video.autoplay = true;
         if (isLocal) {
           videoContainer.addClass('local-user');
-          video.muted = true;
+          video.muted = true; // TODO what is this about? is it relevant to me now?
         }
         self.addInterface(userId);
       }
@@ -243,18 +247,20 @@ var rtc = (function() {
       var $video = $("#" + videoId);
 
       var $mute = $("<span class='interface-btn audio-btn buttonicon'>")
-        .attr("title", "Mute")
+        // TODO what about non-local? Shouldn't we be showing their mute state?
+        .attr("title", isLocal && isMuted ? "Unmute" : "Mute")
+        .toggleClass("muted", isLocal && isMuted);
         .on({
           click: function(event) {
             var muted;
             if (isLocal) {
               muted = self.toggleMuted();
             } else {
-              $video[0].muted = !$video[0].muted;
+              $video[0].muted = !$video[0].muted; // TODO what is this about? is it relevant to me now?
               muted = $video[0].muted;
             }
             $mute
-              .attr("title", muted ? "Mute" : "Unmute")
+              .attr("title", muted ? "Unmute" : "Mute")
               .toggleClass("muted", muted);
           }
         });
@@ -339,7 +345,8 @@ var rtc = (function() {
         if (localStream) {
           if (pc[peer].getLocalStreams) {
             if (!pc[peer].getLocalStreams().length) {
-              pc[peer].addStream(localStream); // TODO deprecated facepalm https://developer.mozilla.org/en-US/docs/Web/API/RTCPeerConnection/addStream
+              pc[peer].addStream(localStream); // TODO deprecated https://developer.mozilla.org/en-US/docs/Web/API/RTCPeerConnection/addStream
+              // TODO also - do I want to put this stuff in the adapter? since we might have old browsers?
             }
           } else if (pc[peer].localStreams) {
             if (!pc[peer].localStreams.length) {
@@ -492,6 +499,8 @@ var rtc = (function() {
         .getUserMedia(mediaConstraints)
         .then(function(stream) {
           localStream = stream;
+          // TODO - set the mute state in setStream instead? That way I can pass mute value into addInterface instead of more global var stuff
+          self.initMuteState(stream)
           self.setStream(self._pad.getUserId(), stream);
           self._pad.collabClient.getConnectedUsers().forEach(function(user) {
             if (user.userId != self.getUserId()) {
@@ -712,3 +721,4 @@ var rtc = (function() {
 })();
 
 exports.rtc = rtc;
+console.log(rtc) // TEMP debug
