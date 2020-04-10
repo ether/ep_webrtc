@@ -132,14 +132,16 @@ var rtc = (function() {
       }
       isActive = true;
     },
-    // TODO set mute to off. but not if I'm "actually" deactivating
-    // TODO alternately, just save the video active state as well between deactivations
-    deactivate: function() {
+    deactivate: function(resetMuted) {
       $("#options-enablertc").prop("checked", false);
       if (!isActive) return;
       self.hide();
+      if (resetMuted) {
+        self.resetMuteState()
+      }
       if (isSupported) {
         padcookie.setPref("rtcEnabled", false);
+        // TODO - hangup MESSAGE followed by reestablishment. Problematic, or at least disruptive on a bad connection, if users are doing this "all the time" muting and unmuting video?
         self.hangupAll();
         if (localStream) {
           var videoTrack = localStream.getVideoTracks()[0];
@@ -158,6 +160,10 @@ var rtc = (function() {
       }
       isActive = false;
     },
+    resetMuteState: function() {
+      isMuted = false;
+    },
+    // TODO - rename. something something global mute state.
     initMuteState: function() {
       var audioTrack = localStream.getAudioTracks()[0];
       if (audioTrack) {
@@ -178,6 +184,8 @@ var rtc = (function() {
         return !audioTrack.enabled; // returns whether it's "muted", which is the opposite of enabled
       }
     },
+    // TODO chromium and non-chromium modes different.
+    // TODO setting to turn it off as well
     toggleVideo: function() {
       var videoTrack = localStream.getVideoTracks()[0];
       if (videoTrack) {
@@ -187,7 +195,7 @@ var rtc = (function() {
           return false
         } else {
           var audioTrack = localStream.getAudioTracks()[0];
-          self.deactivate() // video was stopped above
+          self.deactivate(false) // video was stopped above
           self.activate()
           // TODO - do it here instead of init? probably not.
           return true
@@ -554,14 +562,14 @@ var rtc = (function() {
         if (rtcEnabled) {
           self.activate();
         } else {
-          self.deactivate();
+          self.deactivate(true);
         }
       }
       $("#options-enablertc").on("change", function() {
         if (this.checked) {
           self.activate();
         } else {
-          self.deactivate();
+          self.deactivate(true);
         }
       });
       if (isActive) {
