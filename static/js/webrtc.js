@@ -1,5 +1,6 @@
 // TODO - test with two browsers. Perhaps it'll catch differences in "mute" state.
-// TODO Fix the names. Get rid of "mute". It adds a negative. It's confusing. I found a bug, and the image has the wrong name.
+// TODO Fix the "mute/audioenabled" names. Get rid of "mute". It adds a negative. It's confusing. I found a bug, and the image has the wrong name.
+// TODO Comment function names
 /**
  * Copyright 2013 j <j@mailb.org>
  *
@@ -131,6 +132,8 @@ var rtc = (function() {
       }
       isActive = true;
     },
+    // TODO set mute to off. but not if I'm "actually" deactivating
+    // TODO alternately, just save the video active state as well between deactivations
     deactivate: function() {
       $("#options-enablertc").prop("checked", false);
       if (!isActive) return;
