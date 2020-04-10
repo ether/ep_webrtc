@@ -2,6 +2,11 @@
 // TODO Fix the "mute/audioenabled" names. Get rid of "mute". It adds a negative. It's confusing. I found a bug, and the image has the wrong name.
 // TODO Comment function names
 // TODO hangupAll - hangup MESSAGE followed by reestablishment. Problematic, or at least disruptive on a bad connection, if users are doing this "all the time" muting and unmuting video?
+// TODO addStream deprecated https://developer.mozilla.org/en-US/docs/Web/API/RTCPeerConnection/addStream
+//   also - do I want to put this stuff in the adapter? since we might have old browsers?
+// TODO - Handle AbortError and others for getUserMedia failure https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/getUserMedia
+//   it's not that hard to get this stuff. At worst just do a catchall "other error"
+
 /**
  * Copyright 2013 j <j@mailb.org>
  *
@@ -185,6 +190,7 @@ var rtc = (function() {
       }
     },
     // TODO chromium and non-chromium modes different.
+    //   does the Chromium thing belong in the adapter?
     // TODO setting to turn it off as well
     toggleVideo: function() {
       var videoTrack = localStream.getVideoTracks()[0];
@@ -197,7 +203,7 @@ var rtc = (function() {
           var audioTrack = localStream.getAudioTracks()[0];
           self.deactivate(false) // video was stopped above
           self.activate()
-          // TODO - do it here instead of init? probably not.
+          // TODO - revert from isMuted here instead of init? probably not.
           return true
         }
       }
@@ -354,8 +360,7 @@ var rtc = (function() {
         if (localStream) {
           if (pc[peer].getLocalStreams) {
             if (!pc[peer].getLocalStreams().length) {
-              pc[peer].addStream(localStream); // TODO deprecated https://developer.mozilla.org/en-US/docs/Web/API/RTCPeerConnection/addStream
-              // TODO also - do I want to put this stuff in the adapter? since we might have old browsers?
+              pc[peer].addStream(localStream);
             }
           } else if (pc[peer].localStreams) {
             if (!pc[peer].localStreams.length) {
@@ -521,8 +526,6 @@ var rtc = (function() {
           });
         })
         .catch(function(err) {
-          // TODO - https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/getUserMedia
-          // it's not that hard to get this stuff. At worst just do a catchall "other error"
           var reason = "Sorry, we couldnt't find a suitable camera on your device. If you have a camera, make sure it set up correctly and refresh this website to retry.";
           if(err.name !== "NotFoundError") reason = "Sorry, you need to install SSL certificates for your Etherpad instance to use WebRTC";
 
