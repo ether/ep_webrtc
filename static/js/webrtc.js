@@ -1,3 +1,9 @@
+// * See if "stop()" removes it
+// * See if "remove()" stops the light?
+// * Try addTrack() - can i create a track?
+
+
+
 /**
  * Copyright 2013 j <j@mailb.org>
  *
@@ -333,7 +339,7 @@ var rtc = (function() {
         if (localStream) {
           if (pc[peer].getLocalStreams) {
             if (!pc[peer].getLocalStreams().length) {
-              pc[peer].addStream(localStream);
+              pc[peer].addStream(localStream); // TODO deprecated facepalm https://developer.mozilla.org/en-US/docs/Web/API/RTCPeerConnection/addStream
             }
           } else if (pc[peer].localStreams) {
             if (!pc[peer].localStreams.length) {
@@ -497,6 +503,8 @@ var rtc = (function() {
           });
         })
         .catch(function(err) {
+          // TODO - https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/getUserMedia
+          // it's not that hard to get this stuff. At worst just do a catchall "other error"
           var reason = "Sorry, we couldnt't find a suitable camera on your device. If you have a camera, make sure it set up correctly and refresh this website to retry.";
           if(err.name !== "NotFoundError") reason = "Sorry, you need to install SSL certificates for your Etherpad instance to use WebRTC";
 
