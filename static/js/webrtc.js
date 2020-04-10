@@ -120,18 +120,16 @@ var rtc = (function() {
       $("#rtcbox").hide();
     },
     activate: function() {
-      var p = Promise.resolve() // TODO - no longer need promise stuff
       $("#options-enablertc").prop("checked", true);
       if (isActive) return;
       self.show();
       if (isSupported) {
         padcookie.setPref("rtcEnabled", true);
-        p = self.getUserMedia();
+        self.getUserMedia();
       } else {
         self.showNotSupported();
       }
       isActive = true;
-      return p
     },
     deactivate: function() {
       $("#options-enablertc").prop("checked", false);
@@ -495,7 +493,7 @@ var rtc = (function() {
           }
         }
       };
-      return window.navigator.mediaDevices
+      window.navigator.mediaDevices
         .getUserMedia(mediaConstraints)
         .then(function(stream) {
           localStream = stream;
