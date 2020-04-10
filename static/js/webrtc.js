@@ -116,16 +116,18 @@ var rtc = (function() {
       $("#rtcbox").hide();
     },
     activate: function() {
+      var p = Promise.resolve()
       $("#options-enablertc").prop("checked", true);
       if (isActive) return;
       self.show();
       if (isSupported) {
         padcookie.setPref("rtcEnabled", true);
-        self.getUserMedia();
+        p = self.getUserMedia();
       } else {
         self.showNotSupported();
       }
       isActive = true;
+      return p
     },
     deactivate: function() {
       $("#options-enablertc").prop("checked", false);
@@ -161,8 +163,24 @@ var rtc = (function() {
     toggleVideo: function() {
       var videoTrack = localStream.getVideoTracks()[0];
       if (videoTrack) {
-        videoTrack.enabled = !videoTrack.enabled;
-        return !videoTrack.enabled;
+        if (videoTrack.enabled) {
+          videoTrack.enabled = false;
+          videoTrack.stop()
+          return false
+        } else {
+          var audioTrack = localStream.getAudioTracks()[0];
+          console.log(1, audioTrack)
+          var audioTrackEnabled = audioTrack.enabled;
+          self.deactivate()
+          self.activate()
+          .then(() => {
+            // new one, now that we've reactivated
+            audioTrack = localStream.getAudioTracks()[0];
+            console.log(2, audioTrack)
+            audioTrack.enabled = audioTrackEnabled // TODO - this may not work yet. also needs to change the icon
+          })
+          return true
+        }
       }
     },
     getUserFromId: function(userId) {
@@ -464,7 +482,7 @@ var rtc = (function() {
           }
         }
       };
-      window.navigator.mediaDevices
+      return window.navigator.mediaDevices
         .getUserMedia(mediaConstraints)
         .then(function(stream) {
           localStream = stream;
