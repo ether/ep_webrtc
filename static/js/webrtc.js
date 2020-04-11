@@ -201,16 +201,21 @@ var rtc = (function() {
     toggleVideo: function() {
       var videoTrack = localStream.getVideoTracks()[0];
       if (videoTrack) {
-        if (videoTrack.enabled) {
-          videoTrack.enabled = false;
-          videoTrack.stop()
-          return false
+        if (clientVars.webrtc.chromeVideoStopMute) {
+          if (videoTrack.enabled) {
+            videoTrack.enabled = false;
+            videoTrack.stop()
+            return false
+          } else {
+            self.deactivate(false) // video was stopped above
+            self.activate()
+            // TODO - revert from isMuted here instead of init? didn't seem reliable before,
+            // but maybe I should try again. It could avoid the global variable.
+            return true
+          }
         } else {
-          var audioTrack = localStream.getAudioTracks()[0];
-          self.deactivate(false) // video was stopped above
-          self.activate()
-          // TODO - revert from isMuted here instead of init? probably not.
-          return true
+          videoTrack.enabled = !videoTrack.enabled;
+          return !videoTrack.enabled
         }
       }
     },

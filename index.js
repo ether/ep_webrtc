@@ -75,11 +75,17 @@ exports.clientVars = function(hook, context, callback)
     listenClass = settings.ep_webrtc.listenClass;
   }
 
+  var chromeVideoStopMute = true;
+  if(settings.ep_webrtc && settings.ep_webrtc.chromeVideoStopMute === false){
+    chromeVideoStopMute = settings.ep_webrtc.chromeVideoStopMute;
+  }
+
   return callback({
     webrtc: {
       "iceServers": iceServers,
       "enabled": enabled,
-      "listenClass": listenClass
+      "listenClass": listenClass,
+      "chromeVideoStopMute": chromeVideoStopMute
     }
   });
 };
