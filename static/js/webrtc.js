@@ -6,6 +6,7 @@
 //   also - do I want to put this stuff in the adapter? since we might have old browsers?
 // TODO - Handle AbortError and others for getUserMedia failure https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/getUserMedia
 //   it's not that hard to get this stuff. At worst just do a catchall "other error"
+// TODO get rid of videoEnabled! should take the return value of toggleVideo, just like toggleMuted
 
 /**
  * Copyright 2013 j <j@mailb.org>
