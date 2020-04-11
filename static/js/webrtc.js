@@ -5,13 +5,12 @@
 
 // Assorted tangential to fix:
 //
-// TODO Fix the "mute/audioenabled" names. Get rid of "mute". It adds a negative. It's confusing. I found a bug, and the image has the wrong name.
+// TODO Change "muted" to "off", to match video. It adds a negative which is confusing (and there was indeed a bug)
 // TODO Comment function names
 // TODO addStream deprecated https://developer.mozilla.org/en-US/docs/Web/API/RTCPeerConnection/addStream
 //   also - do I want to put this stuff in the adapter? since we might have old browsers?
-// TODO - Handle AbortError and others for getUserMedia failure https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/getUserMedia
-//   it's not that hard to get this stuff. At worst just do a catchall "other error"
 // TODO get rid of videoEnabled! should take the return value of toggleVideo, just like toggleMuted
+// TODO get rid webrtcDetectedBrowser?
 
 /**
  * Copyright 2013 j <j@mailb.org>
@@ -197,7 +196,6 @@ var rtc = (function() {
     },
     // TODO chromium and non-chromium modes different.
     //   does the Chromium thing belong in the adapter?
-    // TODO setting to turn it off as well
     toggleVideo: function() {
       var videoTrack = localStream.getVideoTracks()[0];
       if (videoTrack) {
