@@ -1,4 +1,7 @@
 // TODO - test with two browsers. Perhaps it'll catch differences in "mute" state.
+
+// Assorted tangential to fix:
+//
 // TODO Fix the "mute/audioenabled" names. Get rid of "mute". It adds a negative. It's confusing. I found a bug, and the image has the wrong name.
 // TODO Comment function names
 // TODO hangupAll - hangup MESSAGE followed by reestablishment. Problematic, or at least disruptive on a bad connection, if users are doing this "all the time" muting and unmuting video?
