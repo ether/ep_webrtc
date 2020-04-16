@@ -100,13 +100,23 @@ exports.setSocketIO = function (hook, context, callback)
   callback();
 };
 
-exports.settings = function (hook, context, callback)
+exports.eejsBlock_mySettings = function (hook, context, callback)
 {
     var checked = (settings.ep_webrtc && settings.ep_webrtc.enabled === false)
       ? 'unchecked'
       : 'checked';
-    context.content += eejs.require('ep_webrtc/templates/webrtc_entry.ejs', {
+    context.content += eejs.require('ep_webrtc/templates/settings.ejs', {
       checked : checked
     });
     callback();
+};
+
+exports.eejsBlock_editorContainerBox = function (hook_name, args, cb) {
+  args.content = args.content + eejs.require("ep_webrtc/templates/webrtc.ejs", {}, module);
+  return cb();
+}
+
+exports.eejsBlock_styles = function (hook_name, args, cb) {
+  args.content = args.content + eejs.require("ep_webrtc/templates/styles.html", {}, module);
+  return cb();
 };

@@ -3,10 +3,12 @@
         {
             "name": "ep_webrtc",
             "hooks": {
-                "clientVars": "ep_webrtc/webrtc:clientVars",
-                "handleMessage" : "ep_webrtc/webrtc:handleMessage",
-                "socketio" : "ep_webrtc/webrtc:setSocketIO",
-                "eejsBlock_mySettings": "ep_webrtc/webrtc:settings"
+                "clientVars": "ep_webrtc/index:clientVars",
+                "handleMessage" : "ep_webrtc/index:handleMessage",
+                "socketio" : "ep_webrtc/index:setSocketIO",
+                "eejsBlock_mySettings": "ep_webrtc/index",
+                "eejsBlock_editorContainerBox": "ep_webrtc/index",
+                "eejsBlock_styles": "ep_webrtc/index"
             },
             "client_hooks": {
                 "postAceInit": "ep_webrtc/static/js/webrtc:rtc.postAceInit",

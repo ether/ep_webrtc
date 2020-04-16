@@ -1,0 +1,117 @@
+#rtcbox {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  padding: 0;
+  order: -1; /* on left side */
+  box-sizing: border-box;
+  background-color: transparent;
+  height: auto;
+  overflow: auto;
+}
+
+#rtcbox .error-msg {
+  padding: 10px;
+  max-width: 120px;
+}
+#rtcbox .video-container {
+  position: relative;
+}
+#rtcbox .video-container:not(:first-child) {
+  margin-top: 5px;
+}
+#rtcbox video {
+  border-left: 5px solid;
+  box-sizing: border-box;
+  background-color: black;
+}
+#rtcbox .video-container, #rtcbox video {
+  max-width: 128px;
+  max-height: 128px;
+  border-radius: 0 3px 3px 0;
+  transition: max-width .3s, max-height .3s, width .3s, height .3s;
+}
+#rtcbox .video-container.large, #rtcbox .video-container.large video {
+  max-width: 256px;
+  max-height: 256px;
+}
+
+.interface-container {
+  display: flex;
+  position: absolute;
+  z-index: 2;
+  bottom: 8px;
+  left: 8px;
+}
+.interface-btn {
+  background-color: rgba(255, 255, 255, 0.35);
+  border-radius: 50%;
+  padding: 5px;
+  margin-right: 6px;
+  cursor: pointer;
+  transition: opacity .2s, background-color .2s;
+  color: #333;
+  width: 16px;
+  height: 16px;
+}
+.interface-btn:hover {
+  opacity: 1;
+  background-color: white !important;
+}
+.interface-btn.audio-btn:before { content: '\e83d'; }
+.interface-btn.audio-btn.muted:before { content: '\e83e'; }
+
+.interface-btn.video-btn:before { content: '\e83b'; }
+.interface-btn.video-btn.off:before { content: '\e83c'; }
+
+.interface-btn.enlarge-btn:before { content: '\e840'; }
+.interface-btn.enlarge-btn.large:before { content: '\e83f'; }
+
+#rtcbox .video-container .user-name {
+  transition: opacity .2s, background-color .2s;
+  position: absolute;
+  top: 0;
+  left: 5px; /* border-width */
+  right: 0;
+  opacity: 0;
+  background-color: rgba(255, 255, 255, 0.35);
+  font-weight: bold;
+  line-height: 20px;
+  padding-left: 8px;
+  color: #111;
+  z-index: 5;
+  height: 20px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  background-color:
+}
+#rtcbox .video-container.local-user {
+  order: -1; /* first position */
+}
+#rtcbox .video-container:hover .interface-btn,
+#rtcbox .video-container:hover .user-name,
+#rtcbox .video-container.local-user .interface-btn {
+  background-color: rgba(255, 255, 255, 0.65);
+  opacity: 1;
+}
+#rtcbox .video-container:hover .user-name {
+  opacity: 1;
+}
+
+@media (max-width: 800px) {
+  #editorcontainerbox {
+    flex-direction: column;
+  }
+  #rtcbox {
+    flex-direction: row;
+    flex-shrink: 0;
+    order: 2;
+    justify-content: start;
+    align-items: baseline;
+  }
+  #rtcbox .video-container:not(:first-child) {
+    margin-top: 0;
+    margin-left: 5px;
+  }
+}

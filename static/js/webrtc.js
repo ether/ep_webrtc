@@ -46,28 +46,14 @@ var rtc = (function() {
   var self = {
     //API HOOKS
     postAceInit: function(hook, context, callback) {
-      var top = $("div#editbar").offset().top + $("div#editbar").height() + 5;
-      $("<div>")
-        .attr({ id: "rtcbox" })
-        .css({
-          position: "absolute",
-          bottom: "0",
-          left: "0",
-          top: top + "px",
-          width: "130px",
-          "z-index": "1",
-          "border-right": "1px solid #999",
-          "border-top": "1px solid #999",
-          padding: "3px",
-          "padding-bottom": "10px",
-          "background-color": "#f1f1f1",
-          height: "auto",
-          border: "none",
-          "border-right": "1px solid #ccc",
-          display: "none"
+      if (!$('#editorcontainerbox').hasClass('flex-layout')) {
+        $.gritter.add({
+          title: "Error",
+          text: "Ep_webrtc: Please upgrade to etherpad 1.8.3 for this plugin to work correctly",
+          sticky: true,
+          class_name: "error"
         })
-        .appendTo($("body"));
-
+      }
       pc_config.iceServers =
         clientVars.webrtc && clientVars.webrtc.iceServers
           ? clientVars.webrtc.iceServers
@@ -80,10 +66,13 @@ var rtc = (function() {
       callback();
     },
     aceSetAuthorStyle: function(hook, context, callback) {
-      if (context.author && context.info && context.info.bgcolor) {
-        $("#video_" + context.author.replace(/\./g, "_")).css({
-          "border-color": context.info.bgcolor
-        });
+      if (context.author) {
+        var user = self.getUserFromId(context.author)
+        if (user) {
+          $("#video_" + context.author.replace(/\./g, "_")).css({
+            "border-color": user.colorId
+          }).siblings('.user-name').text(user.name)
+        }
       }
       callback();
     },
@@ -110,31 +99,21 @@ var rtc = (function() {
     },
     //END OF API HOOKS
     show: function() {
-      $("#rtcbox").show();
-      var right = $("#editorcontainer").css("right");
-      right = right == "auto" ? "0px" : right;
-      $("#editorcontainer").css({ left: "130px", width: "auto", right: right });
+      $("#rtcbox").css('display', 'flex');
     },
     showNotSupported: function() {
-      $("#rtcbox")
-        .empty()
-        .append(
-          $("<div>")
-            .css({
-              padding: "8px",
-              "padding-top": "32px"
-            })
-            .html(
-              "Sorry, your browser does not support WebRTC." +
-                "<br><br>" +
-                "To participate in this audio/video chat you have to user a browser with WebRTC support like Chrome, Firefox or Opera." +
-                ' <a href="http://www.webrtc.org/" target="_new">Find out more</a>'
-            )
-        );
+      $.gritter.add({
+        title: "Error",
+        text: "Sorry, your browser does not support WebRTC.<br><br>" +
+              "To participate in this audio/video chat you have to user a browser with WebRTC support like Chrome, Firefox or Opera." +
+              '<a href="http://www.webrtc.org/" target="_new">Find out more</a>',
+        sticky: true,
+        class_name: "error"
+      })
+      self.hide();
     },
     hide: function() {
       $("#rtcbox").hide();
-      $("#editorcontainer").css({ left: "0" });
     },
     activate: function() {
       $("#options-enablertc").prop("checked", true);
@@ -186,44 +165,52 @@ var rtc = (function() {
         return !videoTrack.enabled;
       }
     },
+    getUserFromId: function(userId) {
+      if (!self._pad || !self._pad.collabClient) return null;
+      var result = self._pad.collabClient
+        .getConnectedUsers()
+        .filter(function(user) {
+          return user.userId == userId;
+        });
+      var user = result.length > 0 ? result[0] : null;
+      if (user && userId == self.getUserId()) user.name = "Me";
+      return user;
+    },
     setStream: function(userId, stream) {
       var isLocal = userId == self.getUserId();
       var videoId = "video_" + userId.replace(/\./g, "_");
       var video = $("#" + videoId)[0];
-      var colorId = self._pad.collabClient
-        .getConnectedUsers()
-        .filter(function(user) {
-          return user.userId == userId;
-        })
-        .map(function(user) {
-          return user.colorId;
-        })[0];
+
+      var user = self.getUserFromId(userId)
+
       if (!video && stream) {
+        var videoContainer = $("<div class='video-container'>").appendTo($("#rtcbox"))
+
+        videoContainer.append($('<div class="user-name">').text(user.name))
+
         video = $("<video playsinline>")
           .attr("id", videoId)
           .css({
-            maxWidth: "128px",
-            maxHeight: "128px",
-            "border-left": "4px solid",
-            "border-color": colorId
+            "border-color": user.colorId
           })
           .on({
             loadedmetadata: function() {
               self.addInterface(userId);
             }
           })
-          .appendTo($("#rtcbox"))[0];
+          .appendTo(videoContainer)[0];
+
         video.autoplay = true;
         if (isLocal) {
+          videoContainer.addClass('local-user');
           video.muted = true;
         }
         self.addInterface(userId);
       }
       if (stream) {
-        attachMediaStream(video, stream);
+        // attachMediaStream(video, stream);
       } else if (video) {
-        $(video).remove();
-        $("#interface_" + videoId).remove();
+        $(video).parent().remove();
       }
     },
     addInterface: function(userId) {
@@ -231,17 +218,8 @@ var rtc = (function() {
       var videoId = "video_" + userId.replace(/\./g, "_");
       var $video = $("#" + videoId);
 
-      var $mute = $("<img>")
-        .css({
-          width: "24px",
-          height: "24px",
-          border: "1px solid #999",
-          "border-radius": "4px",
-          margin: "8px",
-          cursor: "pointer"
-        })
-        .attr("src", "/static/plugins/ep_webrtc/static/image/mute_on.png")
-        .attr("title", "mute")
+      var $mute = $("<span class='interface-btn audio-btn buttonicon'>")
+        .attr("title", "Mute")
         .on({
           click: function(event) {
             var muted;
@@ -252,29 +230,14 @@ var rtc = (function() {
               muted = $video[0].muted;
             }
             $mute
-              .attr("title", muted ? "mute" : "unmute")
-              .attr(
-                "src",
-                muted
-                  ? "/static/plugins/ep_webrtc/static/image/mute_off.png"
-                  : "/static/plugins/ep_webrtc/static/image/mute_on.png"
-              );
+              .attr("title", muted ? "Mute" : "Unmute")
+              .toggleClass("muted", muted);
           }
         });
       var videoEnabled = true;
       var $disableVideo = isLocal
-        ? $("<img>")
-            .css({
-              width: "24px",
-              height: "24px",
-
-              border: "1px solid #999",
-              "border-radius": "4px",
-              margin: "8px",
-              cursor: "pointer"
-            })
-            .attr("src", "/static/plugins/ep_webrtc/static/image/video_on.png")
-            .attr("title", "disable video")
+        ? $("<span class='interface-btn video-btn buttonicon'>")
+            .attr("title", "Disable video")
             .on({
               click: function(event) {
                 self.toggleVideo();
@@ -282,31 +245,16 @@ var rtc = (function() {
                 $disableVideo
                   .attr(
                     "title",
-                    videoEnabled ? "disable video" : "enable video"
+                    videoEnabled ? "Disable video" : "Enable video"
                   )
-                  .attr(
-                    "src",
-                    videoEnabled
-                      ? "/static/plugins/ep_webrtc/static/image/video_on.png"
-                      : "/static/plugins/ep_webrtc/static/image/video_off.png"
-                  );
+                  .toggleClass("off", !videoEnabled);
               }
             })
         : null;
 
       var videoEnlarged = false;
-      var $largeVideo = $("<img>")
-        .css({
-          width: "24px",
-          height: "24px",
-
-          border: "1px solid #999",
-          "border-radius": "4px",
-          margin: "8px",
-          cursor: "pointer"
-        })
-        .attr("src", "/static/plugins/ep_webrtc/static/image/large_on.png")
-        .attr("title", "make video larger")
+      var $largeVideo = $("<span class='interface-btn enlarge-btn buttonicon'>")
+        .attr("title", "Make video larger")
         .on({
           click: function(event) {
             videoEnlarged = !videoEnlarged;
@@ -320,34 +268,17 @@ var rtc = (function() {
             $largeVideo
               .attr(
                 "title",
-                videoEnlarged ? "make video smaller" : "make video larger"
+                videoEnlarged ? "Make video smaller" : "Make video larger"
               )
-              .attr(
-                "src",
-                videoEnlarged
-                  ? "/static/plugins/ep_webrtc/static/image/large_off.png"
-                  : "/static/plugins/ep_webrtc/static/image/large_on.png"
-              );
+              .toggleClass("large", videoEnlarged);
 
-            $video.css("max-width", videoEnlarged ? "256px" : "128px");
-            $video.css("max-height", videoEnlarged ? "256px" : "128px");
-            $("#rtcbox").css(
-              "width",
-              enlargedVideos.size > 0 ? "258px" : "130px"
-            );
-            $("#editorcontainer").css(
-              "left",
-              enlargedVideos.size > 0 ? "258px" : "130px"
-            );
+            $video.parent().toggleClass('large', videoEnlarged)
           }
         });
 
       $("#interface_" + videoId).remove();
-      $("<div>")
+      $("<div class='interface-container'>")
         .attr("id", "interface_" + videoId)
-        .css({
-          display: "flex"
-        })
         .append($mute)
         .append($disableVideo)
         .append($largeVideo)
@@ -551,16 +482,13 @@ var rtc = (function() {
           var reason = "Sorry, we couldnt't find a suitable camera on your device. If you have a camera, make sure it set up correctly and refresh this website to retry.";
           if(err.name !== "NotFoundError") reason = "Sorry, you need to install SSL certificates for your Etherpad instance to use WebRTC";
 
-          $("#rtcbox")
-            .empty()
-            .append(
-              $("<div>")
-                .css({
-                  padding: "8px",
-                  "padding-top": "32px"
-                })
-                .html(reason)
-            );
+          $.gritter.add({
+            title: "Error",
+            text: reason,
+            sticky: true,
+            class_name: "error"
+          })
+          self.hide();
         });
     },
     avInURL: function() {
