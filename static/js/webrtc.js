@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 "use strict";
+
 require("./adapter");
 require("./getUserMediaPolyfill");
 var padcookie = require("ep_etherpad-lite/static/js/pad_cookie").padcookie;
