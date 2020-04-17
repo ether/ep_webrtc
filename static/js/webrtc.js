@@ -10,7 +10,6 @@
 // TODO addStream deprecated https://developer.mozilla.org/en-US/docs/Web/API/RTCPeerConnection/addStream
 //   also - do I want to put this stuff in the adapter? since we might have old browsers?
 // TODO get rid of videoEnabled! should take the return value of toggleVideo, just like toggleMuted
-// TODO get rid webrtcDetectedBrowser?
 
 /**
  * Copyright 2013 j <j@mailb.org>
@@ -194,12 +193,10 @@ var rtc = (function() {
         return !audioTrack.enabled; // returns whether it's "muted", which is the opposite of enabled
       }
     },
-    // TODO chromium and non-chromium modes different.
-    //   does the Chromium thing belong in the adapter?
     toggleVideo: function() {
       var videoTrack = localStream.getVideoTracks()[0];
       if (videoTrack) {
-        if (clientVars.webrtc.chromeVideoStopMute) {
+        if (clientVars.webrtc.chromeVideoStopMute && detectedChrome) {
           if (videoTrack.enabled) {
             videoTrack.enabled = false;
             videoTrack.stop()
@@ -443,7 +440,7 @@ var rtc = (function() {
       }
       var constraints = { optional: [], mandatory: {} };
       // temporary measure to remove Moz* constraints in Chrome
-      if (webrtcDetectedBrowser === "chrome") {
+      if (detectedChrome) { // TODO - now that this is actually detects Chrome, make sure I'm not breaking things for Firefox here
         for (var prop in constraints.mandatory) {
           if (prop.indexOf("Moz") != -1) {
             delete constraints.mandatory[prop];
@@ -605,7 +602,13 @@ var rtc = (function() {
       console.log("Error attaching stream to element.", element);
     }
   };
-  var webrtcDetectedBrowser = "chrome";
+  var detectedChrome = false;
+  // taken from adapter logic
+  // TODO - reuse existing code?
+  if (
+    navigator.webkitGetUserMedia
+    || window.isSecureContext === false && window.webkitRTCPeerConnection && !window.RTCIceGatherer
+  ) detectedChrome = true;
 
   isSupported = true; // TODO: remove me
 
