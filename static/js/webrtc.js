@@ -273,7 +273,7 @@ var rtc = (function() {
       var $mute = $("<span class='interface-btn audio-btn buttonicon'>")
         // TODO what about non-local? Shouldn't we be showing their mute state?
         .attr("title", isLocal && isMuted ? "Unmute" : "Mute")
-        .toggleClass("muted", isLocal && isMuted);
+        .toggleClass("muted", isLocal && isMuted)
         .on({
           click: function(event) {
             var muted;
