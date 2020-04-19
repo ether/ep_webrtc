@@ -547,7 +547,7 @@ var rtc = (function() {
         }
       });
       if (isActive) {
-        $(window).unload(function() {
+        $(window).on("unload", function() {
           self.hangupAll();
         });
       }
