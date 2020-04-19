@@ -26,14 +26,14 @@
   background-color: black;
 }
 #rtcbox .video-container, #rtcbox video {
-  max-width: 128px;
-  max-height: 128px;
+  max-width: 160px;
+  max-height: 160px;
   border-radius: 0 3px 3px 0;
   transition: max-width .3s, max-height .3s, width .3s, height .3s;
 }
 #rtcbox .video-container.large, #rtcbox .video-container.large video {
-  max-width: 256px;
-  max-height: 256px;
+  max-width: 260px;
+  max-height: 260px;
 }
 
 .interface-container {
@@ -51,8 +51,8 @@
   cursor: pointer;
   transition: opacity .2s, background-color .2s;
   color: #333;
-  width: 16px;
-  height: 16px;
+  width: 28px;
+  height: 28px;
 }
 .interface-btn:hover {
   opacity: 1;
