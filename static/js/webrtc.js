@@ -22,7 +22,6 @@ var hooks = require("ep_etherpad-lite/static/js/pluginfw/hooks");
 
 var rtc = (function() {
   var isActive = false;
-  var isSupported = true;
   var pc_config = {};
   var pc_constraints = {
     optional: [
@@ -101,12 +100,48 @@ var rtc = (function() {
     show: function() {
       $("#rtcbox").css('display', 'flex');
     },
-    showNotSupported: function() {
+    showUserMediaError: function(err) { // show an error returned from getUserMedia
+      var reason
+      // For reference on standard errors returned by getUserMedia:
+      // https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/getUserMedia
+      // However keep in mind that we add our own errors in getUserMediaPolyfill
+      switch(err.name) {
+        case "CustomNotSupportedError":
+          reason = "Sorry, your browser does not support WebRTC. (or you have it disabled in your settings).<br><br>" +
+              "To participate in this audio/video chat you have to user a browser with WebRTC support like Chrome, Firefox or Opera." +
+              '<a href="http://www.webrtc.org/" target="_new">Find out more</a>'
+          break;
+        case "CustomSecureConnectionError":
+          reason = "Sorry, you need to install SSL certificates for your Etherpad instance to use WebRTC"
+          break;
+        case "NotAllowedError":
+          // For certain (I suspect older) browsers, `NotAllowedError` indicates either an insecure connection or the user rejecting camera permissions.
+          // The error for both cases appears to be identical, so our best guess at telling them apart is to guess whether we are in a secure context.
+          // (webrtc is considered secure for https connections or on localhost)
+          if (location.protocol === "https:" || location.hostname === "localhost" || location.hostname === "127.0.0.1") {
+            reason = "Sorry, you need to give us permission to use your camera and microphone"
+          } else {
+            reason = "Sorry, you need to install SSL certificates for your Etherpad instance to use WebRTC"
+          }
+          break;
+        case "NotFoundError":
+          reason = "Sorry, we couldnt't find a suitable camera on your device. If you have a camera, make sure it set up correctly and refresh this website to retry."
+          break;
+        case "NotReadableError":
+          // `err.message` might give useful info to the user (not necessarily useful for other error messages)
+          reason = "Sorry, a hardware error occurred that prevented access to your camera and/or microphone:<br><br>" + err.message
+          break;
+        case "AbortError":
+          // `err.message` might give useful info to the user (not necessarily useful for other error messages)
+          reason = "Sorry, an error occurred (probably not hardware related) that prevented access to your camera and/or microphone:<br><br>" + err.message
+          break;
+        default:
+          // `err` as a string might give useful info to the user (not necessarily useful for other error messages)
+          reason = "Sorry, there was an unknown Error:<br><br>" + err
+      }
       $.gritter.add({
         title: "Error",
-        text: "Sorry, your browser does not support WebRTC.<br><br>" +
-              "To participate in this audio/video chat you have to user a browser with WebRTC support like Chrome, Firefox or Opera." +
-              '<a href="http://www.webrtc.org/" target="_new">Find out more</a>',
+        text: reason,
         sticky: true,
         class_name: "error"
       })
@@ -119,35 +154,29 @@ var rtc = (function() {
       $("#options-enablertc").prop("checked", true);
       if (isActive) return;
       self.show();
-      if (isSupported) {
-        padcookie.setPref("rtcEnabled", true);
-        self.getUserMedia();
-      } else {
-        self.showNotSupported();
-      }
+      padcookie.setPref("rtcEnabled", true);
+      self.getUserMedia();
       isActive = true;
     },
     deactivate: function() {
       $("#options-enablertc").prop("checked", false);
       if (!isActive) return;
       self.hide();
-      if (isSupported) {
-        padcookie.setPref("rtcEnabled", false);
-        self.hangupAll();
-        if (localStream) {
-          var videoTrack = localStream.getVideoTracks()[0];
-          var audioTrack = localStream.getAudioTracks()[0];
-          self.setStream(self._pad.getUserId(), "");
-          if (videoTrack.stop === undefined) {
-            // deprecated in 2015, probably disabled by 2020
-            // https://developers.google.com/web/updates/2015/07/mediastream-deprecations
-            localStream.stop();
-          } else {
-            videoTrack.stop();
-            audioTrack.stop();
-          }
-          localStream = null;
+      padcookie.setPref("rtcEnabled", false);
+      self.hangupAll();
+      if (localStream) {
+        var videoTrack = localStream.getVideoTracks()[0];
+        var audioTrack = localStream.getAudioTracks()[0];
+        self.setStream(self._pad.getUserId(), "");
+        if (videoTrack.stop === undefined) {
+          // deprecated in 2015, probably disabled by 2020
+          // https://developers.google.com/web/updates/2015/07/mediastream-deprecations
+          localStream.stop();
+        } else {
+          videoTrack.stop();
+          audioTrack.stop();
         }
+        localStream = null;
       }
       isActive = false;
     },
@@ -478,18 +507,7 @@ var rtc = (function() {
             }
           });
         })
-        .catch(function(err) {
-          var reason = "Sorry, we couldnt't find a suitable camera on your device. If you have a camera, make sure it set up correctly and refresh this website to retry.";
-          if(err.name !== "NotFoundError") reason = "Sorry, you need to install SSL certificates for your Etherpad instance to use WebRTC";
-
-          $.gritter.add({
-            title: "Error",
-            text: reason,
-            sticky: true,
-            class_name: "error"
-          })
-          self.hide();
-        });
+        .catch(function(err) {self.showUserMediaError(err)})
     },
     avInURL: function() {
       if (window.location.search.indexOf("av=YES") > -1) {
@@ -550,8 +568,6 @@ var rtc = (function() {
     }
   };
   var webrtcDetectedBrowser = "chrome";
-
-  isSupported = true; // TODO: remove me
 
   // Set Opus as the default audio codec if it's present.
   function preferOpus(sdp) {
