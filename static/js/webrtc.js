@@ -237,7 +237,7 @@ var rtc = (function() {
         self.addInterface(userId);
       }
       if (stream) {
-        // attachMediaStream(video, stream);
+        attachMediaStream(video, stream);
       } else if (video) {
         $(video).parent().remove();
       }
