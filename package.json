@@ -1,8 +1,8 @@
 {
   "name": "ep_webrtc",
-  "version": "0.0.11",
+  "version": "0.1.0",
   "description": "WebRTC based audio/video chat to Etherpad",
-  "author": "j <j@mailb.org>",
+  "author": "John McLear <john@mclear.co.uk>",
   "contributors": [],
   "engines": {
     "node": ">=0.6.3"
