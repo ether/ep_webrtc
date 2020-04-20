@@ -555,7 +555,7 @@ var rtc = (function() {
   };
 
   // Normalize RTC implementation between browsers
-  // var getUserMedia = window.navigator.mediaDevices.getUserMedia;
+  var getUserMedia = window.navigator.mediaDevices.getUserMedia;
   var attachMediaStream = function(element, stream) {
     if (typeof element.srcObject !== "undefined") {
       element.srcObject = stream;
