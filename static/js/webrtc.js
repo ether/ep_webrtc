@@ -506,7 +506,7 @@ var rtc = (function() {
           localStream = stream;
           var audioTrack = localStream.getAudioTracks()[0];
           if (audioTrack) {
-            audioTrack.enabled = !clientVars.webrtc.audio_default_muted;
+            audioTrack.enabled = !$("#options-audiodefaultmuted").prop("checked");
           }
           self.setStream(self._pad.getUserId(), stream);
           self._pad.collabClient.getConnectedUsers().forEach(function(user) {
@@ -527,7 +527,17 @@ var rtc = (function() {
         return false;
       }
     },
+    initOptions: function() {
+      var audioDefaultMuted = padcookie.getPref("audioDefaultMuted");
+      if (typeof audioDefaultMuted !== "undefined") {
+        $("#options-audiodefaultmuted").prop("checked", audioDefaultMuted);
+      }
+      $("#options-audiodefaultmuted").on("change", function() {
+        padcookie.setPref("audioDefaultMuted", this.checked);
+      });
+    },
     init: function(pad) {
+      self.initOptions()
       self._pad = pad || window.pad;
       var rtcEnabled = padcookie.getPref("rtcEnabled");
       if (typeof rtcEnabled == "undefined") {
