@@ -259,7 +259,7 @@ var rtc = (function() {
               muted = $video[0].muted;
             }
             $mute
-              .attr("title", muted ? "Mute" : "Unmute")
+              .attr("title", muted ? "Unmute" : "Mute")
               .toggleClass("muted", muted);
           }
         });
