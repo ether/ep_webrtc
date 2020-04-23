@@ -87,6 +87,12 @@ exports.clientVars = function(hook, context, callback)
     enabled = settings.ep_webrtc.enabled;
   }
 
+  // TODO - have a settings.json.template type thing
+  var audio_default_muted = true;
+  if(settings.ep_webrtc && settings.ep_webrtc.audio_default_muted === false){
+    audio_default_muted = settings.ep_webrtc.audio_default_muted;
+  }
+
   var iceServers = [ {"url": "stun:stun.l.google.com:19302"} ];
   if(settings.ep_webrtc && settings.ep_webrtc.iceServers){
     iceServers = settings.ep_webrtc.iceServers;
@@ -109,6 +115,7 @@ exports.clientVars = function(hook, context, callback)
     webrtc: {
       "iceServers": iceServers,
       "enabled": enabled,
+      "audio_default_muted": audio_default_muted,
       "listenClass": listenClass,
       "video": video
     }
