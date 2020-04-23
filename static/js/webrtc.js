@@ -570,7 +570,20 @@ var rtc = (function() {
       }
     },
     initOptions: function() {
-      var audioDefaultMuted = padcookie.getPref("audioDefaultMuted");
+      var audioDefaultMuted
+
+      // If the setting is in the URL, set the cookie
+      if (window.location.search.indexOf("defaultmuted=YES") > -1) {
+        padcookie.setPref("audioDefaultMuted", true);
+        audioDefaultMuted = true
+      } else if (window.location.search.indexOf("defaultmuted=NO") > -1) {
+        padcookie.setPref("audioDefaultMuted", false);
+        audioDefaultMuted = false
+      } else {
+        // If the setting is not in the URL, get the cookie
+        audioDefaultMuted = padcookie.getPref("audioDefaultMuted");
+      }
+      // Could be "undefined" if we tried to get the cookie and it wasn't there
       if (typeof audioDefaultMuted !== "undefined") {
         $("#options-audiodefaultmuted").prop("checked", audioDefaultMuted);
       }
