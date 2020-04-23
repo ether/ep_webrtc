@@ -224,7 +224,7 @@ var rtc = (function() {
           })
           .on({
             loadedmetadata: function() {
-              self.addInterface(userId);
+              self.addInterface(userId, stream);
             }
           })
           .appendTo(videoContainer)[0];
@@ -234,7 +234,7 @@ var rtc = (function() {
           videoContainer.addClass('local-user');
           video.muted = true;
         }
-        self.addInterface(userId);
+        self.addInterface(userId, stream);
       }
       if (stream) {
         attachMediaStream(video, stream);
@@ -242,13 +242,20 @@ var rtc = (function() {
         $(video).parent().remove();
       }
     },
-    addInterface: function(userId) {
+    addInterface: function(userId, stream) {
       var isLocal = userId == self.getUserId();
       var videoId = "video_" + userId.replace(/\./g, "_");
       var $video = $("#" + videoId);
 
+      var audioTrack = stream.getAudioTracks()[0];
+      var initiallyMuted = false;
+      if (audioTrack) {
+        initiallyMuted = !audioTrack.enabled
+      }
+
       var $mute = $("<span class='interface-btn audio-btn buttonicon'>")
-        .attr("title", "Mute")
+        .attr("title", initiallyMuted ? "Unmute" : "Mute")
+        .toggleClass("muted", initiallyMuted)
         .on({
           click: function(event) {
             var muted;
@@ -497,6 +504,10 @@ var rtc = (function() {
         .getUserMedia(mediaConstraints)
         .then(function(stream) {
           localStream = stream;
+          var audioTrack = localStream.getAudioTracks()[0];
+          if (audioTrack) {
+            audioTrack.enabled = !clientVars.webrtc.audio_default_muted;
+          }
           self.setStream(self._pad.getUserId(), stream);
           self._pad.collabClient.getConnectedUsers().forEach(function(user) {
             if (user.userId != self.getUserId()) {
