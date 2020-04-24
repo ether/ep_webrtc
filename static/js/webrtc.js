@@ -532,12 +532,10 @@ var rtc = (function() {
         });
       }
 
-      if (clientVars.webrtc.enabled) {
-        if (rtcEnabled) {
-          self.activate();
-        } else {
-          self.deactivate();
-        }
+      if (rtcEnabled) {
+        self.activate();
+      } else {
+        self.deactivate();
       }
       $("#options-enablertc").on("change", function() {
         if (this.checked) {
