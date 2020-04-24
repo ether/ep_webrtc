@@ -1,4 +1,4 @@
 {
     "pad.settings.enablertc": "Enable Audio/Video Chat",
-    "pad.settings.audiodefaultmuted": "Mute by Default"
+    "pad.settings.audiodefaulton": "Audio On At Start"
 }

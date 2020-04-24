@@ -181,6 +181,10 @@ var rtc = (function() {
       isActive = false;
     },
     toggleMuted: function() {
+      if (!clientVars.webrtc.audio_enabled) {
+        // If audio is disabled, don't let us toggle it
+        return true
+      }
       var audioTrack = localStream.getAudioTracks()[0];
       if (audioTrack) {
         audioTrack.enabled = !audioTrack.enabled;
@@ -253,8 +257,15 @@ var rtc = (function() {
         initiallyMuted = !audioTrack.enabled
       }
 
+      var title
+      if (!clientVars.webrtc.audio_enabled) {
+        title = "Audio disabled by admin"
+      } else {
+        title = initiallyMuted ? "Unmute" : "Mute"
+      }
+
       var $mute = $("<span class='interface-btn audio-btn buttonicon'>")
-        .attr("title", initiallyMuted ? "Unmute" : "Mute")
+        .attr("title", title)
         .toggleClass("muted", initiallyMuted)
         .on({
           click: function(event) {
@@ -506,7 +517,7 @@ var rtc = (function() {
           localStream = stream;
           var audioTrack = localStream.getAudioTracks()[0];
           if (audioTrack) {
-            audioTrack.enabled = !$("#options-audiodefaultmuted").prop("checked");
+            audioTrack.enabled = $("#options-audiodefaulton").prop("checked");
           }
           self.setStream(self._pad.getUserId(), stream);
           self._pad.collabClient.getConnectedUsers().forEach(function(user) {
@@ -528,25 +539,36 @@ var rtc = (function() {
       }
     },
     initOptions: function() {
-      var audioDefaultMuted
+      var audioDefaultOn
 
-      // If the setting is in the URL, set the cookie
-      if (window.location.search.indexOf("defaultmuted=YES") > -1) {
-        padcookie.setPref("audioDefaultMuted", true);
-        audioDefaultMuted = true
-      } else if (window.location.search.indexOf("defaultmuted=NO") > -1) {
-        padcookie.setPref("audioDefaultMuted", false);
-        audioDefaultMuted = false
+      // Ignore "default on" if it's not enabled at all
+      if (!clientVars.webrtc.audio_enabled) {
+        return
+      }
+
+      // * If the setting is in the URL: use it, and also set the cookie
+      // * If the setting is not in the URL: try to get it from the cookie
+      if (window.location.search.indexOf("audiodefault=ON") > -1) {
+        padcookie.setPref("audioDefaultOn", true);
+        audioDefaultOn = true
+      } else if (window.location.search.indexOf("audiodefault=OFF") > -1) {
+        padcookie.setPref("audioDefaultOn", false);
+        audioDefaultOn = false
       } else {
-        // If the setting is not in the URL, get the cookie
-        audioDefaultMuted = padcookie.getPref("audioDefaultMuted");
+        audioDefaultOn = padcookie.getPref("audioDefaultOn");
       }
-      // Could be "undefined" if we tried to get the cookie and it wasn't there
-      if (typeof audioDefaultMuted !== "undefined") {
-        $("#options-audiodefaultmuted").prop("checked", audioDefaultMuted);
+
+      // * If audioDefaultOn was in the cookie or the URL var, set the checkbox accordingly
+      // * If audioDefaultOn was not in the cookie, go with the site-wide settings
+      if (typeof audioDefaultOn !== "undefined") {
+        $("#options-audiodefaulton").prop("checked", audioDefaultOn);
+      } else {
+        $("#options-audiodefaulton").prop("checked", clientVars.webrtc.audio_default_on);
       }
-      $("#options-audiodefaultmuted").on("change", function() {
-        padcookie.setPref("audioDefaultMuted", this.checked);
+
+      // If the user changes the checkbox, set the cookie accordingly
+      $("#options-audiodefaulton").on("change", function() {
+        padcookie.setPref("audioDefaultOn", this.checked);
       });
     },
     init: function(pad) {
