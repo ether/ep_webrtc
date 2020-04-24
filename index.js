@@ -88,9 +88,21 @@ exports.clientVars = function(hook, context, callback)
   }
 
   // TODO - have a settings.json.template type thing
-  var audio_default_muted = true;
-  if(settings.ep_webrtc && settings.ep_webrtc.audio_default_muted === false){
-    audio_default_muted = settings.ep_webrtc.audio_default_muted;
+  var audioEnabled
+  var audioDefaultOn
+  if (settings.ep_webrtc) {
+    if (settings.ep_webrtc.audio === "disabled") {
+      audioEnabled = false
+      // audioDefaultOn should be ignored in this case
+    } else if (settings.ep_webrtc.audio === "default_on") {
+      audioEnabled = true
+      audioDefaultOn = true
+    } else if (settings.ep_webrtc.audio === "default_off") {
+      audioEnabled = true
+      audioDefaultOn = false
+    } else {
+      throw Error("invalid value for setting ep_webrtc.audio: " + settings.ep_webrtc.audio)
+    }
   }
 
   var iceServers = [ {"url": "stun:stun.l.google.com:19302"} ];
@@ -115,7 +127,8 @@ exports.clientVars = function(hook, context, callback)
     webrtc: {
       "iceServers": iceServers,
       "enabled": enabled,
-      "audio_default_muted": audio_default_muted,
+      "audio_enabled": audioEnabled,
+      "audio_default_on": audioDefaultOn,
       "listenClass": listenClass,
       "video": video
     }
@@ -143,11 +156,18 @@ exports.setSocketIO = function (hook, context, callback)
 
 exports.eejsBlock_mySettings = function (hook, context, callback)
 {
-    var checked = (settings.ep_webrtc && settings.ep_webrtc.enabled === false)
+    // TODO - Double check this still works. Don't rely on the javascript
+    var enabled = (settings.ep_webrtc && settings.ep_webrtc.enabled === false)
       ? 'unchecked'
       : 'checked';
+
+    var audioEnabled = (settings.ep_webrtc && settings.ep_webrtc.audio !== "disabled")
+      ? true
+      : false;
+
     context.content += eejs.require('ep_webrtc/templates/settings.ejs', {
-      checked : checked
+      enabled : enabled,
+      audio_enabled : audioEnabled,
     });
     callback();
 };

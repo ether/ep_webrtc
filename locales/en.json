@@ -12,5 +12,5 @@
     "pad.ep_webrtc.error.other": "Sorry, there was an unknown error:",
 
     "pad.settings.enablertc": "Enable Audio/Video Chat",
-    "pad.settings.audiodefaultmuted": "Mute by Default"
+    "pad.settings.audiodefaulton": "Audio On At Start"
 }
