@@ -583,7 +583,7 @@ var rtc = (function() {
       }
     },
     initOptions: function() {
-      var audioDefaultOn
+      var value
 
       // Ignore "default on" if it's not enabled at all
       if (!clientVars.webrtc.audio_enabled) {
@@ -592,23 +592,22 @@ var rtc = (function() {
 
       // * If the setting is in the URL: use it, and also set the cookie
       // * If the setting is not in the URL: try to get it from the cookie
+      // * If the setting was in neither, go with the site-wide settings
+      //   but don't put it in the cookies
       if (window.location.search.indexOf("audiodefault=ON") > -1) {
         padcookie.setPref("audioDefaultOn", true);
-        audioDefaultOn = true
+        value = true
       } else if (window.location.search.indexOf("audiodefault=OFF") > -1) {
         padcookie.setPref("audioDefaultOn", false);
-        audioDefaultOn = false
+        value = false
       } else {
-        audioDefaultOn = padcookie.getPref("audioDefaultOn");
+        value = padcookie.getPref("audioDefaultOn");
+        if (typeof value === "undefined") {
+          value = clientVars.webrtc.audio_default_on;
+        }
       }
 
-      // * If audioDefaultOn was in the cookie or the URL var, set the checkbox accordingly
-      // * If audioDefaultOn was not in the cookie, go with the site-wide settings
-      if (typeof audioDefaultOn !== "undefined") {
-        $("#options-audiodefaulton").prop("checked", audioDefaultOn);
-      } else {
-        $("#options-audiodefaulton").prop("checked", clientVars.webrtc.audio_default_on);
-      }
+      $("#options-audiodefaulton").prop("checked", value);
 
       // If the user changes the checkbox, set the cookie accordingly
       $("#options-audiodefaulton").on("change", function() {
