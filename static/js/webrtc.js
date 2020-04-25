@@ -180,6 +180,8 @@ var rtc = (function() {
       }
       isActive = false;
     },
+    // TODO - is audio_enabled a security issue? Do we care if the user hacks the client to do video anyway?
+    // I suppose this has nothing to do with the server anyway. It uses Google turn servers etc
     toggleMuted: function() {
       if (!clientVars.webrtc.audio_enabled) {
         // If audio is disabled, don't let us toggle it
@@ -259,7 +261,7 @@ var rtc = (function() {
 
       var title
       if (!clientVars.webrtc.audio_enabled) {
-        title = "Audio disabled by admin"
+        title = "Audio disabled by admin" // TODO - greyed out or something for CSS?
       } else {
         title = initiallyMuted ? "Unmute" : "Mute"
       }
@@ -519,6 +521,7 @@ var rtc = (function() {
           if (audioTrack) {
             // using `=== true` to make absolutely sure the result is a boolean
             // we don't want bugs when it comes to muting/turning off video
+            // TODO - can there be more than one?
             audioTrack.enabled = $("#options-audiodefaulton").prop("checked") === true;
           }
           self.setStream(self._pad.getUserId(), stream);
@@ -540,41 +543,58 @@ var rtc = (function() {
         return false;
       }
     },
-    initOptions: function() {
-      var value
 
-      // Ignore "default on" if it's not enabled at all
-      if (!clientVars.webrtc.audio_enabled) {
-        return
-      }
+    // Connect a setting to a checkbox. To be called on initialization.
+    //
+    // It will check for the value in urlVar, cookie, and clientVar, in that order
+    // If urlVar is found, it will also set the cookie
+    // Finally, it sets up to set cookie if the user changes the setting in the gearbox
+    settingToCheckbox: function({urlVar, cookie, clientVar, checkboxId}) {
+      if (!urlVar) {throw Error("missing urlVar in settingToCheckbox");}
+      if (!cookie) {throw Error("missing cookie in settingToCheckbox");}
+      if (!clientVar) {throw Error("missing clientVar in settingToCheckbox");}
+      if (!(clientVar in clientVars.webrtc)) {throw Error("unknown clientVar: " + clientVar);}
+      if (!checkboxId) {throw Error("missing checkboxId in settingToCheckbox");}
+
+      var value
 
       // * If the setting is in the URL: use it, and also set the cookie
       // * If the setting is not in the URL: try to get it from the cookie
-      // * If the setting was in neither, go with the site-wide settings
+      // * If the setting was in neither, go with the site-wide setting in clientVar
       //   but don't put it in the cookies
-      if (window.location.search.indexOf("audiodefault=ON") > -1) {
-        padcookie.setPref("audioDefaultOn", true);
+      if (window.location.search.indexOf(urlVar + "=true") > -1) {
+        padcookie.setPref(cookie, true);
         value = true
-      } else if (window.location.search.indexOf("audiodefault=OFF") > -1) {
-        padcookie.setPref("audioDefaultOn", false);
+      } else if (window.location.search.indexOf(urlVar + "=false") > -1) {
+        padcookie.setPref(cookie, false);
         value = false
       } else {
-        value = padcookie.getPref("audioDefaultOn");
+        value = padcookie.getPref(cookie);
         if (typeof value === "undefined") {
-          value = clientVars.webrtc.audio_default_on;
+          value = clientVars.webrtc[clientVar];
         }
       }
 
-      $("#options-audiodefaulton").prop("checked", value);
+      $(checkboxId).prop("checked", value);
 
       // If the user changes the checkbox, set the cookie accordingly
-      $("#options-audiodefaulton").on("change", function() {
-        padcookie.setPref("audioDefaultOn", this.checked);
+      $(checkboxId).on("change", function() {
+        padcookie.setPref(cookie, this.checked);
       });
     },
     init: function(pad) {
-      self.initOptions()
       self._pad = pad || window.pad;
+
+      // The checkbox shouldn't even exist if it's not enabled
+      if (clientVars.webrtc.audio_enabled) {
+        self.settingToCheckbox({
+          urlVar: "audiodefault",
+          cookie: "audioDefaultOn",
+          clientVar: "audio_default_on",
+          checkboxId: "#options-audiodefaulton"
+        })
+      }
+
       var rtcEnabled = padcookie.getPref("rtcEnabled");
       if (typeof rtcEnabled == "undefined") {
         rtcEnabled = $("#options-enablertc").prop("checked");
