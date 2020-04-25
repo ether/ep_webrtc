@@ -101,6 +101,7 @@ exports.clientVars = function(hook, context, callback)
       audioEnabled = true
       audioDefaultOn = false
     } else {
+      // TODO - useless since you can change it in the admin?
       throw Error("invalid value for setting ep_webrtc.audio: " + settings.ep_webrtc.audio)
     }
   }
