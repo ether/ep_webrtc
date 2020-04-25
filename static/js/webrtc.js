@@ -517,7 +517,9 @@ var rtc = (function() {
           localStream = stream;
           var audioTrack = localStream.getAudioTracks()[0];
           if (audioTrack) {
-            audioTrack.enabled = $("#options-audiodefaulton").prop("checked");
+            // using `=== true` to make absolutely sure the result is a boolean
+            // we don't want bugs when it comes to muting/turning off video
+            audioTrack.enabled = $("#options-audiodefaulton").prop("checked") === true;
           }
           self.setStream(self._pad.getUserId(), stream);
           self._pad.collabClient.getConnectedUsers().forEach(function(user) {
