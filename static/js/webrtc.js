@@ -203,6 +203,7 @@ var rtc = (function() {
     toggleMuted: function() {
       if (!clientVars.webrtc.audio_enabled) {
         // If audio is disabled, don't let us toggle it
+        // TODO - make sure this doesn't change title. it happens in the calling function
         return true
       }
       var audioTrack = localStream.getAudioTracks()[0];
