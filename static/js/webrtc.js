@@ -201,11 +201,6 @@ var rtc = (function() {
     // TODO - is audio_enabled a security issue? Do we care if the user hacks the client to do video anyway?
     // I suppose this has nothing to do with the server anyway. It uses Google turn servers etc
     toggleMuted: function() {
-      if (!clientVars.webrtc.audio_enabled) {
-        // If audio is disabled, don't let us toggle it
-        // TODO - make sure this doesn't change title. it happens in the calling function
-        return true
-      }
       var audioTrack = localStream.getAudioTracks()[0];
       if (audioTrack) {
         audioTrack.enabled = !audioTrack.enabled;
@@ -296,7 +291,9 @@ var rtc = (function() {
       var $mute = $("<span class='interface-btn audio-btn buttonicon'>")
         .attr("title", title)
         .toggleClass("muted", initiallyMuted)
-        .on({
+
+      if (clientVars.webrtc.audio_enabled) {
+        $mute.on({
           click: function(event) {
             var muted;
             if (isLocal) {
@@ -310,6 +307,7 @@ var rtc = (function() {
               .toggleClass("muted", muted);
           }
         });
+      }
       var videoEnabled = true;
       var $disableVideo = isLocal
         ? $("<span class='interface-btn video-btn buttonicon'>")
