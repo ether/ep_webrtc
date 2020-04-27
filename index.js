@@ -58,6 +58,24 @@ function handleRTCMessage(client, payload)
   }
 }
 
+getDisabledDefault = function(field)
+{
+  // TODO - have a settings.json.template type thing
+  if (settings.ep_webrtc) {
+    if (settings.ep_webrtc[field] === "disabled") {
+      // defaultOn should be ignored in this case
+      return {enabled: false}
+    } else if (settings.ep_webrtc[field] === "default_off") {
+      return {enabled: true, defaultOn: false}
+    } else if (settings.ep_webrtc[field] === "default_on" || settings.ep_webrtc[field] === undefined) {
+      return {enabled: true, defaultOn: true}
+    } else {
+      // TODO - useless since you can change it in the admin?
+      throw Error("invalid value for setting ep_webrtc." + field + ": " + settings.ep_webrtc[field])
+    }
+  }
+}
+
 exports.clientVars = function(hook, context, callback)
 {
   var enabled = true;
@@ -65,24 +83,7 @@ exports.clientVars = function(hook, context, callback)
     enabled = settings.ep_webrtc.enabled;
   }
 
-  // TODO - have a settings.json.template type thing
-  var audioEnabled
-  var audioDefaultOn
-  if (settings.ep_webrtc) {
-    if (settings.ep_webrtc.audio === "disabled") {
-      audioEnabled = false
-      // audioDefaultOn should be ignored in this case
-    } else if (settings.ep_webrtc.audio === "default_on") {
-      audioEnabled = true
-      audioDefaultOn = true
-    } else if (settings.ep_webrtc.audio === "default_off") {
-      audioEnabled = true
-      audioDefaultOn = false
-    } else {
-      // TODO - useless since you can change it in the admin?
-      throw Error("invalid value for setting ep_webrtc.audio: " + settings.ep_webrtc.audio)
-    }
-  }
+  audio = getDisabledDefault('audio');
 
   var iceServers = [ {"url": "stun:stun.l.google.com:19302"} ];
   if(settings.ep_webrtc && settings.ep_webrtc.iceServers){
@@ -98,8 +99,8 @@ exports.clientVars = function(hook, context, callback)
     webrtc: {
       "iceServers": iceServers,
       "enabled": enabled,
-      "audio_enabled": audioEnabled,
-      "audio_default_on": audioDefaultOn,
+      "audio_enabled": audio.enabled,
+      "audio_default_on": audio.defaultOn,
       "listenClass": listenClass
     }
   });
