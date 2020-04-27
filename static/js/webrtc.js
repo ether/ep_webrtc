@@ -186,14 +186,14 @@ var rtc = (function() {
       var audioTrack = localStream.getAudioTracks()[0];
       if (audioTrack) {
         audioTrack.enabled = !audioTrack.enabled;
-        return !audioTrack.enabled;
+        return !audioTrack.enabled; // returning "Muted" state, which is !enabled
       }
     },
     toggleVideo: function() {
       var videoTrack = localStream.getVideoTracks()[0];
       if (videoTrack) {
         videoTrack.enabled = !videoTrack.enabled;
-        return !videoTrack.enabled;
+        return videoTrack.enabled;
       }
     },
     getUserFromId: function(userId) {
@@ -282,14 +282,12 @@ var rtc = (function() {
           }
         });
       }
-      var videoEnabled = true;
       var $disableVideo = isLocal
         ? $("<span class='interface-btn video-btn buttonicon'>")
             .attr("title", "Disable video")
             .on({
               click: function(event) {
-                self.toggleVideo();
-                videoEnabled = !videoEnabled;
+                var videoEnabled = self.toggleVideo();
                 $disableVideo
                   .attr(
                     "title",
