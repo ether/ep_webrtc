@@ -59,6 +59,7 @@ function handleRTCMessage(client, payload)
   }
 }
 
+// TODO - axe this function in favor of all booleans
 getDisabledDefault = function(field)
 {
   // TODO - have a settings.json.template type thing
@@ -84,6 +85,7 @@ exports.clientVars = function(hook, context, callback)
     enabled = settings.ep_webrtc.enabled;
   }
 
+  // TODO - Rename settings: https://github.com/ether/ep_webrtc/pull/40/files#r416660488
   audio = getDisabledDefault('audio');
   video = getDisabledDefault('video');
 
@@ -101,7 +103,6 @@ exports.clientVars = function(hook, context, callback)
     webrtc: {
       "iceServers": iceServers,
       "enabled": enabled,
-      // TODO - I need to rename audio_enabled/video_enabled. "enabled" means something different than audioTrack.enabled
       "audio_enabled": audio.enabled,
       "audio_default_on": audio.defaultOn,
       "video_enabled": video.enabled,
@@ -129,7 +130,6 @@ exports.setSocketIO = function (hook, context, callback)
 
 exports.eejsBlock_mySettings = function (hook, context, callback)
 {
-    // TODO - Double check this still works. Don't rely on the javascript
     var enabled = (settings.ep_webrtc && settings.ep_webrtc.enabled === false)
       ? 'unchecked'
       : 'checked';
