@@ -1,4 +1,3 @@
-// TODO - test on Firefox as well
 // TODO - test with conversation with multiple ppl
 // vim: et:ts=2:sw=2:sts=2:ft=javascript
 /**
@@ -95,8 +94,8 @@ exports.clientVars = function(hook, context, callback)
   }
 
   var audioEnabledOnStart = true;
-  if(settings.ep_webrtc && settings.ep_webrtc.audio_enabled_on_start === false){
-    audioEnabledOnStart = settings.ep_webrtc.audio_enabled_on_start;
+  if(settings.ep_webrtc && settings.ep_webrtc.audio_enabled_on_start_default === false){
+    audioEnabledOnStart = settings.ep_webrtc.audio_enabled_on_start_default;
   }
 
   var videoAllowed = true;
@@ -104,8 +103,8 @@ exports.clientVars = function(hook, context, callback)
     videoAllowed = settings.ep_webrtc.video_allowed;
   }
   var videoEnabledOnStart = true;
-  if(settings.ep_webrtc && settings.ep_webrtc.video_enabled_on_start === false){
-    videoEnabledOnStart = settings.ep_webrtc.video_enabled_on_start;
+  if(settings.ep_webrtc && settings.ep_webrtc.video_enabled_on_start_default === false){
+    videoEnabledOnStart = settings.ep_webrtc.video_enabled_on_start_default;
   }
 
   var iceServers = [ {"url": "stun:stun.l.google.com:19302"} ];
@@ -131,9 +130,9 @@ exports.clientVars = function(hook, context, callback)
       "iceServers": iceServers,
       "enabled": enabled,
       "audio_allowed": audioAllowed,
-      "audio_enabled_on_start": audioEnabledOnStart,
+      "audio_enabled_on_start_default": audioEnabledOnStart,
       "video_allowed": videoAllowed,
-      "video_enabled_on_start": videoEnabledOnStart,
+      "video_enabled_on_start_default": videoEnabledOnStart,
       "listenClass": listenClass,
       "video": video
     }
