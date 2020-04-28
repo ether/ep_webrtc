@@ -59,25 +59,6 @@ function handleRTCMessage(client, payload)
   }
 }
 
-// TODO - axe this function in favor of all booleans
-getDisabledDefault = function(field)
-{
-  // TODO - have a settings.json.template type thing
-  if (settings.ep_webrtc) {
-    if (settings.ep_webrtc[field] === "disabled") {
-      // defaultOn should be ignored in this case
-      return {enabled: false}
-    } else if (settings.ep_webrtc[field] === "default_off") {
-      return {enabled: true, defaultOn: false}
-    } else if (settings.ep_webrtc[field] === "default_on" || settings.ep_webrtc[field] === undefined) {
-      return {enabled: true, defaultOn: true}
-    } else {
-      // TODO - useless since you can change it in the admin?
-      throw Error("invalid value for setting ep_webrtc." + field + ": " + settings.ep_webrtc[field])
-    }
-  }
-}
-
 exports.clientVars = function(hook, context, callback)
 {
   var enabled = true;
@@ -85,9 +66,24 @@ exports.clientVars = function(hook, context, callback)
     enabled = settings.ep_webrtc.enabled;
   }
 
-  // TODO - Rename settings: https://github.com/ether/ep_webrtc/pull/40/files#r416660488
-  audio = getDisabledDefault('audio');
-  video = getDisabledDefault('video');
+  var audioAllowed = true;
+  if(settings.ep_webrtc && settings.ep_webrtc.audio_allowed === false){
+    audioAllowed = settings.ep_webrtc.audio_allowed;
+  }
+
+  var audioEnabledOnStart = true;
+  if(settings.ep_webrtc && settings.ep_webrtc.audio_enabled_on_start === false){
+    audioEnabledOnStart = settings.ep_webrtc.audio_enabled_on_start;
+  }
+
+  var videoAllowed = true;
+  if(settings.ep_webrtc && settings.ep_webrtc.video_allowed === false){
+    videoAllowed = settings.ep_webrtc.video_allowed;
+  }
+  var videoEnabledOnStart = true;
+  if(settings.ep_webrtc && settings.ep_webrtc.video_enabled_on_start === false){
+    videoEnabledOnStart = settings.ep_webrtc.video_enabled_on_start;
+  }
 
   var iceServers = [ {"url": "stun:stun.l.google.com:19302"} ];
   if(settings.ep_webrtc && settings.ep_webrtc.iceServers){
@@ -103,10 +99,10 @@ exports.clientVars = function(hook, context, callback)
     webrtc: {
       "iceServers": iceServers,
       "enabled": enabled,
-      "audio_enabled": audio.enabled,
-      "audio_default_on": audio.defaultOn,
-      "video_enabled": video.enabled,
-      "video_default_on": video.defaultOn,
+      "audio_allowed": audioAllowed,
+      "audio_enabled_on_start": audioEnabledOnStart,
+      "video_allowed": videoAllowed,
+      "video_enabled_on_start": videoEnabledOnStart,
       "listenClass": listenClass
     }
   });
@@ -134,18 +130,18 @@ exports.eejsBlock_mySettings = function (hook, context, callback)
       ? 'unchecked'
       : 'checked';
 
-    var audioEnabled = (settings.ep_webrtc && settings.ep_webrtc.audio !== "disabled")
-      ? true
-      : false;
+    var audioAllowed = (settings.ep_webrtc && settings.ep_webrtc.audio_allowed === false)
+      ? false
+      : true;
 
-    var videoEnabled = (settings.ep_webrtc && settings.ep_webrtc.video !== "disabled")
-      ? true
-      : false;
+    var videoAllowed = (settings.ep_webrtc && settings.ep_webrtc.video_allowed === false)
+      ? false
+      : true;
 
     context.content += eejs.require('ep_webrtc/templates/settings.ejs', {
       enabled : enabled,
-      audio_enabled : audioEnabled,
-      video_enabled : videoEnabled,
+      audio_allowed : audioAllowed,
+      video_allowed : videoAllowed
     });
     callback();
 };
