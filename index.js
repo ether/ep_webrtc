@@ -1,3 +1,5 @@
+// TODO - test on Firefox as well
+// TODO - figure out weird glitchy sizing thing on startup. seems to just be when video.enabled is false. test that alone on master. if it still happens, ship it.
 // vim: et:ts=2:sw=2:sts=2:ft=javascript
 /**
  * Copyright 2013 j <j@mailb.org>
@@ -84,6 +86,7 @@ exports.clientVars = function(hook, context, callback)
   }
 
   audio = getDisabledDefault('audio');
+  video = getDisabledDefault('video');
 
   var iceServers = [ {"url": "stun:stun.l.google.com:19302"} ];
   if(settings.ep_webrtc && settings.ep_webrtc.iceServers){
@@ -99,8 +102,11 @@ exports.clientVars = function(hook, context, callback)
     webrtc: {
       "iceServers": iceServers,
       "enabled": enabled,
+      // TODO - I need to rename audio_enabled/video_enabled. "enabled" means something different than audioTrack.enabled
       "audio_enabled": audio.enabled,
       "audio_default_on": audio.defaultOn,
+      "video_enabled": video.enabled,
+      "video_default_on": video.defaultOn,
       "listenClass": listenClass
     }
   });
@@ -133,9 +139,14 @@ exports.eejsBlock_mySettings = function (hook, context, callback)
       ? true
       : false;
 
+    var videoEnabled = (settings.ep_webrtc && settings.ep_webrtc.video !== "disabled")
+      ? true
+      : false;
+
     context.content += eejs.require('ep_webrtc/templates/settings.ejs', {
       enabled : enabled,
       audio_enabled : audioEnabled,
+      video_enabled : videoEnabled,
     });
     callback();
 };

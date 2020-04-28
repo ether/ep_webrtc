@@ -180,8 +180,6 @@ var rtc = (function() {
       }
       isActive = false;
     },
-    // TODO - is audio_enabled a security issue? Do we care if the user hacks the client to do video anyway?
-    // I suppose this has nothing to do with the server anyway. It uses Google turn servers etc
     toggleMuted: function() {
       var audioTrack = localStream.getAudioTracks()[0];
       if (audioTrack) {
@@ -255,48 +253,60 @@ var rtc = (function() {
         initiallyMuted = !audioTrack.enabled
       }
 
-      var title
-      if (!clientVars.webrtc.audio_enabled) {
-        title = "Audio disabled by admin" // TODO - greyed out or something for CSS?
-      } else {
-        title = initiallyMuted ? "Unmute" : "Mute"
-      }
-
       var $mute = $("<span class='interface-btn audio-btn buttonicon'>")
-        .attr("title", title)
+        .attr("title", clientVars.webrtc.audio_enabled
+          ? (initiallyMuted ? "Unmute" : "Mute")
+          : "Audio disabled by admin")
         .toggleClass("muted", initiallyMuted)
 
-      if (clientVars.webrtc.audio_enabled) {
-        $mute.on({
-          click: function(event) {
-            var muted;
-            if (isLocal) {
-              muted = self.toggleMuted();
-            } else {
-              $video[0].muted = !$video[0].muted;
-              muted = $video[0].muted;
-            }
-            $mute
-              .attr("title", muted ? "Unmute" : "Mute")
-              .toggleClass("muted", muted);
+      // TODO - is audio_enabled/video_enabled a security issue? Like do we care if the user hacks the client to do video anyway?
+      // I suppose this has nothing to do with the server anyway. It uses Google turn servers etc
+      $mute.on({
+        click: function(event) {
+          var muted;
+          if (isLocal && !clientVars.webrtc.audio_enabled) {
+            return
           }
-        });
+          if (isLocal) {
+            muted = self.toggleMuted();
+          } else {
+            $video[0].muted = !$video[0].muted;
+            muted = $video[0].muted;
+          }
+          $mute
+            .attr("title", muted ? "Unmute" : "Mute")
+            .toggleClass("muted", muted);
+        }
+      });
+
+      var videoTrack = stream.getVideoTracks()[0];
+      var initiallyVideoEnabled = false;
+      if (videoTrack) {
+        initiallyVideoEnabled = videoTrack.enabled
       }
-      var $disableVideo = isLocal
-        ? $("<span class='interface-btn video-btn buttonicon'>")
-            .attr("title", "Disable video")
-            .on({
-              click: function(event) {
-                var videoEnabled = self.toggleVideo();
-                $disableVideo
-                  .attr(
-                    "title",
-                    videoEnabled ? "Disable video" : "Enable video"
-                  )
-                  .toggleClass("off", !videoEnabled);
-              }
-            })
-        : null;
+
+      var $disableVideo = null
+      if (isLocal) {
+        $disableVideo = $("<span class='interface-btn video-btn buttonicon'>")
+          .attr("title", clientVars.webrtc.video_enabled
+            ? (initiallyVideoEnabled ? "Disable video" : "Enable video")
+            : "Video disabled by admin" // TODO - greyed out or something for CSS?)
+          )
+          .toggleClass("off", !initiallyVideoEnabled);
+        if (clientVars.webrtc.video_enabled) {
+          $disableVideo.on({
+            click: function(event) {
+              var videoEnabled = self.toggleVideo();
+              $disableVideo
+                .attr(
+                  "title",
+                  videoEnabled ? "Disable video" : "Enable video"
+                )
+                .toggleClass("off", !videoEnabled);
+            }
+          })
+        }
+      }
 
       var videoEnlarged = false;
       var $largeVideo = $("<span class='interface-btn enlarge-btn buttonicon'>")
@@ -515,11 +525,14 @@ var rtc = (function() {
         .then(function(stream) {
           localStream = stream;
           var audioTrack = localStream.getAudioTracks()[0];
+          // using `.prop("checked") === true` to make absolutely sure the result is a boolean
+          // we don't want bugs when it comes to muting/turning off video
           if (audioTrack) {
-            // using `=== true` to make absolutely sure the result is a boolean
-            // we don't want bugs when it comes to muting/turning off video
-            // TODO - can there be more than one?
             audioTrack.enabled = $("#options-audiodefaulton").prop("checked") === true;
+          }
+          var videoTrack = localStream.getVideoTracks()[0];
+          if (videoTrack) {
+            videoTrack.enabled = $("#options-videodefaulton").prop("checked") === true;
           }
           self.setStream(self._pad.getUserId(), stream);
           self._pad.collabClient.getConnectedUsers().forEach(function(user) {
@@ -584,11 +597,21 @@ var rtc = (function() {
 
       // The checkbox shouldn't even exist if it's not enabled
       if (clientVars.webrtc.audio_enabled) {
-        self.settingToCheckbox({
+        self.settingToCheckbox({ // TODO - object literals - too modern of js?
           urlVar: "audiodefault",
           cookie: "audioDefaultOn",
           clientVar: "audio_default_on",
           checkboxId: "#options-audiodefaulton"
+        })
+      }
+
+      // The checkbox shouldn't even exist if it's not enabled
+      if (clientVars.webrtc.video_enabled) {
+        self.settingToCheckbox({
+          urlVar: "videodefault",
+          cookie: "videoDefaultOn",
+          clientVar: "video_default_on",
+          checkboxId: "#options-videodefaulton"
         })
       }
 
