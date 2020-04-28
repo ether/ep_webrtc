@@ -11,6 +11,6 @@
     "pad.ep_webrtc.error.otherCantAccess": "Sorry, the browser doesn't have access to your camera and/or microphone.  Please check permissions in your browser's settings. This is most likely not a hardware error:",
     "pad.ep_webrtc.error.other": "Sorry, there was an unknown error:",
 
-    "pad.settings.audiodefaulton": "Audio On At Start",
-    "pad.settings.videodefaulton": "Video On At Start"
+    "pad.settings.audioenabledonstart": "Audio On At Start",
+    "pad.settings.videoenabledonstart": "Video On At Start"
 }
