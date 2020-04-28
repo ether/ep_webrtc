@@ -578,12 +578,12 @@ var rtc = (function() {
     // It will check for the value in urlVar, cookie, and clientVar, in that order
     // If urlVar is found, it will also set the cookie
     // Finally, it sets up to set cookie if the user changes the setting in the gearbox
-    settingToCheckbox: function({urlVar, cookie, clientVar, checkboxId}) {
-      if (!urlVar) {throw Error("missing urlVar in settingToCheckbox");}
-      if (!cookie) {throw Error("missing cookie in settingToCheckbox");}
-      if (!clientVar) {throw Error("missing clientVar in settingToCheckbox");}
-      if (!(clientVar in clientVars.webrtc)) {throw Error("unknown clientVar: " + clientVar);}
-      if (!checkboxId) {throw Error("missing checkboxId in settingToCheckbox");}
+    settingToCheckbox: function(params) {
+      if (!params.urlVar) {throw Error("missing urlVar in settingToCheckbox");}
+      if (!params.cookie) {throw Error("missing cookie in settingToCheckbox");}
+      if (!params.clientVar) {throw Error("missing clientVar in settingToCheckbox");}
+      if (!(params.clientVar in clientVars.webrtc)) {throw Error("unknown clientVar: " + params.clientVar + " in settingToCheckbox");}
+      if (!params.checkboxId) {throw Error("missing checkboxId in settingToCheckbox");}
 
       var value
 
@@ -591,24 +591,24 @@ var rtc = (function() {
       // * If the setting is not in the URL: try to get it from the cookie
       // * If the setting was in neither, go with the site-wide setting in clientVar
       //   but don't put it in the cookies
-      if (window.location.search.indexOf(urlVar + "=true") > -1) {
-        padcookie.setPref(cookie, true);
+      if (window.location.search.indexOf(params.urlVar + "=true") > -1) {
+        padcookie.setPref(params.cookie, true);
         value = true
-      } else if (window.location.search.indexOf(urlVar + "=false") > -1) {
-        padcookie.setPref(cookie, false);
+      } else if (window.location.search.indexOf(params.urlVar + "=false") > -1) {
+        padcookie.setPref(params.cookie, false);
         value = false
       } else {
-        value = padcookie.getPref(cookie);
+        value = padcookie.getPref(params.cookie);
         if (typeof value === "undefined") {
-          value = clientVars.webrtc[clientVar];
+          value = clientVars.webrtc[params.clientVar];
         }
       }
 
-      $(checkboxId).prop("checked", value);
+      $(params.checkboxId).prop("checked", value);
 
       // If the user changes the checkbox, set the cookie accordingly
-      $(checkboxId).on("change", function() {
-        padcookie.setPref(cookie, this.checked);
+      $(params.checkboxId).on("change", function() {
+        padcookie.setPref(params.cookie, this.checked);
       });
     },
     init: function(pad) {
@@ -616,7 +616,7 @@ var rtc = (function() {
 
       // The checkbox shouldn't even exist if audio is not allowed
       if (clientVars.webrtc.audio_allowed) {
-        self.settingToCheckbox({ // TODO - object literals - too modern of js?
+        self.settingToCheckbox({
           urlVar: "webrtcaudioenabled",
           cookie: "audioEnabledOnStart",
           clientVar: "audio_enabled_on_start",
