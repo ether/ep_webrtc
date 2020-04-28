@@ -619,7 +619,7 @@ var rtc = (function() {
         self.settingToCheckbox({
           urlVar: "webrtcaudioenabled",
           cookie: "audioEnabledOnStart",
-          clientVar: "audio_enabled_on_start",
+          clientVar: "audio_enabled_on_start_default",
           checkboxId: "#options-audioenabledonstart"
         })
       }
@@ -629,7 +629,7 @@ var rtc = (function() {
         self.settingToCheckbox({
           urlVar: "webrtcvideoenabled",
           cookie: "videoEnabledOnStart",
-          clientVar: "video_enabled_on_start",
+          clientVar: "video_enabled_on_start_default",
           checkboxId: "#options-videoenabledonstart"
         })
       }
