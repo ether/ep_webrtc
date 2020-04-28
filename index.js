@@ -1,4 +1,5 @@
 // TODO - test on Firefox as well
+// TODO - test with conversation with multiple ppl
 // vim: et:ts=2:sw=2:sts=2:ft=javascript
 /**
  * Copyright 2013 j <j@mailb.org>
