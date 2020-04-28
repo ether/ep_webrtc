@@ -47,19 +47,21 @@
   margin-right: 6px;
   cursor: pointer;
   transition: opacity .2s, background-color .2s;
-  color: #333;
+  color: rgba(51, 51, 51, 1);
   width: 28px;
   height: 28px;
 }
-.interface-btn:hover {
+.interface-btn:hover:not(.disallowed) {
   opacity: 1;
   background-color: white !important;
 }
 .interface-btn.audio-btn:before { content: '\e83d'; }
 .interface-btn.audio-btn.muted:before { content: '\e83e'; }
+.interface-btn.audio-btn.disallowed:before { color: rgba(51, 51, 51, .5); }
 
 .interface-btn.video-btn:before { content: '\e83b'; }
 .interface-btn.video-btn.off:before { content: '\e83c'; }
+.interface-btn.video-btn.disallowed:before { color: rgba(51, 51, 51, .5); }
 
 .interface-btn.enlarge-btn:before { content: '\e840'; }
 .interface-btn.enlarge-btn.large:before { content: '\e83f'; }

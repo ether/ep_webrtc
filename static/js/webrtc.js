@@ -288,6 +288,7 @@ var rtc = (function() {
           ? (initiallyMuted ? "Unmute" : "Mute")
           : "Audio disallowed by admin")
         .toggleClass("muted", initiallyMuted)
+        .toggleClass("disallowed", !clientVars.webrtc.audio_allowed);
 
       // TODO - is audio_enabled/video_enabled a security issue? Like do we care if the user hacks the client to do video anyway?
       // I suppose this has nothing to do with the server anyway. It uses Google turn servers etc
@@ -324,9 +325,10 @@ var rtc = (function() {
         $disableVideo = $("<span class='interface-btn video-btn buttonicon'>")
           .attr("title", clientVars.webrtc.video_allowed
             ? (initiallyVideoEnabled ? "Disable video" : "Enable video")
-            : "Video disallowed by admin" // TODO - greyed out or something for CSS?)
+            : "Video disallowed by admin"
           )
-          .toggleClass("off", !initiallyVideoEnabled);
+          .toggleClass("off", !initiallyVideoEnabled)
+          .toggleClass("disallowed", !clientVars.webrtc.video_allowed);
         if (clientVars.webrtc.video_allowed) {
           $disableVideo.on({
             click: function(event) {
