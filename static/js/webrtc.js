@@ -247,6 +247,10 @@ var rtc = (function() {
       var videoId = "video_" + userId.replace(/\./g, "_");
       var $video = $("#" + videoId);
 
+      ///////
+      // Mute button
+      ///////
+
       var audioTrack = stream.getAudioTracks()[0];
       var initiallyMuted = false;
       if (audioTrack) {
@@ -279,6 +283,10 @@ var rtc = (function() {
         }
       });
 
+      ///////
+      // Disable Video button
+      ///////
+
       var videoTrack = stream.getVideoTracks()[0];
       var initiallyVideoEnabled = false;
       if (videoTrack) {
@@ -308,6 +316,10 @@ var rtc = (function() {
         }
       }
 
+      ///////
+      // Enlarge Video button
+      ///////
+
       var videoEnlarged = false;
       var $largeVideo = $("<span class='interface-btn enlarge-btn buttonicon'>")
         .attr("title", "Make video larger")
@@ -331,6 +343,11 @@ var rtc = (function() {
             $video.parent().toggleClass('large', videoEnlarged)
           }
         });
+
+
+      ///////
+      // Combining
+      ///////
 
       $("#interface_" + videoId).remove();
       $("<div class='interface-container'>")
