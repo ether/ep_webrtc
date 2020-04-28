@@ -1,5 +1,4 @@
 // TODO - test on Firefox as well
-// TODO - figure out weird glitchy sizing thing on startup. seems to just be when video.enabled is false. test that alone on master. if it still happens, ship it.
 // vim: et:ts=2:sw=2:sts=2:ft=javascript
 /**
  * Copyright 2013 j <j@mailb.org>
