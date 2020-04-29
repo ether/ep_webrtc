@@ -5,7 +5,7 @@ WebRTC based audio/video chat for your documents.
 This plugin creates an audio/video chat with all
 active users of the pad using WebRTC.
 
-# installing
+# Installing
 
     to get current version:
 
@@ -19,7 +19,7 @@ active users of the pad using WebRTC.
 
 You should use a STUN/TURN server to ensure consistant connecivty between clients.  See STUN/TURN in settings. 
 
-# settings
+# Settings
 
 To disable the chat by default, append this to your settings.json:
 
@@ -67,8 +67,26 @@ To set an element or class to listen for an init event set `ep_webrtc.listenClas
 
 To enable webrtc with a URL parameter append the following to your pad URL ``?av=YES``
 
-# developing and contributing
+# Developing and contributing
 
-On your browser, you should use `localhost` instead of `0.0.0.0`. This is because webrtc generally requires a secure connection (https), but [an exception is made](https://w3c.github.io/webappsec-secure-contexts/#localhost) specifically for localhost and domains that end in `.localhost`.
+## Basic
+
+If you're just working on the interface and don't need to test connections to other computers, you can point your browser to `localhost` instead of `0.0.0.0`. Webrtc generally requires a secure connection (https), but [an exception is made](https://w3c.github.io/webappsec-secure-contexts/#localhost) specifically for localhost and domains that end in `.localhost`.
+
+## Developing / Testing Communications
+
+If you need to test communication, you may get away with opening two browser windows to the same URL on `localhost`. However this may be of limited utility, especially if you're confirming that sound works appropriately. In order to test on two computers, you'll need your dev computer to serve on an IP address accessible from the other computer, at which point you will no longer get away with using `localhost`. You will need SSL certs, though for dev purposes they can be self-signed.
+
+[Generate your certificate](https://serverfault.com/a/224127), which will give you your cert and key files. In `settings.js`, set the full path to them on your file system:
+
+    "ssl" : {
+      "key"  : "/path-to-your/epl-server.key",
+      "cert" : "/path-to-your/epl-server.crt"
+      // "ca" - not needed for dev purposes
+    }
+
+Point your browser to your outward facing IP address, preceeded by `https://`, and accept the security warning (since this is a self-signed cert).
+
+## Bug Reports
 
 Please submit bug reports or patches at https://github.com/ether/ep_webrtc/issues
