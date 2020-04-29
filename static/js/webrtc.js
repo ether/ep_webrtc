@@ -191,8 +191,12 @@ var rtc = (function() {
           // https://developers.google.com/web/updates/2015/07/mediastream-deprecations
           localStream.stop();
         } else {
-          videoTrack.stop();
-          audioTrack.stop();
+          if (videoTrack) {
+            videoTrack.stop();
+          }
+          if (audioTrack) {
+            audioTrack.stop();
+          }
         }
         localStream = null;
       }
@@ -280,7 +284,7 @@ var rtc = (function() {
       ///////
 
       var audioTrack = stream.getAudioTracks()[0];
-      var initiallyMuted = false;
+      var initiallyMuted = true; // if there's no audio track, it's muted
       if (audioTrack) {
         initiallyMuted = !audioTrack.enabled
       }
