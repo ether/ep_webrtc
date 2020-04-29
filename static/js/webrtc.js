@@ -186,6 +186,7 @@ var rtc = (function() {
         audioTrack.enabled = !audioTrack.enabled;
         return !audioTrack.enabled; // returning "Muted" state, which is !enabled
       }
+      return true // if there's no audio track, it's muted
     },
     toggleVideo: function() {
       var videoTrack = localStream.getVideoTracks()[0];
@@ -193,6 +194,7 @@ var rtc = (function() {
         videoTrack.enabled = !videoTrack.enabled;
         return videoTrack.enabled;
       }
+      return false // if there's no video track, it's not enabled
     },
     getUserFromId: function(userId) {
       if (!self._pad || !self._pad.collabClient) return null;
@@ -266,23 +268,22 @@ var rtc = (function() {
 
       // TODO - is audio_enabled/video_enabled a security issue? Like do we care if the user hacks the client to do video anyway?
       // I suppose this has nothing to do with the server anyway. It uses Google turn servers etc
-      $mute.on({
-        click: function(event) {
-          var muted;
-          if (isLocal && !clientVars.webrtc.audio_allowed) {
-            return
+      if (clientVars.webrtc.audio_allowed || !isLocal) {
+        $mute.on({
+          click: function(event) {
+            var muted;
+            if (isLocal) {
+              muted = self.toggleMuted();
+            } else {
+              $video[0].muted = !$video[0].muted;
+              muted = $video[0].muted;
+            }
+            $mute
+              .attr("title", muted ? "Unmute" : "Mute")
+              .toggleClass("muted", muted);
           }
-          if (isLocal) {
-            muted = self.toggleMuted();
-          } else {
-            $video[0].muted = !$video[0].muted;
-            muted = $video[0].muted;
-          }
-          $mute
-            .attr("title", muted ? "Unmute" : "Mute")
-            .toggleClass("muted", muted);
-        }
-      });
+        });
+      }
 
       ///////
       // Disable Video button
@@ -530,8 +531,8 @@ var rtc = (function() {
     },
     getUserMedia: function() {
       var mediaConstraints = {
-        audio: true,
-        video: {
+        audio: clientVars.webrtc.audio_allowed,
+        video: clientVars.webrtc.video_allowed && {
           optional: [],
           mandatory: {
             maxWidth: 320,
