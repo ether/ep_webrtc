@@ -296,8 +296,6 @@ var rtc = (function() {
         .toggleClass("muted", initiallyMuted)
         .toggleClass("disallowed", !clientVars.webrtc.audio_allowed);
 
-      // TODO - is audio_enabled/video_enabled a security issue? Like do we care if the user hacks the client to do video anyway?
-      // I suppose this has nothing to do with the server anyway. It uses Google turn servers etc
       if (clientVars.webrtc.audio_allowed) {
         $mute.on({
           click: function(event) {
