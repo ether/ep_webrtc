@@ -202,7 +202,8 @@ var rtc = (function() {
           return user.userId == userId;
         });
       var user = result.length > 0 ? result[0] : null;
-      if (user && userId == self.getUserId()) user.name = "Me";
+      // if (user && userId == self.getUserId()) user.name = "Me";
+      // Commented by JM because it made every user name "Me"
       return user;
     },
     setStream: function(userId, stream) {
