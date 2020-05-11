@@ -114,13 +114,16 @@ var rtc = (function() {
       // However keep in mind that we add our own errors in getUserMediaPolyfill
       switch(err.name) {
         case "CustomNotSupportedError":
-          reason = "Sorry, your browser does not support WebRTC. (or you have it disabled in your settings).<br><br>" +
-              "To participate in this audio/video chat you have to user a browser with WebRTC support like Chrome, Firefox or Opera." +
-              '<a href="http://www.webrtc.org/" target="_new">Find out more</a>'
+          reason = html10n.get("pad.ep_webrtc.error.notSupported.sorry") +
+                   "<br><br>" +
+                   html10n.get("pad.ep_webrtc.error.notSupported.howTo") +
+                   "<br><br><a href=\"http://www.webrtc.org/\" target=\"_new\">" +
+                   html10n.get("pad.ep_webrtc.error.notSupported.findOutMore") +
+                   "</a>";
           self.sendErrorStat("NotSupported");
           break;
         case "CustomSecureConnectionError":
-          reason = "Sorry, you need to install SSL certificates for your Etherpad instance to use WebRTC"
+          reason = html10n.get("pad.ep_webrtc.error.ssl");
           self.sendErrorStat("SecureConnection");
           break;
         case "NotAllowedError":
@@ -128,30 +131,30 @@ var rtc = (function() {
           // The error for both cases appears to be identical, so our best guess at telling them apart is to guess whether we are in a secure context.
           // (webrtc is considered secure for https connections or on localhost)
           if (location.protocol === "https:" || location.hostname === "localhost" || location.hostname === "127.0.0.1") {
-            reason = "Sorry, you need to give us permission to use your camera and microphone"
+            reason = html10n.get("pad.ep_webrtc.error.permission");
             self.sendErrorStat("Permission");
           } else {
-            reason = "Sorry, you need to install SSL certificates for your Etherpad instance to use WebRTC"
+            reason = html10n.get("pad.ep_webrtc.error.ssl");
             self.sendErrorStat("SecureConnection");
           }
           break;
         case "NotFoundError":
-          reason = "Sorry, we couldn't find a suitable camera on your device. If you have a camera, make sure it set up correctly and refresh this website to retry."
+          reason = html10n.get("pad.ep_webrtc.error.notFound");
           self.sendErrorStat("NotFound");
           break;
         case "NotReadableError":
           // `err.message` might give useful info to the user (not necessarily useful for other error messages)
-          reason = "Sorry, a hardware error occurred that prevented access to your camera and/or microphone:<br><br>" + err.message
+          reason = html10n.get("pad.ep_webrtc.error.notReadable") + "<br><br>" + err.message;
           self.sendErrorStat("Hardware");
           break;
         case "AbortError":
           // `err.message` might give useful info to the user (not necessarily useful for other error messages)
-          reason = "Sorry, an error occurred (probably not hardware related) that prevented access to your camera and/or microphone:<br><br>" + err.message
+          reason = html10n.get("pad.ep_webrtc.error.otherCantAccess") + "<br><br>" + err.message;
           self.sendErrorStat("Abort");
           break;
         default:
           // `err` as a string might give useful info to the user (not necessarily useful for other error messages)
-          reason = "Sorry, there was an unknown Error:<br><br>" + err
+          reason = html10n.get("pad.ep_webrtc.error.other") + "<br><br>" + err;
           self.sendErrorStat("Unknown");
       }
       $.gritter.add({
@@ -159,7 +162,7 @@ var rtc = (function() {
         text: reason,
         sticky: true,
         class_name: "error"
-      })
+      });
       self.hide();
     },
     hide: function() {
