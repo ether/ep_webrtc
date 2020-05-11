@@ -87,23 +87,21 @@ exports.clientVars = function(hook, context, callback)
     enabled = settings.ep_webrtc.enabled;
   }
 
-  var audioAllowed = true;
-  if(settings.ep_webrtc && settings.ep_webrtc.audio_allowed === false){
-    audioAllowed = settings.ep_webrtc.audio_allowed;
+  var audioDisabled = "none";
+  if(settings.ep_webrtc && settings.ep_webrtc.audio && settings.ep_webrtc.audio.disabled){
+    audioDisabled = settings.ep_webrtc.audio.disabled;
+    if (audioDisabled != "none" && audioDisabled != "hard" && audioDisabled != "soft") {
+      // TODO - better way to deal with such errors?
+      throw Error("Invalid value in settings for ep_webrtc.audio.disabled")
+    }
   }
 
-  var audioEnabledOnStart = true;
-  if(settings.ep_webrtc && settings.ep_webrtc.audio_enabled_on_start_default === false){
-    audioEnabledOnStart = settings.ep_webrtc.audio_enabled_on_start_default;
-  }
-
-  var videoAllowed = true;
-  if(settings.ep_webrtc && settings.ep_webrtc.video_allowed === false){
-    videoAllowed = settings.ep_webrtc.video_allowed;
-  }
-  var videoEnabledOnStart = true;
-  if(settings.ep_webrtc && settings.ep_webrtc.video_enabled_on_start_default === false){
-    videoEnabledOnStart = settings.ep_webrtc.video_enabled_on_start_default;
+  var videoDisabled = "none";
+  if(settings.ep_webrtc && settings.ep_webrtc.video && settings.ep_webrtc.video.disabled){
+    videoDisabled = settings.ep_webrtc.video.disabled;
+    if (videoDisabled != "none" && videoDisabled != "hard" && videoDisabled != "soft") {
+      throw Error("Invalid value in settings for ep_webrtc.video.disabled")
+    }
   }
 
   var iceServers = [ {"url": "stun:stun.l.google.com:19302"} ];
@@ -116,9 +114,9 @@ exports.clientVars = function(hook, context, callback)
     listenClass = settings.ep_webrtc.listenClass;
   }
 
-  var video = {sizes: {}};
+  var videoSizes = {};
   if(settings.ep_webrtc && settings.ep_webrtc.video && settings.ep_webrtc.video.sizes) {
-    video.sizes = {
+    videoSizes = {
       large: settings.ep_webrtc.video.sizes.large,
       small: settings.ep_webrtc.video.sizes.small
     }
@@ -128,12 +126,9 @@ exports.clientVars = function(hook, context, callback)
     webrtc: {
       "iceServers": iceServers,
       "enabled": enabled,
-      "audio_allowed": audioAllowed,
-      "audio_enabled_on_start_default": audioEnabledOnStart,
-      "video_allowed": videoAllowed,
-      "video_enabled_on_start_default": videoEnabledOnStart,
-      "listenClass": listenClass,
-      "video": video
+      "audio": {"disabled": audioDisabled},
+      "video": {"disabled": videoDisabled, video: videoSizes},
+      "listenClass": listenClass
     }
   });
 };
@@ -163,18 +158,26 @@ exports.eejsBlock_mySettings = function (hook, context, callback)
       ? 'unchecked'
       : 'checked';
 
-    var audioAllowed = (settings.ep_webrtc && settings.ep_webrtc.audio_allowed === false)
-      ? false
-      : true;
+    var audioDisabled = "none";
+    if(settings.ep_webrtc && settings.ep_webrtc.audio && settings.ep_webrtc.audio.disabled){
+      audioDisabled = settings.ep_webrtc.audio.disabled;
+      if (audioDisabled != "none" && audioDisabled != "hard" && audioDisabled != "soft") {
+        throw Error("Invalid value in settings for ep_webrtc.audio.disabled")
+      }
+    }
 
-    var videoAllowed = (settings.ep_webrtc && settings.ep_webrtc.video_allowed === false)
-      ? false
-      : true;
+    var videoDisabled = "none";
+    if(settings.ep_webrtc && settings.ep_webrtc.video && settings.ep_webrtc.video.disabled){
+      videoDisabled = settings.ep_webrtc.video.disabled;
+      if (videoDisabled != "none" && videoDisabled != "hard" && videoDisabled != "soft") {
+        throw Error("Invalid value in settings for ep_webrtc.video.disabled")
+      }
+    }
 
     context.content += eejs.require('ep_webrtc/templates/settings.ejs', {
-      enabled : enabled,
-      audio_allowed : audioAllowed,
-      video_allowed : videoAllowed
+      "enabled" : enabled,
+      "audio_hard_disabled": audioDisabled === "hard",
+      "video_hard_disabled": videoDisabled === "hard"
     });
     callback();
 };

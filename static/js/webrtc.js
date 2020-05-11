@@ -290,13 +290,13 @@ var rtc = (function() {
       }
 
       var $mute = $("<span class='interface-btn audio-btn buttonicon'>")
-        .attr("title", clientVars.webrtc.audio_allowed
+        .attr("title", clientVars.webrtc.audio.disabled !== "hard"
           ? (initiallyMuted ? "Unmute" : "Mute")
           : "Audio disallowed by admin")
         .toggleClass("muted", initiallyMuted)
-        .toggleClass("disallowed", !clientVars.webrtc.audio_allowed);
+        .toggleClass("disallowed", clientVars.webrtc.audio.disabled === "hard");
 
-      if (clientVars.webrtc.audio_allowed) {
+      if (clientVars.webrtc.audio.disabled !== "hard") {
         $mute.on({
           click: function(event) {
             var muted;
@@ -326,13 +326,13 @@ var rtc = (function() {
       var $disableVideo = null
       if (isLocal) {
         $disableVideo = $("<span class='interface-btn video-btn buttonicon'>")
-          .attr("title", clientVars.webrtc.video_allowed
+          .attr("title", clientVars.webrtc.video.disabled !== "hard"
             ? (initiallyVideoEnabled ? "Disable video" : "Enable video")
             : "Video disallowed by admin"
           )
           .toggleClass("off", !initiallyVideoEnabled)
-          .toggleClass("disallowed", !clientVars.webrtc.video_allowed);
-        if (clientVars.webrtc.video_allowed) {
+          .toggleClass("disallowed", clientVars.webrtc.video.disabled === "hard");
+        if (clientVars.webrtc.video.disabled !== "hard") {
           $disableVideo.on({
             click: function(event) {
               var videoEnabled = self.toggleVideo();
@@ -570,8 +570,8 @@ var rtc = (function() {
     },
     getUserMedia: function() {
       var mediaConstraints = {
-        audio: clientVars.webrtc.audio_allowed,
-        video: clientVars.webrtc.video_allowed && {
+        audio: clientVars.webrtc.audio.disabled !== "hard",
+        video: clientVars.webrtc.video.disabled !== "hard" && {
           optional: [],
           mandatory: {
             maxWidth: 320,
@@ -620,21 +620,21 @@ var rtc = (function() {
 
     // Connect a setting to a checkbox. To be called on initialization.
     //
-    // It will check for the value in urlVar, cookie, and clientVar, in that order
+    // It will check for the value in urlVar, cookie, and the site-wide
+    //   default value, in that order
     // If urlVar is found, it will also set the cookie
     // Finally, it sets up to set cookie if the user changes the setting in the gearbox
     settingToCheckbox: function(params) {
-      if (!params.urlVar) {throw Error("missing urlVar in settingToCheckbox");}
-      if (!params.cookie) {throw Error("missing cookie in settingToCheckbox");}
-      if (!params.clientVar) {throw Error("missing clientVar in settingToCheckbox");}
-      if (!(params.clientVar in clientVars.webrtc)) {throw Error("unknown clientVar: " + params.clientVar + " in settingToCheckbox");}
-      if (!params.checkboxId) {throw Error("missing checkboxId in settingToCheckbox");}
+      if (params.urlVar === undefined) {throw Error("missing urlVar in settingToCheckbox");}
+      if (params.cookie === undefined) {throw Error("missing cookie in settingToCheckbox");}
+      if (params.defaultVal === undefined) {throw Error("missing defaultVal in settingToCheckbox");}
+      if (params.checkboxId === undefined) {throw Error("missing checkboxId in settingToCheckbox");}
 
       var value
 
       // * If the setting is in the URL: use it, and also set the cookie
       // * If the setting is not in the URL: try to get it from the cookie
-      // * If the setting was in neither, go with the site-wide setting in clientVar
+      // * If the setting was in neither, go with the site-wide default value
       //   but don't put it in the cookies
       if (window.location.search.indexOf(params.urlVar + "=true") > -1) {
         padcookie.setPref(params.cookie, true);
@@ -645,7 +645,7 @@ var rtc = (function() {
       } else {
         value = padcookie.getPref(params.cookie);
         if (typeof value === "undefined") {
-          value = clientVars.webrtc[params.clientVar];
+          value = params.defaultVal;
         }
       }
 
@@ -660,21 +660,21 @@ var rtc = (function() {
       self._pad = pad || window.pad;
 
       // The checkbox shouldn't even exist if audio is not allowed
-      if (clientVars.webrtc.audio_allowed) {
+      if (clientVars.webrtc.audio.disabled !== "hard") {
         self.settingToCheckbox({
           urlVar: "webrtcaudioenabled",
           cookie: "audioEnabledOnStart",
-          clientVar: "audio_enabled_on_start_default",
+          defaultVal: clientVars.webrtc.audio.disabled === "none",
           checkboxId: "#options-audioenabledonstart"
         })
       }
 
       // The checkbox shouldn't even exist if video is not allowed
-      if (clientVars.webrtc.video_allowed) {
+      if (clientVars.webrtc.video.disabled !== "hard") {
         self.settingToCheckbox({
           urlVar: "webrtcvideoenabled",
           cookie: "videoEnabledOnStart",
-          clientVar: "video_enabled_on_start_default",
+          defaultVal: clientVars.webrtc.video.disabled === "none",
           checkboxId: "#options-videoenabledonstart"
         })
       }
