@@ -30,11 +30,45 @@ You should use a STUN/TURN server to ensure consistant connecivty between client
 
 # Settings
 
-To disable the chat by default, append this to your settings.json:
+## Audio / Video
+
+To disable the audio/video conversation by default (each user can override this for themselves), append this to your settings.json:
 
     "ep_webrtc" : {
         "enabled" : false
     }
+
+To enable webrtc with a URL parameter append the following to your pad URL ``?av=YES``
+
+To make the conversation audio-only:
+
+    "ep_webrtc" : {
+        "audio" : {
+            "disabled": "hard"
+        }
+    }
+
+To make the conversation default to muted on startup (each user can override this for themselves):
+
+    "ep_webrtc" : {
+        "audio" : {
+            "disabled": "soft"
+        }
+    }
+
+The default value is "none". The same applies to `video.disabled` as well.
+
+For `"soft"` or `"none"`, the user can override these either in their settings gearbox, or by appending `?webrtcaudioenabled=true`/`?webrtcaudioenabled=false` and `?webrtcvideoenabled=true`/`?webrtcvideoenabled=false`
+
+## Other Interface
+
+To set an element or class to listen for an init event set `ep_webrtc.listenClass` in your settings.json.  This is often stabled with ``"enabled":false`` and a button to provide a button to begin video sessions
+
+    "ep_webrtc" : {
+        "listenClass": "#chatLabel"
+    }
+
+## ICE Servers
 
 To set a custom stun server, set `ep_webrtc.iceServer` in your settings.json:
 
@@ -67,13 +101,6 @@ To ensure reliable connectivity we recommend setting both a STUN and TURN server
         ],
     }
 
-
-To set an element or class to listen for an init event set `ep_webrtc.listenClass` in your settings.json.  This is often stabled with ``"enabled":false`` and a button to provide a button to begin video sessions
-
-    "ep_webrtc" : {
-        "listenClass": "#chatLabel"
-    }
-
 To set a custom small and/or large size in pixels, for the video displays, set one or both of the following in your settings.json:
 
     "ep_webrtc": {
@@ -85,7 +112,6 @@ To set a custom small and/or large size in pixels, for the video displays, set o
       }
     }
 
-To enable webrtc with a URL parameter append the following to your pad URL ``?av=YES``
 
 ## Metrics
 
