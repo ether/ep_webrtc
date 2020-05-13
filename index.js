@@ -88,20 +88,13 @@ exports.clientVars = function(hook, context, callback)
   }
 
   var audioDisabled = "none";
-  if(settings.ep_webrtc && settings.ep_webrtc.audio && settings.ep_webrtc.audio.disabled){
+  if(settings.ep_webrtc && settings.ep_webrtc.audio){
     audioDisabled = settings.ep_webrtc.audio.disabled;
-    if (audioDisabled != "none" && audioDisabled != "hard" && audioDisabled != "soft") {
-      // TODO - better way to deal with such errors?
-      throw Error("Invalid value in settings for ep_webrtc.audio.disabled")
-    }
   }
 
   var videoDisabled = "none";
-  if(settings.ep_webrtc && settings.ep_webrtc.video && settings.ep_webrtc.video.disabled){
+  if(settings.ep_webrtc && settings.ep_webrtc.video){
     videoDisabled = settings.ep_webrtc.video.disabled;
-    if (videoDisabled != "none" && videoDisabled != "hard" && videoDisabled != "soft") {
-      throw Error("Invalid value in settings for ep_webrtc.video.disabled")
-    }
   }
 
   var iceServers = [ {"url": "stun:stun.l.google.com:19302"} ];
@@ -159,19 +152,13 @@ exports.eejsBlock_mySettings = function (hook, context, callback)
       : 'checked';
 
     var audioDisabled = "none";
-    if(settings.ep_webrtc && settings.ep_webrtc.audio && settings.ep_webrtc.audio.disabled){
+    if(settings.ep_webrtc && settings.ep_webrtc.audio){
       audioDisabled = settings.ep_webrtc.audio.disabled;
-      if (audioDisabled != "none" && audioDisabled != "hard" && audioDisabled != "soft") {
-        throw Error("Invalid value in settings for ep_webrtc.audio.disabled")
-      }
     }
 
     var videoDisabled = "none";
-    if(settings.ep_webrtc && settings.ep_webrtc.video && settings.ep_webrtc.video.disabled){
+    if(settings.ep_webrtc && settings.ep_webrtc.video){
       videoDisabled = settings.ep_webrtc.video.disabled;
-      if (videoDisabled != "none" && videoDisabled != "hard" && videoDisabled != "soft") {
-        throw Error("Invalid value in settings for ep_webrtc.video.disabled")
-      }
     }
 
     context.content += eejs.require('ep_webrtc/templates/settings.ejs', {
@@ -191,3 +178,28 @@ exports.eejsBlock_styles = function (hook_name, args, cb) {
   args.content = args.content + eejs.require("ep_webrtc/templates/styles.html", {}, module);
   return cb();
 };
+
+function validateSettings() {
+  if(settings.ep_webrtc && settings.ep_webrtc.audio && settings.ep_webrtc.audio.disabled){
+    if (
+      settings.ep_webrtc.audio.disabled != "none" &&
+      settings.ep_webrtc.audio.disabled != "hard" &&
+      settings.ep_webrtc.audio.disabled != "soft"
+    ) {
+      throw Error("Invalid value in settings for ep_webrtc.audio.disabled")
+    }
+  }
+
+  if(settings.ep_webrtc && settings.ep_webrtc.video && settings.ep_webrtc.video.disabled){
+    if (
+      settings.ep_webrtc.video.disabled != "none" &&
+      settings.ep_webrtc.video.disabled != "hard" &&
+      settings.ep_webrtc.video.disabled != "soft"
+    ) {
+      throw Error("Invalid value in settings for ep_webrtc.video.disabled")
+    }
+  }
+}
+
+// Validate settings.json now so that the admin notices any errors right away
+validateSettings()
