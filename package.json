@@ -8,6 +8,5 @@
     "node": ">=0.6.3"
   },
   "dependencies": {
-    "uglify": "^0.1.5"
   }
 }
