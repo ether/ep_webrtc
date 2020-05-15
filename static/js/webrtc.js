@@ -317,14 +317,13 @@ var rtc = (function() {
       // Disable Video button
       ///////
 
-      var videoTrack = stream.getVideoTracks()[0];
-      var initiallyVideoEnabled = false;
-      if (videoTrack) {
-        initiallyVideoEnabled = videoTrack.enabled
-      }
-
       var $disableVideo = null
       if (isLocal) {
+        var videoTrack = stream.getVideoTracks()[0];
+        var initiallyVideoEnabled = false;
+        if (videoTrack) {
+          initiallyVideoEnabled = videoTrack.enabled
+        }
         $disableVideo = $("<span class='interface-btn video-btn buttonicon'>")
           .attr("title", clientVars.webrtc.video.disabled !== "hard"
             ? (initiallyVideoEnabled ? "Disable video" : "Enable video")
