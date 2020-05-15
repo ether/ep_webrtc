@@ -586,7 +586,9 @@ var rtc = (function() {
       window.navigator.mediaDevices
         .getUserMedia(mediaConstraints)
         .then(function(stream) {
-          localStream = stream;
+          // Disable audio and/or video according to user/site settings.
+          // Do this before setting `localStream` to avoid a race condition
+          // that might flash the video on for an instant before disabling it.
           var audioTrack = localStream.getAudioTracks()[0];
           // using `.prop("checked") === true` to make absolutely sure the result is a boolean
           // we don't want bugs when it comes to muting/turning off video
@@ -597,6 +599,8 @@ var rtc = (function() {
           if (videoTrack) {
             videoTrack.enabled = $("#options-videoenabledonstart").prop("checked") === true;
           }
+
+          localStream = stream;
           self.setStream(self._pad.getUserId(), stream);
           self._pad.collabClient.getConnectedUsers().forEach(function(user) {
             if (user.userId != self.getUserId()) {
