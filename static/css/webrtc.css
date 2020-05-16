@@ -1,13 +1,16 @@
 #rtcbox {
   display: none;
   flex-direction: column;
-  justify-content: center;
+  justify-content: start;
   padding: 0;
   order: -1; /* on left side */
   box-sizing: border-box;
   background-color: transparent;
   height: auto;
   overflow: auto;
+}
+@media (min-width: 1000px) {
+  padding: 20px 0;
 }
 
 #rtcbox .error-msg {
