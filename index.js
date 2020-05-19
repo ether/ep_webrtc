@@ -97,7 +97,7 @@ exports.clientVars = function(hook, context, callback)
     listenClass = settings.ep_webrtc.listenClass;
   }
 
-  var video = {};
+  var video = {sizes: {}};
   if(settings.ep_webrtc && settings.ep_webrtc.video && settings.ep_webrtc.video.sizes) {
     video.sizes = {
       large: settings.ep_webrtc.video.sizes.large,
