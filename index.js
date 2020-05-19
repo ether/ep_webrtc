@@ -14,9 +14,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+var log4js = require('ep_etherpad-lite/node_modules/log4js')
+var statsLogger = log4js.getLogger("stats");
 var eejs = require('ep_etherpad-lite/node/eejs/');
 var settings = require('ep_etherpad-lite/node/utils/Settings');
 var sessioninfos = require('ep_etherpad-lite/node/handler/PadMessageHandler').sessioninfos;
+var stats = require('ep_etherpad-lite/node/stats')
 var socketio;
 
 /**
@@ -55,6 +58,25 @@ function handleRTCMessage(client, payload)
       clients[i].json.send(msg);
       break;
     }
+  }
+}
+
+// Make sure any updates to this are reflected in README
+const statErrorNames = [
+  "Abort",
+  "Hardware",
+  "NotFound",
+  "NotSupported",
+  "Permission",
+  "SecureConnection",
+  "Unknown"
+]
+
+function handleErrorStatMessage(statName) {
+  if (statErrorNames.indexOf(statName) !== -1) {
+    stats.meter("ep_webrtc_err_" + statName).mark();
+  } else {
+    statsLogger.warn("Invalid ep_webrtc error stat: " + statName);
   }
 }
 
@@ -97,6 +119,9 @@ exports.handleMessage = function ( hook, context, callback )
 {
   if (context.message.type == 'COLLABROOM' && context.message.data.type == 'RTC_MESSAGE') {
     handleRTCMessage(context.client, context.message.data.payload);
+    callback([null]);
+  } else if (context.message.type == 'STATS' && context.message.data.type == 'RTC_MESSAGE') {
+    handleErrorStatMessage(context.message.data.statName);
     callback([null]);
   } else {
     callback();

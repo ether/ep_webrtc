@@ -117,9 +117,11 @@ var rtc = (function() {
           reason = "Sorry, your browser does not support WebRTC. (or you have it disabled in your settings).<br><br>" +
               "To participate in this audio/video chat you have to user a browser with WebRTC support like Chrome, Firefox or Opera." +
               '<a href="http://www.webrtc.org/" target="_new">Find out more</a>'
+          self.sendErrorStat("NotSupported");
           break;
         case "CustomSecureConnectionError":
           reason = "Sorry, you need to install SSL certificates for your Etherpad instance to use WebRTC"
+          self.sendErrorStat("SecureConnection");
           break;
         case "NotAllowedError":
           // For certain (I suspect older) browsers, `NotAllowedError` indicates either an insecure connection or the user rejecting camera permissions.
@@ -127,24 +129,30 @@ var rtc = (function() {
           // (webrtc is considered secure for https connections or on localhost)
           if (location.protocol === "https:" || location.hostname === "localhost" || location.hostname === "127.0.0.1") {
             reason = "Sorry, you need to give us permission to use your camera and microphone"
+            self.sendErrorStat("Permission");
           } else {
             reason = "Sorry, you need to install SSL certificates for your Etherpad instance to use WebRTC"
+            self.sendErrorStat("SecureConnection");
           }
           break;
         case "NotFoundError":
-          reason = "Sorry, we couldnt't find a suitable camera on your device. If you have a camera, make sure it set up correctly and refresh this website to retry."
+          reason = "Sorry, we couldn't find a suitable camera on your device. If you have a camera, make sure it set up correctly and refresh this website to retry."
+          self.sendErrorStat("NotFound");
           break;
         case "NotReadableError":
           // `err.message` might give useful info to the user (not necessarily useful for other error messages)
           reason = "Sorry, a hardware error occurred that prevented access to your camera and/or microphone:<br><br>" + err.message
+          self.sendErrorStat("Hardware");
           break;
         case "AbortError":
           // `err.message` might give useful info to the user (not necessarily useful for other error messages)
           reason = "Sorry, an error occurred (probably not hardware related) that prevented access to your camera and/or microphone:<br><br>" + err.message
+          self.sendErrorStat("Abort");
           break;
         default:
           // `err` as a string might give useful info to the user (not necessarily useful for other error messages)
           reason = "Sorry, there was an unknown Error:<br><br>" + err
+          self.sendErrorStat("Unknown");
       }
       $.gritter.add({
         title: "Error",
@@ -329,6 +337,15 @@ var rtc = (function() {
         .append($disableVideo)
         .append($largeVideo)
         .insertAfter($video);
+    },
+    // Sends a stat to the back end. `statName` must be in the
+    // approved list on the server side.
+    sendErrorStat: function(statName) {
+      var msg = { "component" : "pad",
+                  "type": "STATS",
+                  "data": {statName: statName, type: 'RTC_MESSAGE'}
+      }
+      pad.socket.json.send(msg);
     },
     sendMessage: function(to, data) {
       self._pad.collabClient.sendMessage({

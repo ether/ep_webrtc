@@ -17,7 +17,7 @@ active users of the pad using WebRTC.
 
 ## Post installation
 
-You should use a STUN/TURN server to ensure consistant connecivty between clients.  See STUN/TURN in settings. 
+You should use a STUN/TURN server to ensure consistant connecivty between clients.  See STUN/TURN in settings.
 
 # Settings
 
@@ -77,6 +77,18 @@ To set a custom small and/or large size in pixels, for the video displays, set o
     }
 
 To enable webrtc with a URL parameter append the following to your pad URL ``?av=YES``
+
+## Metrics
+
+You can see metrics for various errors that users have when attempting to connect their camera/microphone:
+
+* `ep_webrtc_err_Hardware`: Some sort of hardware-related connection problem on the users' computer.
+* `ep_webrtc_err_NotFound`: Could not find user's camera/microphone.
+* `ep_webrtc_err_Abort`: Some sort of other, non-hardware related connection problem on the user's computer.
+* `ep_webrtc_err_NotSupported`: User's environment does not support webrtc.
+* `ep_webrtc_err_Permission`: User did not grant permission to their camera/microphone
+* `ep_webrtc_err_SecureConnection`: Etherpad is not set up on a secure connection, which is requried for webrtc
+* `ep_webrtc_err_Unknown`: Some other unspecified error. Perhaps a bug in this plugin.
 
 # Developing and contributing
 
