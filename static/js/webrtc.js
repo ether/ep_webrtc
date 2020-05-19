@@ -21,6 +21,7 @@ var padcookie = require("ep_etherpad-lite/static/js/pad_cookie").padcookie;
 var hooks = require("ep_etherpad-lite/static/js/pluginfw/hooks");
 
 var rtc = (function() {
+  var videoSizes = {large: "260px", small: "160px"}
   var isActive = false;
   var pc_config = {};
   var pc_constraints = {
@@ -61,6 +62,12 @@ var rtc = (function() {
                 url: "stun:stun.l.google.com:19302"
               }
             ];
+      if (clientVars.webrtc.video.sizes.large) {
+        videoSizes.large = `${clientVars.webrtc.video.sizes.large}px`
+      }
+      if (clientVars.webrtc.video.sizes.small) {
+        videoSizes.small = `${clientVars.webrtc.video.sizes.small}px`
+      }
       self.init(context.pad);
       callback();
     },
@@ -214,14 +221,21 @@ var rtc = (function() {
       var user = self.getUserFromId(userId)
 
       if (!video && stream) {
-        var videoContainer = $("<div class='video-container'>").appendTo($("#rtcbox"))
+        var videoContainer = $("<div class='video-container'>")
+          .css({
+            'width': videoSizes.small,
+            'max-height': videoSizes.small
+          })
+          .appendTo($("#rtcbox"))
 
         videoContainer.append($('<div class="user-name">').text(user.name))
 
         video = $("<video playsinline>")
           .attr("id", videoId)
           .css({
-            "border-color": user.colorId
+            "border-color": user.colorId,
+            'width': videoSizes.small,
+            'max-height': videoSizes.small
           })
           .on({
             loadedmetadata: function() {
@@ -302,7 +316,9 @@ var rtc = (function() {
               )
               .toggleClass("large", videoEnlarged);
 
-            $video.parent().toggleClass('large', videoEnlarged)
+            const videoSize = videoEnlarged ? videoSizes.large : videoSizes.small
+            $video.parent().css({'width': videoSize, 'max-height': videoSize})
+            $video.css({'width': videoSize, 'max-height': videoSize})
           }
         });
 

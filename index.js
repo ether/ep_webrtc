@@ -75,11 +75,20 @@ exports.clientVars = function(hook, context, callback)
     listenClass = settings.ep_webrtc.listenClass;
   }
 
+  var video = {};
+  if(settings.ep_webrtc && settings.ep_webrtc.video && settings.ep_webrtc.video.sizes) {
+    video.sizes = {
+      large: settings.ep_webrtc.video.sizes.large,
+      small: settings.ep_webrtc.video.sizes.small
+    }
+  }
+
   return callback({
     webrtc: {
       "iceServers": iceServers,
       "enabled": enabled,
-      "listenClass": listenClass
+      "listenClass": listenClass,
+      "video": video
     }
   });
 };

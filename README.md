@@ -65,6 +65,17 @@ To set an element or class to listen for an init event set `ep_webrtc.listenClas
         "listenClass": "#chatLabel"
     }
 
+To set a custom small and/or large size in pixels, for the video displays, set one or both of the following in your settings.json:
+
+    "ep_webrtc": {
+      "video": {
+        "sizes": {
+          "small": 200,
+          "large": 400
+        }
+      }
+    }
+
 To enable webrtc with a URL parameter append the following to your pad URL ``?av=YES``
 
 # Developing and contributing

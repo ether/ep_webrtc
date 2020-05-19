@@ -29,14 +29,8 @@
   background-color: black;
 }
 #rtcbox .video-container, #rtcbox video {
-  max-width: 160px;
-  max-height: 160px;
   border-radius: 0 3px 3px 0;
   transition: max-width .3s, max-height .3s, width .3s, height .3s;
-}
-#rtcbox .video-container.large, #rtcbox .video-container.large video {
-  max-width: 260px;
-  max-height: 260px;
 }
 
 .interface-container {
