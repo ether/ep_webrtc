@@ -78,7 +78,6 @@ You can see metrics for various errors that users have when attempting to connec
 * `ep_webrtc_err_Permission`: User did not grant permission to their camera/microphone
 * `ep_webrtc_err_SecureConnection`: Etherpad is not set up on a secure connection, which is requried for webrtc
 * `ep_webrtc_err_Unknown`: Some other unspecified error. Perhaps a bug in this plugin.
-* `ep_webrtc_err_Invalid`: Invalid error report. Either a bug in this plugin or a mischievous user.
 
 # Developing and contributing
 
