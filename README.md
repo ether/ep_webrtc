@@ -7,13 +7,19 @@ active users of the pad using WebRTC.
 
 # Installing
 
-    to get current version:
+Option 1.
+Use the ``/admin`` interface, search for ``ep_webrtc`` and click Install
 
-        npm install ep_webrtc
-
-    to get latest version form git:
-
-        npm install https://github.com/ether/ep_webrtc
+Option 2.
+```
+cd your_etherpad_install
+npm install ep_webrtc
+```
+Option 3.
+```
+cd your_etherpad_install/node_modules
+git clone https://github.com/ether/ep_webrtc
+```
 
 ## Post installation
 
