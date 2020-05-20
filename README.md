@@ -8,6 +8,7 @@ active users of the pad using WebRTC.
 # Installing
 
 Option 1.
+
 Use the ``/admin`` interface, search for ``ep_webrtc`` and click Install
 
 Option 2.
