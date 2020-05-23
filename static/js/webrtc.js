@@ -530,6 +530,11 @@ var rtc = (function() {
           }
         }
       };
+      if (padcookie.getPref("fakeWebrtcFirefox")) {
+        // The equivalent is done for chromium with cli option:
+        // --use-fake-device-for-media-stream
+        mediaConstraints.fake = true
+      }
       window.navigator.mediaDevices
         .getUserMedia(mediaConstraints)
         .then(function(stream) {
