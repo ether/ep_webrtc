@@ -27,7 +27,7 @@ jobs:
     - name: "Run the Backend tests"
       install:
         - "mkdir ep_webrtc"
-        - "mv -f * ep_webrtc"
+        - "mv !(ep_webrtc) ep_webrtc"
         - "git clone https://github.com/ether/etherpad-lite.git etherpad"
         - "cd etherpad"
         - "mkdir node_modules"
@@ -41,7 +41,7 @@ jobs:
     - name: "Test the Frontend"
       install:
         - "mkdir ep_webrtc"
-        - "mv -f * ep_webrtc"
+        - "mv !(ep_webrtc) ep_webrtc"
         - "git clone https://github.com/ether/etherpad-lite.git etherpad"
         - "cd etherpad"
         - "mkdir node_modules"
