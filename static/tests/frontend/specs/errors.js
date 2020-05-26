@@ -1,0 +1,69 @@
+describe('gritter shows error messages', function() {
+  beforeEach(function(done) {
+    // Make sure webrtc is disabled, and reload with the firefox fake webrtc pref
+    // (Chrome needs a CLI parameter to have fake webrtc)
+    helper.newPad({
+      clearCookies: false,
+      padPrefs: {rtcEnabled: false, fakeWebrtcFirefox: true},
+      cb: done
+    });
+    this.timeout(60000);
+  });
+
+  function tryError(errName, checkString, done) {
+    var chrome$ = helper.padChrome$;
+
+    chrome$.window.navigator.mediaDevices.getUserMedia = function() {
+      return new Promise(function(resolve, reject) {
+        var err = Error()
+        err.name = errName
+        reject(err)
+      });
+    };
+
+    var $enableRtc = chrome$("#options-enablertc");
+
+    $enableRtc.click();
+
+    expect($enableRtc.prop("checked")).to.be(true)
+
+    helper.waitFor(function(){
+      return chrome$("#gritter-container:visible").length === 1;
+    }, 1000).done(function () {
+      expect(chrome$('.gritter-title').html()).to.be("Error")
+      expect(chrome$('.gritter-content p').html()).to.contain(checkString)
+      done()
+    });
+  }
+
+  it('gives the right error message for CustomNotSupportedError', function(done) {
+    tryError("CustomNotSupportedError", "does not support WebRTC", done)
+  });
+
+  it('gives the right error message for CustomSecureConnectionError', function(done) {
+    tryError("CustomSecureConnectionError", "need to install SSL certificates", done)
+  });
+
+  it('gives the right error message for NotAllowedError', function(done) {
+    // Hard to test the version of NotAllowedError that is the SSL error
+    // because it requires changing window.location
+    tryError("NotAllowedError", "need to give us permission", done)
+  });
+
+  it('gives the right error message for NotFoundError', function(done) {
+    tryError("NotFoundError", "couldn't find a suitable camera", done)
+  });
+
+  it('gives the right error message for NotReadableError', function(done) {
+    tryError("NotReadableError", "hardware error occurred", done)
+  });
+
+  it('gives the right error message for AbortError', function(done) {
+    tryError("AbortError", "not hardware related", done)
+  });
+
+  it('gives the right error message for an unknown error', function(done) {
+    tryError("asdf", "there was an unknown Error", done)
+  });
+
+});
