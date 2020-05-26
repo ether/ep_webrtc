@@ -2,13 +2,13 @@
     "pad.settings.enablertc": "Enable Audio/Video Chat",
 
     "pad.ep_webrtc.error.notSupported.sorry": "Sorry, your browser does not support WebRTC (or you have it disabled in your settings).",
-    "pad.ep_webrtc.error.notSupported.howTo": "To participate in this audio/video chat you have to use a browser with WebRTC support like Chrome, Firefox or Opera.",
+    "pad.ep_webrtc.error.notSupported.howTo": "To participate in this audio/video chat you have to use a browser with WebRTC support like Chrome, Firefox, Safari, Edge, or Opera.",
     "pad.ep_webrtc.error.notSupported.findOutMore": "Click here to learn more.",
     "pad.ep_webrtc.error.ssl": "Sorry, you need to install SSL certificates for your Etherpad instance to use WebRTC.",
     "pad.ep_webrtc.error.permission": "Sorry, you need to give us permission to use your camera and microphone.",
     "pad.ep_webrtc.error.notFound": "Sorry, we couldn't find a suitable camera on your device. If you have a camera, make sure it set up correctly and refresh this website to retry.",
     "pad.ep_webrtc.error.notReadable": "Sorry, a hardware error occurred that prevented access to your camera and/or microphone:",
-    "pad.ep_webrtc.error.otherCantAccess": "Sorry, an error occurred (probably not hardware related) that prevented access to your camera and/or microphone:",
-    "pad.ep_webrtc.error.other": "Sorry, there was an unknown Error:"
+    "pad.ep_webrtc.error.otherCantAccess": "Sorry, the browser doesn't have access to your camera and/or microphone.  Please check permissions in your browser's settings. This is most likely not a hardware error:",
+    "pad.ep_webrtc.error.other": "Sorry, there was an unknown error:"
 
 }
