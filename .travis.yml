@@ -30,7 +30,7 @@ jobs:
         - "git clone https://github.com/ether/etherpad-lite.git etherpad"
         - "cd etherpad"
         - "mkdir node_modules"
-        - "mkdir node_modules/ep_webrc"
+        - "mkdir node_modules/ep_webrtc"
         - "mv /tmp/* node_modules/ep_webrtc"
         - "bin/installDeps.sh"
         - "export GIT_HASH=$(git rev-parse --verify --short HEAD)"
