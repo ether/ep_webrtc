@@ -37,7 +37,7 @@ jobs:
         - "npm install ep_test_line_attrib"
         - "cd src && npm install && cd -"
       script:
-        - "etherpad/tests/frontend/travis/runnerBackend.sh"
+        - "tests/frontend/travis/runnerBackend.sh"
     - name: "Test the Frontend"
       install:
         - "mkdir ep_webrtc"
