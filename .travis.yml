@@ -27,7 +27,8 @@ jobs:
     - name: "Run the Backend tests"
       install:
         - "mv * /tmp"
-        - "git clone https://github.com/ether/etherpad-lite.git ."
+        - "git clone https://github.com/ether/etherpad-lite.git etherpad"
+        - "cd etherpad"
         - "mkdir node_modules"
         - "mv /tmp/* node_modules/ep_webrtc"
         - "mkdir node_modules/ep_webrtc"
@@ -37,11 +38,12 @@ jobs:
         - "npm install ep_test_line_attrib"
         - "cd src && npm install && cd -"
       script:
-        - "tests/frontend/travis/runnerBackend.sh"
+        - "etherpad/tests/frontend/travis/runnerBackend.sh"
     - name: "Test the Frontend"
       install:
         - "mv * /tmp"
-        - "git clone https://github.com/ether/etherpad-lite.git ."
+        - "git clone https://github.com/ether/etherpad-lite.git etherpad"
+        - "cd etherpad"
         - "mkdir node_modules"
         - "mv /tmp/* node_modules/ep_webrtc"
         - "mkdir node_modules/ep_webrtc"
@@ -50,7 +52,7 @@ jobs:
         - "export GIT_HASH=$(git rev-parse --verify --short HEAD)"
         - "npm install ep_test_line_attrib"
       script:
-        - "tests/frontend/travis/runner.sh"
+        - "etherpad/tests/frontend/travis/runner.sh"
 
 notifications:
   irc:
