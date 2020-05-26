@@ -12,7 +12,7 @@ install:
   - "npm install ep_test_line_attrib"
 
 before_script:
-  - "/tests/frontend/travis/sauce_tunnel.sh"
+  - "tests/frontend/travis/sauce_tunnel.sh"
 
 script:
   - "etherpad/tests/frontend/travis/runner.sh"
