@@ -26,8 +26,9 @@ jobs:
   include:
     - name: "Run the Backend tests"
       install:
+        - "mv * /tmp"
         - "mkdir tmp"
-        - "mv * tmp"
+        - "mv /tmp/* tmp"
         - "cd tmp"
         - "npm install"
         - "cd .."
@@ -43,8 +44,9 @@ jobs:
         - "tests/frontend/travis/runnerBackend.sh"
     - name: "Test the Frontend"
       install:
+        - "mv * /tmp"
         - "mkdir tmp"
-        - "mv * tmp"
+        - "mv /tmp/* tmp"
         - "cd tmp"
         - "npm install"
         - "cd .."
