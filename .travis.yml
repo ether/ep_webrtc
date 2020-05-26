@@ -7,15 +7,15 @@ services:
   - docker
 
 install:
-  - "mkdir tmp"
-  - "mv * ep_webrtc"
-  - "git clone https://github.com/ether/etherpad-lite.git ."
-  - "mkdir node_modules"
-  - "mkdir node_modules/ep_webrtc"
-  - "mv tmp/* node_modules/ep_webrtc"
-  - "bin/installDeps.sh"
-  - "export GIT_HASH=$(git rev-parse --verify --short HEAD)"
-  - "npm install ep_test_line_attrib"
+#  - "mkdir tmp"
+#  - "mv * ep_webrtc"
+#  - "git clone https://github.com/ether/etherpad-lite.git ."
+#  - "mkdir node_modules"
+#  - "mkdir node_modules/ep_webrtc"
+#  - "mv tmp/* node_modules/ep_webrtc"
+#  - "bin/installDeps.sh"
+#  - "export GIT_HASH=$(git rev-parse --verify --short HEAD)"
+#  - "npm install ep_test_line_attrib"
 
 before_script:
   - "tests/frontend/travis/sauce_tunnel.sh"
@@ -32,6 +32,15 @@ jobs:
   include:
     - name: "Run the Backend tests"
       install:
+        - "mkdir tmp"
+        - "mv * ep_webrtc"
+        - "git clone https://github.com/ether/etherpad-lite.git ."
+        - "mkdir node_modules"
+        - "mkdir node_modules/ep_webrtc"
+        - "mv tmp/* node_modules/ep_webrtc"
+        - "bin/installDeps.sh"
+        - "export GIT_HASH=$(git rev-parse --verify --short HEAD)"
+        - "npm install ep_test_line_attrib"
         - "cd src && npm install && cd -"
       script:
         - "tests/frontend/travis/runnerBackend.sh"
