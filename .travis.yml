@@ -7,15 +7,9 @@ services:
   - docker
 
 install:
-#  - "mkdir tmp"
-#  - "mv * ep_webrtc"
-#  - "git clone https://github.com/ether/etherpad-lite.git ."
-#  - "mkdir node_modules"
-#  - "mkdir node_modules/ep_webrtc"
-#  - "mv tmp/* node_modules/ep_webrtc"
-#  - "bin/installDeps.sh"
-#  - "export GIT_HASH=$(git rev-parse --verify --short HEAD)"
-#  - "npm install ep_test_line_attrib"
+  - "bin/installDeps.sh"
+  - "export GIT_HASH=$(git rev-parse --verify --short HEAD)"
+  - "npm install ep_test_line_attrib"
 
 before_script:
   - "tests/frontend/travis/sauce_tunnel.sh"
@@ -33,7 +27,10 @@ jobs:
     - name: "Run the Backend tests"
       install:
         - "mkdir tmp"
-        - "mv * ep_webrtc"
+        - "mv * tmp"
+        - "cd tmp"
+        - "npm install"
+        - "cd .."
         - "git clone https://github.com/ether/etherpad-lite.git ."
         - "mkdir node_modules"
         - "mkdir node_modules/ep_webrtc"
@@ -46,18 +43,20 @@ jobs:
         - "tests/frontend/travis/runnerBackend.sh"
     - name: "Test the Frontend"
       install:
+        - "mkdir tmp"
+        - "mv * tmp"
+        - "cd tmp"
+        - "npm install"
+        - "cd .."
+        - "git clone https://github.com/ether/etherpad-lite.git ."
+        - "mkdir node_modules"
+        - "mkdir node_modules/ep_webrtc"
+        - "mv tmp/* node_modules/ep_webrtc"
         - "bin/installDeps.sh"
         - "export GIT_HASH=$(git rev-parse --verify --short HEAD)"
         - "npm install ep_test_line_attrib"
       script:
         - "tests/frontend/travis/runner.sh"
-#    - name: "Test the Dockerfile"
-#      install:
-#        - "cd src && npm install && cd -"
-#      script:
-#        - "docker build -t etherpad:test ."
-#        - "docker run -d -p 9001:9001 etherpad:test && sleep 3"
-#        - "cd src && npm run test-container"
 
 notifications:
   irc:
