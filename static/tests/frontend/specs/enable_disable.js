@@ -12,6 +12,7 @@ describe('enable and disable webrtc', function() {
     });
 
     it('enables WebRTC if the user uses the setting', function(done) {
+      this.timeout(60000);
       var chrome$ = helper.padChrome$;
       var $enableRtc = chrome$("#options-enablertc");
       expect($enableRtc.prop("checked")).to.be(false)
@@ -40,6 +41,7 @@ describe('enable and disable webrtc', function() {
     });
 
     it('disables WebRTC if the user uses the setting', function(done) {
+      this.timeout(60000);
       var chrome$ = helper.padChrome$;
       var $enableRtc = chrome$("#options-enablertc");
       expect($enableRtc.prop("checked")).to.be(true)
