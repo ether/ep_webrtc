@@ -24,7 +24,7 @@ describe('enable and disable webrtc', function() {
 
       helper.waitFor(function(){
         return chrome$("#rtcbox video").length === 1;
-      }, 1000).done(done);
+      }, 60000).done(done);
     });
   });
 
@@ -47,7 +47,7 @@ describe('enable and disable webrtc', function() {
       expect($enableRtc.prop("checked")).to.be(true)
       helper.waitFor(function(){
         return chrome$("#rtcbox video").length === 1;
-      }, 1000).done(function () {
+      }, 60000).done(function () {
 
         $enableRtc.click();
 
