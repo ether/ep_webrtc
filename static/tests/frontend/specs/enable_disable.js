@@ -12,7 +12,6 @@ describe('enable and disable webrtc', function() {
     });
 
     it('enables WebRTC if the user uses the setting', function(done) {
-      this.timeout(60000);
       var chrome$ = helper.padChrome$;
       var $enableRtc = chrome$("#options-enablertc");
       expect($enableRtc.prop("checked")).to.be(false)
@@ -24,7 +23,7 @@ describe('enable and disable webrtc', function() {
 
       helper.waitFor(function(){
         return chrome$("#rtcbox video").length === 1;
-      }, 60000).done(done);
+      }, 1000).done(done);
     });
   });
 
@@ -41,13 +40,12 @@ describe('enable and disable webrtc', function() {
     });
 
     it('disables WebRTC if the user uses the setting', function(done) {
-      this.timeout(60000);
       var chrome$ = helper.padChrome$;
       var $enableRtc = chrome$("#options-enablertc");
       expect($enableRtc.prop("checked")).to.be(true)
       helper.waitFor(function(){
         return chrome$("#rtcbox video").length === 1;
-      }, 60000).done(function () {
+      }, 1000).done(function () {
 
         $enableRtc.click();
 
