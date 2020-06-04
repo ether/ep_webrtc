@@ -6,6 +6,8 @@ node_js:
 services:
   - docker
 
+cache: false
+
 install:
   - "bin/installDeps.sh"
   - "export GIT_HASH=$(git rev-parse --verify --short HEAD)"
@@ -28,8 +30,9 @@ jobs:
       install:
         - "mkdir ep_webrtc"
         - "mv !(ep_webrtc) ep_webrtc"
-        - "git clone https://github.com/ether/etherpad-lite.git etherpad"
+        - "git clone https://github.com/orblivion/etherpad-lite.git etherpad"
         - "cd etherpad"
+        - "git checkout chromium-arg"
         - "mkdir node_modules"
         - "mv ../ep_webrtc node_modules"
         - "bin/installDeps.sh"
@@ -42,8 +45,9 @@ jobs:
       install:
         - "mkdir ep_webrtc"
         - "mv !(ep_webrtc) ep_webrtc"
-        - "git clone https://github.com/ether/etherpad-lite.git etherpad"
+        - "git clone https://github.com/orblivion/etherpad-lite.git etherpad"
         - "cd etherpad"
+        - "git checkout chromium-arg"
         - "mkdir node_modules"
         - "mv ../ep_webrtc node_modules"
         - "bin/installDeps.sh"
