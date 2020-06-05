@@ -589,13 +589,13 @@ var rtc = (function() {
           // Disable audio and/or video according to user/site settings.
           // Do this before setting `localStream` to avoid a race condition
           // that might flash the video on for an instant before disabling it.
-          var audioTrack = localStream.getAudioTracks()[0];
+          var audioTrack = stream.getAudioTracks()[0];
           // using `.prop("checked") === true` to make absolutely sure the result is a boolean
           // we don't want bugs when it comes to muting/turning off video
           if (audioTrack) {
             audioTrack.enabled = $("#options-audioenabledonstart").prop("checked") === true;
           }
-          var videoTrack = localStream.getVideoTracks()[0];
+          var videoTrack = stream.getVideoTracks()[0];
           if (videoTrack) {
             videoTrack.enabled = $("#options-videoenabledonstart").prop("checked") === true;
           }
