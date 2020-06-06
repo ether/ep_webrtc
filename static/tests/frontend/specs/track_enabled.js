@@ -1,104 +1,188 @@
-// TODO do getUserMedia trick to all of these to remove the firefox fake cookie - ? Requires the rtcEnabled start as off tho. Won't work so well. Maybe that'll be okay tho.
-
 describe('enable and disable audio/video tracks in UI', function() {
-  beforeEach(function(done) {
-    // Make sure webrtc is enabled, and reload with the firefox fake webrtc pref
-    // (Chrome needs a CLI parameter to have fake webrtc)
-    helper.newPad({
-      clearCookies: false,
-      padPrefs: {rtcEnabled: false, fakeWebrtcFirefox: true},
-      cb: done
-    });
-    this.timeout(60000);
-  });
 
-  function wrapGetUserMedia(inner) {
+  var audioTrack;
+  var videoTrack;
+
+  function wrapGetUserMedia() {
     const chrome$ = helper.padChrome$;
-    const oldGetUserMedia = chrome$.window.navigator.mediaDevices.getUserMedia
+    const oldGetUserMedia = chrome$.window.navigator.mediaDevices.getUserMedia;
     chrome$.window.navigator.mediaDevices.getUserMedia = function(mediaConstraints) {
       return oldGetUserMedia.call(chrome$.window.navigator.mediaDevices, mediaConstraints)
       .then(function(stream) {
-        return inner(stream)
+        audioTrack = stream.getAudioTracks()[0];
+        videoTrack = stream.getVideoTracks()[0];
+        return stream;
       });
     };
   }
 
-  // TODO - unmute then mute, once we add mute cookies
-  it('mutes then unmutes', function(done) {
-    this.timeout(10000);
+  context('audio and video on by default', function() {
+    beforeEach(function(done) {
+      audioTrack = null;
+      videoTrack = null;
 
-    var chrome$ = helper.padChrome$;
-    var audioTrack;
+      // Make sure webrtc starts disabled so we have time to wrap getUserMedia
+      helper.newPad({
+        padPrefs: {
+          rtcEnabled: false,
+          fakeWebrtcFirefox: true,
+          audioEnabledOnStart: true,
+          videoEnabledOnStart: true
+        },
+        cb: function () {wrapGetUserMedia(); done();}
+      });
+      this.timeout(60000);
+    });
 
-    wrapGetUserMedia(function (stream) {
-      audioTrack = stream.getAudioTracks()[0]
-      return stream
-    })
+    it('mutes then unmutes', function(done) {
+      this.timeout(60000);
 
-    var $enableRtc = chrome$("#options-enablertc");
-    $enableRtc.click();
+      var chrome$ = helper.padChrome$;
 
-    helper.waitFor(function(){
-      return chrome$(".audio-btn").length === 1 && audioTrack !== undefined && audioTrack.enabled === true;
-    }, 5000).done(function () {
-      expect(chrome$(".audio-btn.muted").length).to.be(0);
-      expect(chrome$(".audio-btn").attr("title")).to.be("Mute");
-
-      var $audioBtn = chrome$(".audio-btn");
-      $audioBtn.click()
+      var $enableRtc = chrome$("#options-enablertc");
+      $enableRtc.click();
 
       helper.waitFor(function(){
-        return chrome$(".audio-btn.muted").length === 1 && audioTrack.enabled === false;
-      }, 1000).done(function () {
+        return chrome$(".audio-btn").length === 1 && audioTrack !== null;
+      }, 3000).done(function () {
+        expect(audioTrack.enabled).to.be(true);
+        expect(chrome$(".audio-btn.muted").length).to.be(0);
+        expect(chrome$(".audio-btn").attr("title")).to.be("Mute");
+
+        var $audioBtn = chrome$(".audio-btn");
+        $audioBtn.click();
+
+        helper.waitFor(function(){
+          return chrome$(".audio-btn.muted").length === 1 && audioTrack.enabled === false;
+        }, 3000).done(function () {
+          expect(chrome$(".audio-btn").attr("title")).to.be("Unmute");
+          $audioBtn.click();
+          helper.waitFor(function(){
+            return chrome$(".audio-btn.muted").length === 0 && audioTrack.enabled === true;
+          }, 3000).done(function () {
+            expect(chrome$(".audio-btn").attr("title")).to.be("Mute");
+            done();
+          });
+        });
+      });
+    });
+
+    it('disables then enables video', function(done) {
+      this.timeout(60000);
+
+      var chrome$ = helper.padChrome$;
+
+      var $enableRtc = chrome$("#options-enablertc");
+      $enableRtc.click();
+
+      helper.waitFor(function(){
+        return chrome$(".video-btn").length === 1 && videoTrack !== null;
+      }, 3000).done(function () {
+        expect(videoTrack.enabled).to.be(true);
+        expect(chrome$(".video-btn.off").length).to.be(0);
+        expect(chrome$(".video-btn").attr("title")).to.contain("Disable");
+
+        var $videoBtn = chrome$(".video-btn");
+        $videoBtn.click();
+
+        helper.waitFor(function(){
+          return chrome$(".video-btn.off").length === 1 && videoTrack.enabled === false;
+        }, 3000).done(function () {
+          expect(chrome$(".video-btn").attr("title")).to.contain("Enable");
+          $videoBtn.click();
+          helper.waitFor(function(){
+            return chrome$(".video-btn.off").length === 0 && videoTrack.enabled === true;
+          }, 3000).done(function () {
+            expect(chrome$(".video-btn").attr("title")).to.contain("Disable");
+            done();
+          });
+        });
+      });
+    });
+  });
+
+  context('audio and video off by default', function() {
+    beforeEach(function(done) {
+      audioTrack = null;
+      videoTrack = null;
+
+      // Make sure webrtc starts disabled so we have time to wrap getUserMedia
+      helper.newPad({
+        padPrefs: {
+          rtcEnabled: false,
+          fakeWebrtcFirefox: true,
+          audioEnabledOnStart: false,
+          videoEnabledOnStart: false
+        },
+        cb: function () {wrapGetUserMedia(); done();}
+      });
+      this.timeout(60000);
+    });
+
+    it('unmutes then mutes', function(done) {
+      this.timeout(60000);
+
+      var chrome$ = helper.padChrome$;
+
+      var $enableRtc = chrome$("#options-enablertc");
+      $enableRtc.click();
+
+      helper.waitFor(function(){
+        return chrome$(".audio-btn").length === 1 && audioTrack !== null;
+      }, 3000).done(function () {
+        expect(audioTrack.enabled).to.be(false);
+        expect(chrome$(".audio-btn.muted").length).to.be(1);
         expect(chrome$(".audio-btn").attr("title")).to.be("Unmute");
-        $audioBtn.click()
+
+        var $audioBtn = chrome$(".audio-btn");
+        $audioBtn.click();
+
         helper.waitFor(function(){
           return chrome$(".audio-btn.muted").length === 0 && audioTrack.enabled === true;
-        }, 1000).done(function () {
+        }, 3000).done(function () {
           expect(chrome$(".audio-btn").attr("title")).to.be("Mute");
-          done()
-        })
-      })
+          $audioBtn.click();
+          helper.waitFor(function(){
+            return chrome$(".audio-btn.muted").length === 1 && audioTrack.enabled === false;
+          }, 3000).done(function () {
+            expect(chrome$(".audio-btn").attr("title")).to.be("Unmute");
+            done();
+          });
+        });
+      });
     });
-  });
 
-  // TODO - disable then enable, once we add video enable cookies
-  it('disables then enables video', function(done) {
-    this.timeout(10000);
+    it('enables then disables video', function(done) {
+      this.timeout(60000);
 
-    var chrome$ = helper.padChrome$;
-    var videoTrack;
+      var chrome$ = helper.padChrome$;
 
-    wrapGetUserMedia(function (stream) {
-      videoTrack = stream.getVideoTracks()[0]
-      return stream
-    })
-
-    var $enableRtc = chrome$("#options-enablertc");
-    $enableRtc.click();
-
-    helper.waitFor(function(){
-      return chrome$(".video-btn").length === 1 && videoTrack !== undefined && videoTrack.enabled === true;
-    }, 5000).done(function () {
-      expect(chrome$(".video-btn.off").length).to.be(0);
-      expect(chrome$(".video-btn").attr("title")).to.contain("Disable");
-
-      var $videoBtn = chrome$(".video-btn");
-      $videoBtn.click()
+      var $enableRtc = chrome$("#options-enablertc");
+      $enableRtc.click();
 
       helper.waitFor(function(){
-        return chrome$(".video-btn.off").length === 1 && videoTrack.enabled === false;
-      }, 1000).done(function () {
+        return chrome$(".video-btn").length === 1 && videoTrack !== null;
+      }, 3000).done(function () {
+        expect(videoTrack.enabled).to.be(false);
+        expect(chrome$(".video-btn.off").length).to.be(1);
         expect(chrome$(".video-btn").attr("title")).to.contain("Enable");
-        $videoBtn.click()
+
+        var $videoBtn = chrome$(".video-btn");
+        $videoBtn.click();
+
         helper.waitFor(function(){
           return chrome$(".video-btn.off").length === 0 && videoTrack.enabled === true;
-        }, 1000).done(function () {
+        }, 3000).done(function () {
           expect(chrome$(".video-btn").attr("title")).to.contain("Disable");
-          done()
-        })
-      })
+          $videoBtn.click();
+          helper.waitFor(function(){
+            return chrome$(".video-btn.off").length === 1 && videoTrack.enabled === false;
+          }, 3000).done(function () {
+            expect(chrome$(".video-btn").attr("title")).to.contain("Enable");
+            done();
+          });
+        });
+      });
     });
   });
-
 });
