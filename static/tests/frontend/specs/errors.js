@@ -1,9 +1,7 @@
 describe('gritter shows error messages', function() {
   beforeEach(function(done) {
-    // Make sure webrtc is disabled, and reload with the firefox fake webrtc pref
-    // (Chrome needs a CLI parameter to have fake webrtc)
+    // Make sure webrtc starts disabled so we have time to wrap getUserMedia
     helper.newPad({
-      clearCookies: false,
       padPrefs: {rtcEnabled: false, fakeWebrtcFirefox: true},
       cb: done
     });
@@ -59,11 +57,11 @@ describe('gritter shows error messages', function() {
   });
 
   it('gives the right error message for AbortError', function(done) {
-    tryError("AbortError", "not hardware related", done)
+    tryError("AbortError", "not a hardware error", done)
   });
 
   it('gives the right error message for an unknown error', function(done) {
-    tryError("asdf", "there was an unknown Error", done)
+    tryError("asdf", "there was an unknown error", done)
   });
 
 });

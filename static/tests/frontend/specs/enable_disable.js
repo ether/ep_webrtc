@@ -1,8 +1,6 @@
 describe('enable and disable webrtc', function() {
   context('WebRTC is disabled', function() {
     before(function(done) {
-      // Make sure webrtc is disabled, and reload with the firefox fake webrtc pref
-      // (Chrome needs a CLI parameter to have fake webrtc)
       helper.newPad({
         padPrefs: {rtcEnabled: false, fakeWebrtcFirefox: true},
         cb: done
@@ -28,8 +26,6 @@ describe('enable and disable webrtc', function() {
 
   context('WebRTC is enabled', function() {
     before(function(done) {
-      // Make sure webrtc is enabled, and reload with the firefox fake webrtc pref
-      // (Chrome needs a CLI parameter to have fake webrtc)
       helper.newPad({
         padPrefs: {rtcEnabled: true, fakeWebrtcFirefox: true},
         cb: done
