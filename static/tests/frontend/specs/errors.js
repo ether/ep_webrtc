@@ -1,11 +1,19 @@
 describe('gritter shows error messages', function() {
-  beforeEach(function(done) {
+  before(function(done) {
     // Make sure webrtc starts disabled so we have time to wrap getUserMedia
     helper.newPad({
-      padPrefs: {rtcEnabled: false, fakeWebrtcFirefox: true},
+      padPrefs: {rtcEnabled: true, fakeWebrtcFirefox: true},
       cb: done
     });
     this.timeout(60000);
+  });
+
+  beforeEach(function(done) {
+    var chrome$ = helper.padChrome$;
+    // No idea why but this needs to be called twice to actually make #gritter-container hidden
+    chrome$.gritter.removeAll({fade: false})
+    chrome$.gritter.removeAll({fade: false})
+    done()
   });
 
   function tryError(errName, checkString, done) {
@@ -19,18 +27,19 @@ describe('gritter shows error messages', function() {
       });
     };
 
-    var $enableRtc = chrome$("#options-enablertc");
-
-    $enableRtc.click();
-
-    expect($enableRtc.prop("checked")).to.be(true)
-
     helper.waitFor(function(){
-      return chrome$("#gritter-container:visible").length === 1;
+      return chrome$("#gritter-container:visible").length === 0;
     }, 1000).done(function () {
-      expect(chrome$('.gritter-title').html()).to.be("Error")
-      expect(chrome$('.gritter-content p').html()).to.contain(checkString)
-      done()
+      // a wrapper of the above, which includes displaying errors
+      chrome$.window.ep_webrtc.getUserMedia()
+
+      helper.waitFor(function(){
+        return chrome$("#gritter-container:visible").length === 1;
+      }, 1000).done(function () {
+        expect(chrome$('.gritter-title').html()).to.be("Error")
+        expect(chrome$('.gritter-content p').html()).to.contain(checkString)
+        done()
+      });
     });
   }
 

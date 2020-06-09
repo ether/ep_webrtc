@@ -23,6 +23,7 @@ var hooks = require("ep_etherpad-lite/static/js/pluginfw/hooks");
 var rtc = (function() {
   var videoSizes = {large: "260px", small: "160px"}
   var isActive = false;
+  var urlParamString;
   var pc_config = {};
   var pc_constraints = {
     optional: [
@@ -46,6 +47,7 @@ var rtc = (function() {
   var self = {
     //API HOOKS
     postAceInit: function(hook, context, callback) {
+      self.setUrlParamString(window.location.search)
       if (!$('#editorcontainerbox').hasClass('flex-layout')) {
         $.gritter.add({
           title: "Error",
@@ -70,6 +72,10 @@ var rtc = (function() {
       }
       self.init(context.pad);
       callback();
+    },
+    // so we can call it from testing
+    setUrlParamString(str) {
+      urlParamString = str
     },
     aceSetAuthorStyle: function(hook, context, callback) {
       if (context.author) {
@@ -293,7 +299,7 @@ var rtc = (function() {
         .attr("title", clientVars.webrtc.audio.disabled !== "hard"
           ? (initiallyMuted ? "Unmute" : "Mute")
           : "Audio disallowed by admin")
-        .toggleClass("muted", initiallyMuted)
+        .toggleClass("muted", initiallyMuted || clientVars.webrtc.audio.disabled === "hard")
         .toggleClass("disallowed", clientVars.webrtc.audio.disabled === "hard");
 
       if (clientVars.webrtc.audio.disabled !== "hard") {
@@ -329,7 +335,7 @@ var rtc = (function() {
             ? (initiallyVideoEnabled ? "Disable video" : "Enable video")
             : "Video disallowed by admin"
           )
-          .toggleClass("off", !initiallyVideoEnabled)
+          .toggleClass("off", !initiallyVideoEnabled || clientVars.webrtc.video.disabled === "hard")
           .toggleClass("disallowed", clientVars.webrtc.video.disabled === "hard");
         if (clientVars.webrtc.video.disabled !== "hard") {
           $disableVideo.on({
@@ -614,7 +620,7 @@ var rtc = (function() {
         .catch(function(err) {self.showUserMediaError(err)})
     },
     avInURL: function() {
-      if (window.location.search.indexOf("av=YES") > -1) {
+      if (urlParamString.indexOf("av=YES") > -1) {
         return true;
       } else {
         return false;
@@ -639,10 +645,10 @@ var rtc = (function() {
       // * If the setting is not in the URL: try to get it from the cookie
       // * If the setting was in neither, go with the site-wide default value
       //   but don't put it in the cookies
-      if (window.location.search.indexOf(params.urlVar + "=true") > -1) {
+      if (urlParamString.indexOf(params.urlVar + "=true") > -1) {
         padcookie.setPref(params.cookie, true);
         value = true
-      } else if (window.location.search.indexOf(params.urlVar + "=false") > -1) {
+      } else if (urlParamString.indexOf(params.urlVar + "=false") > -1) {
         padcookie.setPref(params.cookie, false);
         value = false
       } else {
@@ -864,3 +870,4 @@ var rtc = (function() {
 })();
 
 exports.rtc = rtc;
+window.ep_webrtc = rtc // Access to do some unit tests. If there's a more formal way to do this for all plugins, we can change to that.
