@@ -195,6 +195,7 @@ var rtc = (function() {
         if ((videoTrack && videoTrack.stop === undefined) || (audioTrack && audioTrack.stop === undefined)) {
           // deprecated in 2015, probably disabled by 2020
           // https://developers.google.com/web/updates/2015/07/mediastream-deprecations
+          // Perhaps we can obviate this by updating adapter.js?
           localStream.stop();
         } else {
           if (videoTrack) {
