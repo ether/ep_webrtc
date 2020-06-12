@@ -220,7 +220,7 @@ var rtc = (function() {
       var videoTrack = localStream.getVideoTracks()[0];
       if (videoTrack) {
         videoTrack.enabled = !videoTrack.enabled;
-        return videoTrack.enabled;
+        return !videoTrack.enabled; // returning whether it's disabled, to match toggleMuted
       }
       return false // if there's no video track, it's not enabled
     },
@@ -340,7 +340,7 @@ var rtc = (function() {
         if (clientVars.webrtc.video.disabled !== "hard") {
           $disableVideo.on({
             click: function(event) {
-              var videoEnabled = self.toggleVideo();
+              var videoEnabled = !self.toggleVideo();
               $disableVideo
                 .attr(
                   "title",
