@@ -1,4 +1,4 @@
-describe('Interface buttons - Mute, Video Disable, Enlarge', function() {
+describe('Test the behavior of the interface buttons: Mute, Video Disable, Enlarge', function() {
 
   var audioTrack;
   var videoTrack;

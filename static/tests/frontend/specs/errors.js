@@ -1,4 +1,4 @@
-describe('gritter shows error messages', function() {
+describe('Test that we show the correct error messages when trying to start webrtc', function() {
   before(function(done) {
     // Make sure webrtc starts disabled so we have time to wrap getUserMedia
     helper.newPad({

@@ -5,7 +5,7 @@ function fakeStream(params) {
   }
 }
 
-describe('test addInterface creating the video interface buttons under different conditions', function() {
+describe('test the addInterface function, which creates of the various video interface buttons, under various conditions', function() {
 
   const otherUserId = "other_user_id"
   const otherVideoId = "video_other_user_id"

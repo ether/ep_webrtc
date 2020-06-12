@@ -5,7 +5,7 @@ function fakeStream(params) {
   }
 }
 
-describe('test settingToCheckbox and the creation of the checkboxes', function() {
+describe('test settingToCheckbox, which creates checkboxes that are linked to to urlVars and cookies', function() {
   before(function(done) {
     this.timeout(60000);
     helper.newPad({
