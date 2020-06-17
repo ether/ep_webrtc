@@ -176,11 +176,11 @@ var rtc = (function() {
     },
     activate: function() {
       $("#options-enablertc").prop("checked", true);
-      if (isActive) return;
+      if (isActive) return Promise.reject(); // maybe should Promise.resolve()? Doesn't make a difference yet.
       self.show();
       padcookie.setPref("rtcEnabled", true);
-      self.getUserMedia();
       isActive = true;
+      return self.getUserMedia();
     },
     deactivate: function() {
       $("#options-enablertc").prop("checked", false);
@@ -590,7 +590,7 @@ var rtc = (function() {
         // --use-fake-device-for-media-stream
         mediaConstraints.fake = true
       }
-      window.navigator.mediaDevices
+      return window.navigator.mediaDevices
         .getUserMedia(mediaConstraints)
         .then(function(stream) {
           // Disable audio and/or video according to user/site settings.
