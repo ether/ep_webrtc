@@ -30,7 +30,7 @@ You should use a STUN/TURN server to ensure consistant connecivty between client
 
 # Settings
 
-## Enabling or disabling the audio/video chat feature
+## Enabling or disabling the feature
 
 ### Per-User
 
@@ -46,7 +46,7 @@ There is a site-wide setting in `settings.json` that determines whether the feat
 
 The `"enabled"` setting can either be `true` or `false`. It is optional, with a default value of `true`.
 
-## Audio / Video
+## Enabling or disabling audio or video individually
 
 The audio/video chat feature gives the user the ability to temporarily disable ("mute") audio, and similarly temporarily disable video. A site admin may also choose to make audio or video entirely unavailable to users.
 
