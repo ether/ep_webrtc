@@ -61,7 +61,7 @@ Each user has the ability, using a setting under the settings menu, to set wheth
 
 ### Site-Wide
 
-There are site-wide settings in `settings.json` that determine whether audio or video are initially turned on or off for users who have not yet set their own preference, or altogether unavailable:
+There are site-wide settings in `settings.json` that determine whether audio or video are available to users, and whether they are initially turned on or off for users who have not yet set their own preference:
 
     "ep_webrtc" : {
         "audio" : {
