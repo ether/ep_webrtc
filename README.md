@@ -30,35 +30,55 @@ You should use a STUN/TURN server to ensure consistant connecivty between client
 
 # Settings
 
+## Enabling or disabling the audio/video chat feature
+
+### Per-User
+
+The audio/video chat feature can be enabled or disabled. There's a setting for each user under their settings menu that can turn it off and on. The setting is saved in cookies and will apply when they reload the page. The user can also change the value of the setting to true by loading the page with `?av=YES` in the URL path. (at the moment, `av=NO` does not work to turn it off)
+
+### Site-Wide
+
+There is a site-wide setting in `settings.json` that determines whether the feature is initially turned on or off for users who have not yet set their own preference:
+
+    "ep_webrtc" : {
+        "enabled" : ...
+    }
+
+The `"enabled"` setting can either be `true` or `false`. It is optional, with a default value of `true`.
+
 ## Audio / Video
 
-To disable the audio/video conversation by default (each user can override this for themselves), append this to your settings.json:
+The audio/video chat feature gives the user the ability to temporarily disable ("mute") audio, and similarly disable video. A site admin may also choose to make audio or video entirely inaccessible to users.
 
-    "ep_webrtc" : {
-        "enabled" : false
-    }
+### Per-User
 
-To enable webrtc with a URL parameter append the following to your pad URL ``?av=YES``
+Each user has the ability, using a setting under the settings menu, to set whether video or audio are initially disabled when the page is loaded. The user can also change the value of the settings by loading the page with the appropriate parameters in the URL path:
 
-To make the conversation audio-only:
+* `?webrtcaudioenabled=true`
+* `?webrtcaudioenabled=false`
+* `?webrtcvideoenabled=true`
+* `?webrtcvideoenabled=false`
 
-    "ep_webrtc" : {
-        "audio" : {
-            "disabled": "hard"
-        }
-    }
+### Site-Wide
 
-To make the conversation default to muted on startup (each user can override this for themselves):
+There are site-wide settings in `settings.json` that determine whether audio or video are initially turned on or off for users who have not yet set their own preference, or altogether inaccessible:
 
     "ep_webrtc" : {
         "audio" : {
-            "disabled": "soft"
+            "disabled": ...
+        }
+        "video" : {
+            "disabled": ...
         }
     }
 
-The default value is "none". The same applies to `video.disabled` as well.
+The `"disabled"` setting under both `"audio"` and `"video"` can have one of the following values:
 
-For `"soft"` or `"none"`, the user can override these either in their settings gearbox, or by appending `?webrtcaudioenabled=true`/`?webrtcaudioenabled=false` and `?webrtcvideoenabled=true`/`?webrtcvideoenabled=false`
+* `"none"` - audio/video (as applicable) is accessible and initially turned on for users who haven't set their own preference
+* `"soft"` - audio/video (as applicable) is accessible but initially turned off for users who haven't set their own preference
+* `"hard"` - audio/video (as applicable) is inaccessible to users
+
+The setting is optional, with a default value of `"none"`.
 
 ## Other Interface
 
