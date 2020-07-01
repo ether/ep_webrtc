@@ -223,7 +223,7 @@ var rtc = (function() {
         videoTrack.enabled = !videoTrack.enabled;
         return !videoTrack.enabled; // returning whether it's disabled, to match toggleMuted
       }
-      return false // if there's no video track, it's not enabled
+      return true // if there's no video track, return true to indicate not enabled (matching toggleMuted)
     },
     getUserFromId: function(userId) {
       if (!self._pad || !self._pad.collabClient) return null;

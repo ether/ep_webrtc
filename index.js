@@ -120,7 +120,7 @@ exports.clientVars = function(hook, context, callback)
       "iceServers": iceServers,
       "enabled": enabled,
       "audio": {"disabled": audioDisabled},
-      "video": {"disabled": videoDisabled, sizes: videoSizes},
+      "video": {"disabled": videoDisabled, "sizes": videoSizes},
       "listenClass": listenClass
     }
   });
