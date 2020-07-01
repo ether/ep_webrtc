@@ -298,9 +298,11 @@ var rtc = (function() {
       }
 
       var $mute = $("<span class='interface-btn audio-btn buttonicon'>")
-        .attr("title", !audioHardDisabled
-          ? (initiallyMuted ? "Unmute" : "Mute")
-          : "Audio disallowed by admin")
+        .attr("title",
+          audioHardDisabled
+            ? "Audio disallowed by admin"
+            : (initiallyMuted ? "Unmute" : "Mute")
+        )
         .toggleClass("muted", initiallyMuted || audioHardDisabled)
         .toggleClass("disallowed", audioHardDisabled);
 
@@ -334,9 +336,11 @@ var rtc = (function() {
           initiallyVideoEnabled = videoTrack.enabled
         }
         $disableVideo = $("<span class='interface-btn video-btn buttonicon'>")
-          .attr("title", !videoHardDisabled
-            ? (initiallyVideoEnabled ? "Disable video" : "Enable video")
-            : "Video disallowed by admin"
+          .attr("title",
+            videoHardDisabled
+              ? "Video disallowed by admin"
+              : (initiallyVideoEnabled ? "Disable video" : "Enable video"
+            )
           )
           .toggleClass("off", !initiallyVideoEnabled || videoHardDisabled)
           .toggleClass("disallowed", videoHardDisabled);
