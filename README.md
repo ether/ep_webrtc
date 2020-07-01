@@ -34,7 +34,7 @@ You should use a STUN/TURN server to ensure consistant connecivty between client
 
 ### Per-User
 
-The audio/video chat feature can be enabled or disabled. There's a setting for each user under their settings menu that can turn it off and on. The setting is saved in cookies and will apply when they reload the page. The user can also change the value of the setting to true by loading the page with `?av=YES` in the URL path. (at the moment, `av=NO` does not work to turn it off)
+There's a setting for each user under their settings menu that can turn audio/video chat feature off and on. The setting is saved in cookies and will apply when they reload the page. The user can also change the value of these setting to true by loading the page with `?av=YES` in the URL path. (at the moment, `av=NO` does not work to turn it off)
 
 ### Site-Wide
 
@@ -48,7 +48,7 @@ The `"enabled"` setting can either be `true` or `false`. It is optional, with a 
 
 ## Audio / Video
 
-The audio/video chat feature gives the user the ability to temporarily disable ("mute") audio, and similarly disable video. A site admin may also choose to make audio or video entirely inaccessible to users.
+The audio/video chat feature gives the user the ability to temporarily disable ("mute") audio, and similarly temporarily disable video. A site admin may also choose to make audio or video entirely unavailable to users.
 
 ### Per-User
 
@@ -61,7 +61,7 @@ Each user has the ability, using a setting under the settings menu, to set wheth
 
 ### Site-Wide
 
-There are site-wide settings in `settings.json` that determine whether audio or video are initially turned on or off for users who have not yet set their own preference, or altogether inaccessible:
+There are site-wide settings in `settings.json` that determine whether audio or video are initially turned on or off for users who have not yet set their own preference, or altogether unavailable:
 
     "ep_webrtc" : {
         "audio" : {
@@ -74,9 +74,9 @@ There are site-wide settings in `settings.json` that determine whether audio or 
 
 The `"disabled"` setting under both `"audio"` and `"video"` can have one of the following values:
 
-* `"none"` - audio/video (as applicable) is accessible and initially turned on for users who haven't set their own preference
-* `"soft"` - audio/video (as applicable) is accessible but initially turned off for users who haven't set their own preference
-* `"hard"` - audio/video (as applicable) is inaccessible to users
+* `"none"` - available and initially turned on for users who haven't set their own preference
+* `"soft"` - available but initially turned off for users who haven't set their own preference
+* `"hard"` - unavailable to users
 
 The setting is optional, with a default value of `"none"`.
 
