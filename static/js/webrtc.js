@@ -291,19 +291,20 @@ var rtc = (function() {
       ///////
 
       var audioTrack = stream.getAudioTracks()[0];
+      const audioHardDisabled = clientVars.webrtc.audio.disabled === "hard"
       var initiallyMuted = true; // if there's no audio track, it's muted
       if (audioTrack) {
         initiallyMuted = !audioTrack.enabled
       }
 
       var $mute = $("<span class='interface-btn audio-btn buttonicon'>")
-        .attr("title", clientVars.webrtc.audio.disabled !== "hard"
+        .attr("title", !audioHardDisabled
           ? (initiallyMuted ? "Unmute" : "Mute")
           : "Audio disallowed by admin")
-        .toggleClass("muted", initiallyMuted || clientVars.webrtc.audio.disabled === "hard")
-        .toggleClass("disallowed", clientVars.webrtc.audio.disabled === "hard");
+        .toggleClass("muted", initiallyMuted || audioHardDisabled)
+        .toggleClass("disallowed", audioHardDisabled);
 
-      if (clientVars.webrtc.audio.disabled !== "hard") {
+      if (!audioHardDisabled) {
         $mute.on({
           click: function(event) {
             var muted;
@@ -327,18 +328,19 @@ var rtc = (function() {
       var $disableVideo = null
       if (isLocal) {
         var videoTrack = stream.getVideoTracks()[0];
-        var initiallyVideoEnabled = false;
+        const videoHardDisabled = clientVars.webrtc.video.disabled === "hard"
+        var initiallyVideoEnabled = false; // if there's no video track, it's disabled
         if (videoTrack) {
           initiallyVideoEnabled = videoTrack.enabled
         }
         $disableVideo = $("<span class='interface-btn video-btn buttonicon'>")
-          .attr("title", clientVars.webrtc.video.disabled !== "hard"
+          .attr("title", !videoHardDisabled
             ? (initiallyVideoEnabled ? "Disable video" : "Enable video")
             : "Video disallowed by admin"
           )
-          .toggleClass("off", !initiallyVideoEnabled || clientVars.webrtc.video.disabled === "hard")
-          .toggleClass("disallowed", clientVars.webrtc.video.disabled === "hard");
-        if (clientVars.webrtc.video.disabled !== "hard") {
+          .toggleClass("off", !initiallyVideoEnabled || videoHardDisabled)
+          .toggleClass("disallowed", videoHardDisabled);
+        if (!videoHardDisabled) {
           $disableVideo.on({
             click: function(event) {
               var videoEnabled = !self.toggleVideo();
