@@ -34,7 +34,7 @@ You should use a STUN/TURN server to ensure consistant connecivty between client
 
 ### Per-User
 
-There's a setting for each user under their settings menu that can turn audio/video chat feature off and on. The setting is saved in cookies and will apply when they reload the page. The user can also change the value of these setting to true by loading the page with `?av=YES` in the URL path. (at the moment, `av=NO` does not work to turn it off)
+There's a setting for each user under their settings menu that can turn audio/video chat feature off and on. The setting is saved in cookies and will apply when they reload the page. The user can also change the value of this setting to true by loading the page with `?av=YES` in the URL path. (at the moment, `av=NO` does not work to turn it off)
 
 ### Site-Wide
 
@@ -52,7 +52,7 @@ The audio/video chat feature gives the user the ability to temporarily disable (
 
 ### Per-User
 
-Each user has the ability, using a setting under the settings menu, to set whether video or audio are initially disabled when the page is loaded. The user can also change the value of the settings by loading the page with the appropriate parameters in the URL path:
+Each user has the ability, using a setting under the settings menu, to set whether video or audio are initially disabled when the page is loaded. The user can also change the value of these settings by loading the page with the appropriate parameters in the URL path:
 
 * `?webrtcaudioenabled=true`
 * `?webrtcaudioenabled=false`
