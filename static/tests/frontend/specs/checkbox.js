@@ -1,10 +1,3 @@
-function fakeStream(params) {
-  return {
-    getAudioTracks: function() {return [{enabled: params.audio}]},
-    getVideoTracks: function() {return [{enabled: params.video}]}
-  }
-}
-
 describe('test settingToCheckbox, which creates checkboxes that are linked to to urlVars and cookies', function() {
   before(function(done) {
     this.timeout(60000);
@@ -29,7 +22,7 @@ describe('test settingToCheckbox, which creates checkboxes that are linked to to
     });
   });
 
-  it('generates checkboxes with values set by urlVar, cookie and site-wide default', function(done) {
+  it('sets up checkboxes with values set by urlVar, cookie and site-wide default', function(done) {
     var chrome$ = helper.padChrome$;
 
     chrome$("<input type='checkbox' id='checkboxId1'>").appendTo("#settings")
