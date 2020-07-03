@@ -13,7 +13,7 @@ describe('test that audio and video are on or off on start according to urlVars 
           var chrome$
           chrome$ = helper.padChrome$;
           helper.waitFor(function(){
-            chrome$ = helper.padChrome$; // get it again, since we refreshed the page
+            chrome$ = helper.padChrome$;
             return chrome$ && chrome$("#rtcbox video").length === 1;
           }, 1000).done(done)
         }
@@ -49,7 +49,7 @@ describe('test that audio and video are on or off on start according to urlVars 
           var chrome$
           chrome$ = helper.padChrome$;
           helper.waitFor(function(){
-            chrome$ = helper.padChrome$; // get it again, since we refreshed the page
+            chrome$ = helper.padChrome$;
             return chrome$ && chrome$("#rtcbox video").length === 1;
           }, 1000).done(done)
         }
