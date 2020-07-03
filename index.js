@@ -16,6 +16,7 @@
  */
 var log4js = require('ep_etherpad-lite/node_modules/log4js')
 var statsLogger = log4js.getLogger("stats");
+var configLogger = log4js.getLogger("configuration");
 var eejs = require('ep_etherpad-lite/node/eejs/');
 var settings = require('ep_etherpad-lite/node/utils/Settings');
 var sessioninfos = require('ep_etherpad-lite/node/handler/PadMessageHandler').sessioninfos;
@@ -82,6 +83,15 @@ function handleErrorStatMessage(statName) {
 
 exports.clientVars = function(hook, context, callback)
 {
+  // Validate settings.json now so that the admin notices any errors right away
+  if (!validateSettings()) {
+    return callback({
+      webrtc: {
+        "configError": true
+      }
+    })
+  }
+
   var enabled = true;
   if(settings.ep_webrtc && settings.ep_webrtc.enabled === false){
     enabled = settings.ep_webrtc.enabled;
@@ -186,7 +196,8 @@ function validateSettings() {
       settings.ep_webrtc.audio.disabled != "hard" &&
       settings.ep_webrtc.audio.disabled != "soft"
     ) {
-      throw Error("Invalid value in settings for ep_webrtc.audio.disabled")
+      configLogger.error("Invalid value in settings.json for ep_webrtc.audio.disabled")
+      return false
     }
   }
 
@@ -196,10 +207,9 @@ function validateSettings() {
       settings.ep_webrtc.video.disabled != "hard" &&
       settings.ep_webrtc.video.disabled != "soft"
     ) {
-      throw Error("Invalid value in settings for ep_webrtc.video.disabled")
+      configLogger.error("Invalid value in settings.json for ep_webrtc.video.disabled")
+      return false
     }
   }
+  return true
 }
-
-// Validate settings.json now so that the admin notices any errors right away
-validateSettings()

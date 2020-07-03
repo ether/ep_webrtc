@@ -48,6 +48,15 @@ var rtc = (function() {
     //API HOOKS
     postAceInit: function(hook, context, callback) {
       self.setUrlParamString(window.location.search)
+      if (clientVars.webrtc.configError) {
+        $.gritter.add({
+          title: "Error",
+          text: "Ep_webrtc: There is an error with the configuration of this plugin. Please inform the administrators of this site. They will see the details in their logs.",
+          sticky: true,
+          class_name: "error"
+        })
+        return
+      }
       if (!$('#editorcontainerbox').hasClass('flex-layout')) {
         $.gritter.add({
           title: "Error",
