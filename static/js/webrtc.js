@@ -672,9 +672,7 @@ var rtc = (function() {
         padcookie.setPref(params.cookie, this.checked);
       });
     },
-    init: function(pad) {
-      self._pad = pad || window.pad;
-
+    setupCheckboxes: function(pad) {
       // The checkbox shouldn't even exist if audio is not allowed
       if (clientVars.webrtc.audio.disabled !== "hard") {
         self.settingToCheckbox({
@@ -694,7 +692,13 @@ var rtc = (function() {
           checkboxId: "#options-videoenabledonstart"
         })
       }
+    },
+    init: function(pad) {
+      self._pad = pad || window.pad;
 
+      self.setupCheckboxes()
+
+      // TODO - add this to setupCheckboxes. it's a bit involved.
       var rtcEnabled = padcookie.getPref("rtcEnabled");
       if (typeof rtcEnabled == "undefined") {
         rtcEnabled = $("#options-enablertc").prop("checked");
