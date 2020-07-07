@@ -23,6 +23,7 @@ var hooks = require("ep_etherpad-lite/static/js/pluginfw/hooks");
 var rtc = (function() {
   var videoSizes = {large: "260px", small: "160px"}
   var isActive = false;
+  var urlParamString;
   var pc_config = {};
   var pc_constraints = {
     optional: [
@@ -46,6 +47,16 @@ var rtc = (function() {
   var self = {
     //API HOOKS
     postAceInit: function(hook, context, callback) {
+      self.setUrlParamString(window.location.search)
+      if (clientVars.webrtc.configError) {
+        $.gritter.add({
+          title: "Error",
+          text: "Ep_webrtc: There is an error with the configuration of this plugin. Please inform the administrators of this site. They will see the details in their logs.",
+          sticky: true,
+          class_name: "error"
+        })
+        return
+      }
       if (!$('#editorcontainerbox').hasClass('flex-layout')) {
         $.gritter.add({
           title: "Error",
@@ -70,6 +81,10 @@ var rtc = (function() {
       }
       self.init(context.pad);
       callback();
+    },
+    // so we can call it from testing
+    setUrlParamString(str) {
+      urlParamString = str
     },
     aceSetAuthorStyle: function(hook, context, callback) {
       if (context.author) {
@@ -170,11 +185,11 @@ var rtc = (function() {
     },
     activate: function() {
       $("#options-enablertc").prop("checked", true);
-      if (isActive) return;
+      if (isActive) return Promise.reject(); // maybe should Promise.resolve()? Doesn't make a difference yet.
       self.show();
       padcookie.setPref("rtcEnabled", true);
-      self.getUserMedia();
       isActive = true;
+      return self.getUserMedia();
     },
     deactivate: function() {
       $("#options-enablertc").prop("checked", false);
@@ -186,13 +201,18 @@ var rtc = (function() {
         var videoTrack = localStream.getVideoTracks()[0];
         var audioTrack = localStream.getAudioTracks()[0];
         self.setStream(self._pad.getUserId(), "");
-        if (videoTrack.stop === undefined) {
+        if ((videoTrack && videoTrack.stop === undefined) || (audioTrack && audioTrack.stop === undefined)) {
           // deprecated in 2015, probably disabled by 2020
           // https://developers.google.com/web/updates/2015/07/mediastream-deprecations
+          // Perhaps we can obviate this by updating adapter.js?
           localStream.stop();
         } else {
-          videoTrack.stop();
-          audioTrack.stop();
+          if (videoTrack) {
+            videoTrack.stop();
+          }
+          if (audioTrack) {
+            audioTrack.stop();
+          }
         }
         localStream = null;
       }
@@ -202,15 +222,17 @@ var rtc = (function() {
       var audioTrack = localStream.getAudioTracks()[0];
       if (audioTrack) {
         audioTrack.enabled = !audioTrack.enabled;
-        return !audioTrack.enabled;
+        return !audioTrack.enabled; // returning "Muted" state, which is !enabled
       }
+      return true // if there's no audio track, it's muted
     },
     toggleVideo: function() {
       var videoTrack = localStream.getVideoTracks()[0];
       if (videoTrack) {
         videoTrack.enabled = !videoTrack.enabled;
-        return !videoTrack.enabled;
+        return !videoTrack.enabled; // returning whether it's disabled, to match toggleMuted
       }
+      return true // if there's no video track, return true to indicate not enabled (matching toggleMuted)
     },
     getUserFromId: function(userId) {
       if (!self._pad || !self._pad.collabClient) return null;
@@ -250,7 +272,7 @@ var rtc = (function() {
           })
           .on({
             loadedmetadata: function() {
-              self.addInterface(userId);
+              self.addInterface(userId, stream);
             }
           })
           .appendTo(videoContainer)[0];
@@ -260,7 +282,7 @@ var rtc = (function() {
           videoContainer.addClass('local-user');
           video.muted = true;
         }
-        self.addInterface(userId);
+        self.addInterface(userId, stream);
       }
       if (stream) {
         attachMediaStream(video, stream);
@@ -268,14 +290,33 @@ var rtc = (function() {
         $(video).parent().remove();
       }
     },
-    addInterface: function(userId) {
+    addInterface: function(userId, stream) {
       var isLocal = userId == self.getUserId();
       var videoId = "video_" + userId.replace(/\./g, "_");
       var $video = $("#" + videoId);
 
+      ///////
+      // Mute button
+      ///////
+
+      var audioTrack = stream.getAudioTracks()[0];
+      const audioHardDisabled = clientVars.webrtc.audio.disabled === "hard"
+      var initiallyMuted = true; // if there's no audio track, it's muted
+      if (audioTrack) {
+        initiallyMuted = !audioTrack.enabled
+      }
+
       var $mute = $("<span class='interface-btn audio-btn buttonicon'>")
-        .attr("title", "Mute")
-        .on({
+        .attr("title",
+          audioHardDisabled
+            ? "Audio disallowed by admin"
+            : (initiallyMuted ? "Unmute" : "Mute")
+        )
+        .toggleClass("muted", initiallyMuted || audioHardDisabled)
+        .toggleClass("disallowed", audioHardDisabled);
+
+      if (!audioHardDisabled) {
+        $mute.on({
           click: function(event) {
             var muted;
             if (isLocal) {
@@ -289,23 +330,47 @@ var rtc = (function() {
               .toggleClass("muted", muted);
           }
         });
-      var videoEnabled = true;
-      var $disableVideo = isLocal
-        ? $("<span class='interface-btn video-btn buttonicon'>")
-            .attr("title", "Disable video")
-            .on({
-              click: function(event) {
-                self.toggleVideo();
-                videoEnabled = !videoEnabled;
-                $disableVideo
-                  .attr(
-                    "title",
-                    videoEnabled ? "Disable video" : "Enable video"
-                  )
-                  .toggleClass("off", !videoEnabled);
-              }
-            })
-        : null;
+      }
+
+      ///////
+      // Disable Video button
+      ///////
+
+      var $disableVideo = null
+      if (isLocal) {
+        var videoTrack = stream.getVideoTracks()[0];
+        const videoHardDisabled = clientVars.webrtc.video.disabled === "hard"
+        var initiallyVideoEnabled = false; // if there's no video track, it's disabled
+        if (videoTrack) {
+          initiallyVideoEnabled = videoTrack.enabled
+        }
+        $disableVideo = $("<span class='interface-btn video-btn buttonicon'>")
+          .attr("title",
+            videoHardDisabled
+              ? "Video disallowed by admin"
+              : (initiallyVideoEnabled ? "Disable video" : "Enable video"
+            )
+          )
+          .toggleClass("off", !initiallyVideoEnabled || videoHardDisabled)
+          .toggleClass("disallowed", videoHardDisabled);
+        if (!videoHardDisabled) {
+          $disableVideo.on({
+            click: function(event) {
+              var videoEnabled = !self.toggleVideo();
+              $disableVideo
+                .attr(
+                  "title",
+                  videoEnabled ? "Disable video" : "Enable video"
+                )
+                .toggleClass("off", !videoEnabled);
+            }
+          })
+        }
+      }
+
+      ///////
+      // Enlarge Video button
+      ///////
 
       var videoEnlarged = false;
       var $largeVideo = $("<span class='interface-btn enlarge-btn buttonicon'>")
@@ -332,6 +397,11 @@ var rtc = (function() {
             $video.css({'width': videoSize, 'max-height': videoSize})
           }
         });
+
+
+      ///////
+      // Combining
+      ///////
 
       $("#interface_" + videoId).remove();
       $("<div class='interface-container'>")
@@ -521,8 +591,8 @@ var rtc = (function() {
     },
     getUserMedia: function() {
       var mediaConstraints = {
-        audio: true,
-        video: {
+        audio: clientVars.webrtc.audio.disabled !== "hard",
+        video: clientVars.webrtc.video.disabled !== "hard" && {
           optional: [],
           mandatory: {
             maxWidth: 320,
@@ -535,9 +605,23 @@ var rtc = (function() {
         // --use-fake-device-for-media-stream
         mediaConstraints.fake = true
       }
-      window.navigator.mediaDevices
+      return window.navigator.mediaDevices
         .getUserMedia(mediaConstraints)
         .then(function(stream) {
+          // Disable audio and/or video according to user/site settings.
+          // Do this before setting `localStream` to avoid a race condition
+          // that might flash the video on for an instant before disabling it.
+          var audioTrack = stream.getAudioTracks()[0];
+          // using `.prop("checked") === true` to make absolutely sure the result is a boolean
+          // we don't want bugs when it comes to muting/turning off video
+          if (audioTrack) {
+            audioTrack.enabled = $("#options-audioenabledonstart").prop("checked") === true;
+          }
+          var videoTrack = stream.getVideoTracks()[0];
+          if (videoTrack) {
+            videoTrack.enabled = $("#options-videoenabledonstart").prop("checked") === true;
+          }
+
           localStream = stream;
           self.setStream(self._pad.getUserId(), stream);
           self._pad.collabClient.getConnectedUsers().forEach(function(user) {
@@ -552,14 +636,78 @@ var rtc = (function() {
         .catch(function(err) {self.showUserMediaError(err)})
     },
     avInURL: function() {
-      if (window.location.search.indexOf("av=YES") > -1) {
+      if (urlParamString.indexOf("av=YES") > -1) {
         return true;
       } else {
         return false;
       }
     },
+
+    // Connect a setting to a checkbox. To be called on initialization.
+    //
+    // It will check for the value in urlVar, cookie, and the site-wide
+    //   default value, in that order
+    // If urlVar is found, it will also set the cookie
+    // Finally, it sets up to set cookie if the user changes the setting in the gearbox
+    settingToCheckbox: function(params) {
+      if (params.urlVar === undefined) {throw Error("missing urlVar in settingToCheckbox");}
+      if (params.cookie === undefined) {throw Error("missing cookie in settingToCheckbox");}
+      if (params.defaultVal === undefined) {throw Error("missing defaultVal in settingToCheckbox");}
+      if (params.checkboxId === undefined) {throw Error("missing checkboxId in settingToCheckbox");}
+
+      var value
+
+      // * If the setting is in the URL: use it, and also set the cookie
+      // * If the setting is not in the URL: try to get it from the cookie
+      // * If the setting was in neither, go with the site-wide default value
+      //   but don't put it in the cookies
+      if (urlParamString.indexOf(params.urlVar + "=true") > -1) {
+        padcookie.setPref(params.cookie, true);
+        value = true
+      } else if (urlParamString.indexOf(params.urlVar + "=false") > -1) {
+        padcookie.setPref(params.cookie, false);
+        value = false
+      } else {
+        value = padcookie.getPref(params.cookie);
+        if (typeof value === "undefined") {
+          value = params.defaultVal;
+        }
+      }
+
+      $(params.checkboxId).prop("checked", value);
+
+      // If the user changes the checkbox, set the cookie accordingly
+      $(params.checkboxId).on("change", function() {
+        padcookie.setPref(params.cookie, this.checked);
+      });
+    },
+    setupCheckboxes: function(pad) {
+      // The checkbox shouldn't even exist if audio is not allowed
+      if (clientVars.webrtc.audio.disabled !== "hard") {
+        self.settingToCheckbox({
+          urlVar: "webrtcaudioenabled",
+          cookie: "audioEnabledOnStart",
+          defaultVal: clientVars.webrtc.audio.disabled === "none",
+          checkboxId: "#options-audioenabledonstart"
+        })
+      }
+
+      // The checkbox shouldn't even exist if video is not allowed
+      if (clientVars.webrtc.video.disabled !== "hard") {
+        self.settingToCheckbox({
+          urlVar: "webrtcvideoenabled",
+          cookie: "videoEnabledOnStart",
+          defaultVal: clientVars.webrtc.video.disabled === "none",
+          checkboxId: "#options-videoenabledonstart"
+        })
+      }
+    },
     init: function(pad) {
       self._pad = pad || window.pad;
+
+      self.setupCheckboxes()
+
+      // TODO - add this to setupCheckboxes. it's a bit involved.
       var rtcEnabled = padcookie.getPref("rtcEnabled");
       if (typeof rtcEnabled == "undefined") {
         rtcEnabled = $("#options-enablertc").prop("checked");
@@ -742,3 +890,4 @@ var rtc = (function() {
 })();
 
 exports.rtc = rtc;
+window.ep_webrtc = rtc // Access to do some unit tests. If there's a more formal way to do this for all plugins, we can change to that.

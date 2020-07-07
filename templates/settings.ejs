@@ -1,2 +1,16 @@
-<input type="checkbox" id="options-enablertc" <%= checked %>></input>
-<label for="options-enablertc" data-l10n-id="pad.settings.enablertc">Enable Audio/Video Chat</label>
+<p>
+  <input type="checkbox" id="options-enablertc" <%= enabled %>></input>
+  <label for="options-enablertc" data-l10n-id="pad.settings.enablertc">Enable Audio/Video Chat</label>
+</p>
+<% if (!audio_hard_disabled) { %>
+  <p>
+    <input type="checkbox" id="options-audioenabledonstart" ></input>
+    <label for="options-audioenabledonstart" data-l10n-id="pad.settings.audioenabledonstart">Audio On At Start</label>
+  </p>
+<% } %>
+<% if (!video_hard_disabled) { %>
+  <p>
+    <input type="checkbox" id="options-videoenabledonstart" ></input>
+    <label for="options-videoenabledonstart" data-l10n-id="pad.settings.videoenabledonstart">Video On At Start</label>
+  </p>
+<% } %>

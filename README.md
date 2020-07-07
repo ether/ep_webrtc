@@ -30,11 +30,65 @@ You should use a STUN/TURN server to ensure consistant connecivty between client
 
 # Settings
 
-To disable the chat by default, append this to your settings.json:
+## Enabling or disabling the feature
+
+### Per-User
+
+There's a setting for each user under their settings menu that can turn audio/video chat feature off and on. The setting is saved in cookies and will apply when they reload the page. The user can also change the value of this setting to true by loading the page with `?av=YES` in the URL path. (at the moment, `av=NO` does not work to turn it off)
+
+### Site-Wide
+
+There is a site-wide setting in `settings.json` that determines whether the feature is initially turned on or off for users who have not yet set their own preference:
 
     "ep_webrtc" : {
-        "enabled" : false
+        "enabled" : ...
     }
+
+The `"enabled"` setting can either be `true` or `false`. It is optional, with a default value of `true`.
+
+## Enabling or disabling audio or video individually
+
+The audio/video chat feature gives the user the ability to temporarily disable ("mute") audio, and similarly temporarily disable video. A site admin may also choose to make audio or video entirely unavailable to users.
+
+### Per-User
+
+Each user has the ability, using a setting under the settings menu, to set whether video or audio are initially disabled when the page is loaded. The user can also change the value of these settings by loading the page with the appropriate parameters in the URL path:
+
+* `?webrtcaudioenabled=true`
+* `?webrtcaudioenabled=false`
+* `?webrtcvideoenabled=true`
+* `?webrtcvideoenabled=false`
+
+### Site-Wide
+
+There are site-wide settings in `settings.json` that determine whether audio or video are available to users, and whether they are initially turned on or off for users who have not yet set their own preference:
+
+    "ep_webrtc" : {
+        "audio" : {
+            "disabled": ...
+        }
+        "video" : {
+            "disabled": ...
+        }
+    }
+
+The `"disabled"` setting under both `"audio"` and `"video"` can have one of the following values:
+
+* `"none"` - available and initially turned on for users who haven't set their own preference
+* `"soft"` - available but initially turned off for users who haven't set their own preference
+* `"hard"` - unavailable to users
+
+The setting is optional, with a default value of `"none"`.
+
+## Other Interface
+
+To set an element or class to listen for an init event set `ep_webrtc.listenClass` in your settings.json.  This is often stabled with ``"enabled":false`` and a button to provide a button to begin video sessions
+
+    "ep_webrtc" : {
+        "listenClass": "#chatLabel"
+    }
+
+## ICE Servers
 
 To set a custom stun server, set `ep_webrtc.iceServer` in your settings.json:
 
@@ -67,13 +121,6 @@ To ensure reliable connectivity we recommend setting both a STUN and TURN server
         ],
     }
 
-
-To set an element or class to listen for an init event set `ep_webrtc.listenClass` in your settings.json.  This is often stabled with ``"enabled":false`` and a button to provide a button to begin video sessions
-
-    "ep_webrtc" : {
-        "listenClass": "#chatLabel"
-    }
-
 To set a custom small and/or large size in pixels, for the video displays, set one or both of the following in your settings.json:
 
     "ep_webrtc": {
@@ -85,7 +132,6 @@ To set a custom small and/or large size in pixels, for the video displays, set o
       }
     }
 
-To enable webrtc with a URL parameter append the following to your pad URL ``?av=YES``
 
 ## Metrics
 

@@ -9,6 +9,8 @@
     "pad.ep_webrtc.error.notFound": "Sorry, we couldn't find a suitable camera on your device. If you have a camera, make sure it set up correctly and refresh this website to retry.",
     "pad.ep_webrtc.error.notReadable": "Sorry, a hardware error occurred that prevented access to your camera and/or microphone:",
     "pad.ep_webrtc.error.otherCantAccess": "Sorry, the browser doesn't have access to your camera and/or microphone.  Please check permissions in your browser's settings. This is most likely not a hardware error:",
-    "pad.ep_webrtc.error.other": "Sorry, there was an unknown error:"
+    "pad.ep_webrtc.error.other": "Sorry, there was an unknown error:",
 
+    "pad.settings.audioenabledonstart": "Audio On At Start",
+    "pad.settings.videoenabledonstart": "Video On At Start"
 }

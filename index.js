@@ -16,6 +16,7 @@
  */
 var log4js = require('ep_etherpad-lite/node_modules/log4js')
 var statsLogger = log4js.getLogger("stats");
+var configLogger = log4js.getLogger("configuration");
 var eejs = require('ep_etherpad-lite/node/eejs/');
 var settings = require('ep_etherpad-lite/node/utils/Settings');
 var sessioninfos = require('ep_etherpad-lite/node/handler/PadMessageHandler').sessioninfos;
@@ -82,9 +83,28 @@ function handleErrorStatMessage(statName) {
 
 exports.clientVars = function(hook, context, callback)
 {
+  // Validate settings.json now so that the admin notices any errors right away
+  if (!validateSettings()) {
+    return callback({
+      webrtc: {
+        "configError": true
+      }
+    })
+  }
+
   var enabled = true;
   if(settings.ep_webrtc && settings.ep_webrtc.enabled === false){
     enabled = settings.ep_webrtc.enabled;
+  }
+
+  var audioDisabled = "none";
+  if(settings.ep_webrtc && settings.ep_webrtc.audio){
+    audioDisabled = settings.ep_webrtc.audio.disabled;
+  }
+
+  var videoDisabled = "none";
+  if(settings.ep_webrtc && settings.ep_webrtc.video){
+    videoDisabled = settings.ep_webrtc.video.disabled;
   }
 
   var iceServers = [ {"url": "stun:stun.l.google.com:19302"} ];
@@ -97,9 +117,9 @@ exports.clientVars = function(hook, context, callback)
     listenClass = settings.ep_webrtc.listenClass;
   }
 
-  var video = {sizes: {}};
+  var videoSizes = {};
   if(settings.ep_webrtc && settings.ep_webrtc.video && settings.ep_webrtc.video.sizes) {
-    video.sizes = {
+    videoSizes = {
       large: settings.ep_webrtc.video.sizes.large,
       small: settings.ep_webrtc.video.sizes.small
     }
@@ -109,8 +129,9 @@ exports.clientVars = function(hook, context, callback)
     webrtc: {
       "iceServers": iceServers,
       "enabled": enabled,
-      "listenClass": listenClass,
-      "video": video
+      "audio": {"disabled": audioDisabled},
+      "video": {"disabled": videoDisabled, "sizes": videoSizes},
+      "listenClass": listenClass
     }
   });
 };
@@ -136,11 +157,24 @@ exports.setSocketIO = function (hook, context, callback)
 
 exports.eejsBlock_mySettings = function (hook, context, callback)
 {
-    var checked = (settings.ep_webrtc && settings.ep_webrtc.enabled === false)
+    var enabled = (settings.ep_webrtc && settings.ep_webrtc.enabled === false)
       ? 'unchecked'
       : 'checked';
+
+    var audioDisabled = "none";
+    if(settings.ep_webrtc && settings.ep_webrtc.audio){
+      audioDisabled = settings.ep_webrtc.audio.disabled;
+    }
+
+    var videoDisabled = "none";
+    if(settings.ep_webrtc && settings.ep_webrtc.video){
+      videoDisabled = settings.ep_webrtc.video.disabled;
+    }
+
     context.content += eejs.require('ep_webrtc/templates/settings.ejs', {
-      checked : checked
+      "enabled" : enabled,
+      "audio_hard_disabled": audioDisabled === "hard",
+      "video_hard_disabled": videoDisabled === "hard"
     });
     callback();
 };
@@ -154,3 +188,28 @@ exports.eejsBlock_styles = function (hook_name, args, cb) {
   args.content = args.content + eejs.require("ep_webrtc/templates/styles.html", {}, module);
   return cb();
 };
+
+function validateSettings() {
+  if(settings.ep_webrtc && settings.ep_webrtc.audio && settings.ep_webrtc.audio.disabled){
+    if (
+      settings.ep_webrtc.audio.disabled != "none" &&
+      settings.ep_webrtc.audio.disabled != "hard" &&
+      settings.ep_webrtc.audio.disabled != "soft"
+    ) {
+      configLogger.error("Invalid value in settings.json for ep_webrtc.audio.disabled")
+      return false
+    }
+  }
+
+  if(settings.ep_webrtc && settings.ep_webrtc.video && settings.ep_webrtc.video.disabled){
+    if (
+      settings.ep_webrtc.video.disabled != "none" &&
+      settings.ep_webrtc.video.disabled != "hard" &&
+      settings.ep_webrtc.video.disabled != "soft"
+    ) {
+      configLogger.error("Invalid value in settings.json for ep_webrtc.video.disabled")
+      return false
+    }
+  }
+  return true
+}
