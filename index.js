@@ -92,28 +92,23 @@ exports.clientVars = function(hook, context, callback)
     })
   }
 
-  var enabled = true;
-  if(settings.ep_webrtc && settings.ep_webrtc.enabled === false){
-    enabled = settings.ep_webrtc.enabled;
-  }
-
   var audioDisabled = "none";
-  if(settings.ep_webrtc && settings.ep_webrtc.audio){
+  if(settings.ep_webrtc && settings.ep_webrtc.audio) {
     audioDisabled = settings.ep_webrtc.audio.disabled;
   }
 
   var videoDisabled = "none";
-  if(settings.ep_webrtc && settings.ep_webrtc.video){
+  if(settings.ep_webrtc && settings.ep_webrtc.video) {
     videoDisabled = settings.ep_webrtc.video.disabled;
   }
 
   var iceServers = [ {"url": "stun:stun.l.google.com:19302"} ];
-  if(settings.ep_webrtc && settings.ep_webrtc.iceServers){
+  if(settings.ep_webrtc && settings.ep_webrtc.iceServers) {
     iceServers = settings.ep_webrtc.iceServers;
   }
 
   var listenClass = false;
-  if(settings.ep_webrtc && settings.ep_webrtc.listenClass){
+  if(settings.ep_webrtc && settings.ep_webrtc.listenClass) {
     listenClass = settings.ep_webrtc.listenClass;
   }
 
@@ -128,7 +123,7 @@ exports.clientVars = function(hook, context, callback)
   return callback({
     webrtc: {
       "iceServers": iceServers,
-      "enabled": enabled,
+      "disabled": rtcDisabledInSettings(),
       "audio": {"disabled": audioDisabled},
       "video": {"disabled": videoDisabled, "sizes": videoSizes},
       "listenClass": listenClass
@@ -157,22 +152,17 @@ exports.setSocketIO = function (hook, context, callback)
 
 exports.eejsBlock_mySettings = function (hook, context, callback)
 {
-    var enabled = (settings.ep_webrtc && settings.ep_webrtc.enabled === false)
-      ? 'unchecked'
-      : 'checked';
-
     var audioDisabled = "none";
-    if(settings.ep_webrtc && settings.ep_webrtc.audio){
+    if(settings.ep_webrtc && settings.ep_webrtc.audio) {
       audioDisabled = settings.ep_webrtc.audio.disabled;
     }
 
     var videoDisabled = "none";
-    if(settings.ep_webrtc && settings.ep_webrtc.video){
+    if(settings.ep_webrtc && settings.ep_webrtc.video) {
       videoDisabled = settings.ep_webrtc.video.disabled;
     }
 
     context.content += eejs.require('ep_webrtc/templates/settings.ejs', {
-      "enabled" : enabled,
       "audio_hard_disabled": audioDisabled === "hard",
       "video_hard_disabled": videoDisabled === "hard"
     });
@@ -190,26 +180,56 @@ exports.eejsBlock_styles = function (hook_name, args, cb) {
 };
 
 function validateSettings() {
-  if(settings.ep_webrtc && settings.ep_webrtc.audio && settings.ep_webrtc.audio.disabled){
-    if (
-      settings.ep_webrtc.audio.disabled != "none" &&
-      settings.ep_webrtc.audio.disabled != "hard" &&
-      settings.ep_webrtc.audio.disabled != "soft"
-    ) {
-      configLogger.error("Invalid value in settings.json for ep_webrtc.audio.disabled")
+  if(settings.ep_webrtc) {
+    if(settings.ep_webrtc.enabled !== undefined && settings.ep_webrtc.disabled !== undefined) {
+      configLogger.error("Can't use both ep_webrtc.enabled (deprecated) and ep_webrtc.disabled in settings.json")
       return false
     }
-  }
 
-  if(settings.ep_webrtc && settings.ep_webrtc.video && settings.ep_webrtc.video.disabled){
-    if (
-      settings.ep_webrtc.video.disabled != "none" &&
-      settings.ep_webrtc.video.disabled != "hard" &&
-      settings.ep_webrtc.video.disabled != "soft"
-    ) {
-      configLogger.error("Invalid value in settings.json for ep_webrtc.video.disabled")
-      return false
+    if(settings.ep_webrtc.disabled !== undefined) {
+      if (
+        settings.ep_webrtc.disabled !== true &&
+        settings.ep_webrtc.disabled !== false
+      ) {
+        configLogger.error("Invalid value in settings.json for ep_webrtc.disabled")
+        return false
+      }
+    }
+
+    if(settings.ep_webrtc.audio && settings.ep_webrtc.audio.disabled !== undefined) {
+      if (
+        settings.ep_webrtc.audio.disabled !== "none" &&
+        settings.ep_webrtc.audio.disabled !== "hard" &&
+        settings.ep_webrtc.audio.disabled !== "soft"
+      ) {
+        configLogger.error("Invalid value in settings.json for ep_webrtc.audio.disabled")
+        return false
+      }
+    }
+
+    if(settings.ep_webrtc.video && settings.ep_webrtc.video.disabled !== undefined) {
+      if (
+        settings.ep_webrtc.video.disabled !== "none" &&
+        settings.ep_webrtc.video.disabled !== "hard" &&
+        settings.ep_webrtc.video.disabled !== "soft"
+      ) {
+        configLogger.error("Invalid value in settings.json for ep_webrtc.video.disabled")
+        return false
+      }
     }
   }
   return true
+}
+
+function rtcDisabledInSettings() {
+  if(settings.ep_webrtc) {
+    if(settings.ep_webrtc.disabled !== undefined) {
+      return settings.ep_webrtc.disabled
+    }
+    if(settings.ep_webrtc.enabled !== undefined) {
+      configLogger.warn("ep_webrtc.enabled in settings.json is deprecated. Use ep_webrtc.disabled instead.")
+      return settings.ep_webrtc.enabled === false
+    }
+  }
+  return false
 }

@@ -184,18 +184,14 @@ var rtc = (function() {
       $("#rtcbox").hide();
     },
     activate: function() {
-      $("#options-enablertc").prop("checked", true);
       if (isActive) return Promise.reject(); // maybe should Promise.resolve()? Doesn't make a difference yet.
       self.show();
-      padcookie.setPref("rtcEnabled", true);
       isActive = true;
       return self.getUserMedia();
     },
     deactivate: function() {
-      $("#options-enablertc").prop("checked", false);
       if (!isActive) return;
       self.hide();
-      padcookie.setPref("rtcEnabled", false);
       self.hangupAll();
       if (localStream) {
         var videoTrack = localStream.getVideoTracks()[0];
@@ -635,13 +631,6 @@ var rtc = (function() {
         })
         .catch(function(err) {self.showUserMediaError(err)})
     },
-    avInURL: function() {
-      if (urlParamString.indexOf("av=YES") > -1) {
-        return true;
-      } else {
-        return false;
-      }
-    },
 
     // Connect a setting to a checkbox. To be called on initialization.
     //
@@ -682,6 +671,13 @@ var rtc = (function() {
       });
     },
     setupCheckboxes: function(pad) {
+      self.settingToCheckbox({
+        urlVar: "webrtcenabled",
+        cookie: "rtcEnabled",
+        defaultVal: !clientVars.webrtc.disabled,
+        checkboxId: "#options-enablertc"
+      })
+
       // The checkbox shouldn't even exist if audio is not allowed
       if (clientVars.webrtc.audio.disabled !== "hard") {
         self.settingToCheckbox({
@@ -707,26 +703,12 @@ var rtc = (function() {
 
       self.setupCheckboxes()
 
-      // TODO - add this to setupCheckboxes. it's a bit involved.
-      var rtcEnabled = padcookie.getPref("rtcEnabled");
-      if (typeof rtcEnabled == "undefined") {
-        rtcEnabled = $("#options-enablertc").prop("checked");
-      }
-
-      // if a URL Parameter is set then activate
-      if (self.avInURL()) self.activate();
-
       if (clientVars.webrtc.listenClass) {
         $(clientVars.webrtc.listenClass).on("click", function() {
           self.activate();
         });
       }
 
-      if (rtcEnabled) {
-        self.activate();
-      } else {
-        self.deactivate();
-      }
       $("#options-enablertc").on("change", function() {
         if (this.checked) {
           self.activate();
@@ -734,6 +716,13 @@ var rtc = (function() {
           self.deactivate();
         }
       });
+
+      if ($("#options-enablertc").prop("checked")) {
+        self.activate();
+      } else {
+        self.deactivate();
+      }
+
       if (isActive) {
         $(window).on("unload", function() {
           self.hangupAll();

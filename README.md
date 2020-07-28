@@ -34,17 +34,17 @@ You should use a STUN/TURN server to ensure consistant connecivty between client
 
 ### Per-User
 
-There's a setting for each user under their settings menu that can turn audio/video chat feature off and on. The setting is saved in cookies and will apply when they reload the page. The user can also change the value of this setting to true by loading the page with `?av=YES` in the URL path. (at the moment, `av=NO` does not work to turn it off)
+There's a setting for each user under their settings menu that can turn audio/video chat feature off and on. The setting is saved in cookies and will apply when they reload the page. The user can also change the value of this setting to true by loading the page with `?webrtcenabled=true` or `?webrtcenabled=false` in the URL path.
 
 ### Site-Wide
 
 There is a site-wide setting in `settings.json` that determines whether the feature is initially turned on or off for users who have not yet set their own preference:
 
     "ep_webrtc" : {
-        "enabled" : ...
+        "disabled" : ...
     }
 
-The `"enabled"` setting can either be `true` or `false`. It is optional, with a default value of `true`.
+The `"disabled"` setting can either be `true` or `false`. It is optional, with a default value of `false`.
 
 ## Enabling or disabling audio or video individually
 
