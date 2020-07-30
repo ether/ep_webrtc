@@ -1,5 +1,10 @@
 {
   "name": "ep_webrtc",
+  "homepage": "https://github.com/ether/ep_webrtc#readme",
+  "repository": {
+    "url": "git@github.com:ether/ep_webrtc.git",
+    "type": "git"
+  },
   "version": "0.1.4",
   "description": "WebRTC based audio/video chat to Etherpad",
   "author": "John McLear <john@mclear.co.uk>",
