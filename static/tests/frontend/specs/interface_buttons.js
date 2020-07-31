@@ -63,21 +63,28 @@ describe('Test the behavior of the interface buttons: Mute, Video Disable, Enlar
 
       this.timeout(60000);
 
-      expect(chrome$("video").css("width")).to.be("160px");
-      expect(chrome$("video").css("height")).to.be("116px");
+      // weird off-by-fraction errors here in css, so we're just gonna round them
+      expect(chrome$("video").css("width").slice(-2)).to.be("px");
+      expect(chrome$("video").css("height").slice(-2)).to.be("px");
+      expect(Math.round(chrome$("video").css("width").slice(0, -2))).to.be(160);
+      expect(Math.round(chrome$("video").css("height").slice(0, -2))).to.be(116);
 
       var $enlargeBtn = chrome$(".enlarge-btn");
       $enlargeBtn.click();
 
       helper.waitFor(function(){
-        return chrome$("video").css("width") === "260px" &&
-               chrome$("video").css("height") === "191px";
+        return Math.round(chrome$("video").css("width").slice(0, -2)) === 260 &&
+               Math.round(chrome$("video").css("height").slice(0, -2)) === 191;
       }, 1000).done(function () {
+        expect(chrome$("video").css("width").slice(-2)).to.be("px");
+        expect(chrome$("video").css("height").slice(-2)).to.be("px");
         $enlargeBtn.click();
         helper.waitFor(function(){
-          return chrome$("video").css("width") === "160px" &&
-                 chrome$("video").css("height") === "116px";
+          return Math.round(chrome$("video").css("width").slice(0, -2)) === 160 &&
+                 Math.round(chrome$("video").css("height").slice(0, -2)) === 116;
         }, 1000).done(function () {
+          expect(chrome$("video").css("width").slice(-2)).to.be("px");
+          expect(chrome$("video").css("height").slice(-2)).to.be("px");
           done();
         });
       });
