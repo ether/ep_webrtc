@@ -1,7 +1,4 @@
 {
-<<<<<<< Updated upstream
-    "pad.settings.enablertc": "Activer la conversation Audio/Vidéo"
-=======
     "pad.settings.enablertc": "Activer la conversation audio/vidéo",
 
     "pad.ep_webrtc.error.notSupported.sorry": "Désolé, votre navigateur ne prend pas en charge WebRTC (ou vous l'avez désactivé dans vos paramètres).",
@@ -16,5 +13,4 @@
 
     "pad.settings.audioenabledonstart": "Audio activé au démarrage",
     "pad.settings.videoenabledonstart": "Vidéo activée au démarrage"
->>>>>>> Stashed changes
 }
