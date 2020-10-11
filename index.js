@@ -171,21 +171,21 @@ exports.eejsBlock_mySettings = function (hook, context, callback)
       videoDisabled = settings.ep_webrtc.video.disabled;
     }
 
-    context.content += eejs.require('ep_webrtc/templates/settings.ejs', {
+    context.content += eejs.require('./templates/settings.ejs', {
       "enabled" : enabled,
       "audio_hard_disabled": audioDisabled === "hard",
       "video_hard_disabled": videoDisabled === "hard"
-    });
+    }, module);
     callback();
 };
 
 exports.eejsBlock_editorContainerBox = function (hook_name, args, cb) {
-  args.content = args.content + eejs.require("ep_webrtc/templates/webrtc.ejs", {}, module);
+  args.content = args.content + eejs.require("./templates/webrtc.ejs", {}, module);
   return cb();
 }
 
 exports.eejsBlock_styles = function (hook_name, args, cb) {
-  args.content = args.content + eejs.require("ep_webrtc/templates/styles.html", {}, module);
+  args.content = args.content + eejs.require("./templates/styles.html", {}, module);
   return cb();
 };
 
