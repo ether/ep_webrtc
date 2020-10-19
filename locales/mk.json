@@ -1,0 +1,19 @@
+{
+	"@metadata": {
+		"authors": [
+			"Bjankuloski06"
+		]
+	},
+	"pad.settings.enablertc": "Овозможи звучен/видео разговор",
+	"pad.ep_webrtc.error.notSupported.sorry": "За жал, вашиот прелистувач не поддржува WebRTC (или го имате оневозможено во нагодувањата).",
+	"pad.ep_webrtc.error.notSupported.howTo": "За да учествувате во овој звучен/видео разговор ќе треба да користите прелистувач со поддршка за WebRTC како Chrome, Firefox, Safari, Edge или Opera.",
+	"pad.ep_webrtc.error.notSupported.findOutMore": "Тука ќе дознаете повеќе.",
+	"pad.ep_webrtc.error.ssl": "За жал, ќе треба да воспоставите SSL-уверенија за вашиот примерок на Etherpad за да можете да користите WebRTC.",
+	"pad.ep_webrtc.error.permission": "Ќе треба да ни дадете дозвола за употреба на вашата камера и микрофон.",
+	"pad.ep_webrtc.error.notFound": "За жал, не можевме да најдеме соодветна камера на вашиот уред. Ако имате камера, видете дали е правилно поставена и превчитајте ја страницава за да пробате повторно.",
+	"pad.ep_webrtc.error.notReadable": "За жал, се јави грешка со опремата која ви го попречи пристапот до камерата и/или микрофонот.",
+	"pad.ep_webrtc.error.otherCantAccess": "За жал, прелистувачот нема пристап до вашата камера и/или микрофон. Проверете ги дозволите во нагодувањата на прелистувачот. Ова најверојатно не е грешка во опремата:",
+	"pad.ep_webrtc.error.other": "За жал, се јави непозната грешка:",
+	"pad.settings.audioenabledonstart": "Вклучен звук при започнување",
+	"pad.settings.videoenabledonstart": "Вклучено видео при започнување"
+}

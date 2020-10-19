@@ -1,0 +1,19 @@
+{
+	"@metadata": {
+		"authors": [
+			"YaronSh"
+		]
+	},
+	"pad.settings.enablertc": "הפעלת שיחת שמע/וידאו",
+	"pad.ep_webrtc.error.notSupported.sorry": "הדפדפן שלך אינו תומך ב־WebRTC (או שהשבתת אותו בהגדרות שלך).",
+	"pad.ep_webrtc.error.notSupported.howTo": "כדי להשתתף בשיחת השמע/וידאו הזאת חייב להיות לך דפדפן שתומך ב־WebRTC כגון Chrome,‏ Firefox,‏ Safari,‏ Edge או Opera.",
+	"pad.ep_webrtc.error.notSupported.findOutMore": "יש ללחוץ כאן למידע נוסף.",
+	"pad.ep_webrtc.error.ssl": "עליך להתקין אישורי SSL לעותק ה־Etherpad שלך כדי להשתמש ב־WebRTC.",
+	"pad.ep_webrtc.error.permission": "עליך להעניק לנו הרשאות להשתמש במצלמה ובמיקרופון שלך, עמך הסליחה.",
+	"pad.ep_webrtc.error.notFound": "לא הצלחנו למצוא מצלמה מתאימה במכשיר שלך. אם יש לך מצלמה, נא לוודא שהיא מוגדרת כראוי ולרענן את האתר הזה כדי לנסות שוב, עמך הסליחה.",
+	"pad.ep_webrtc.error.notReadable": "אירעה שגיאת חומרה שמנעה גישה למצלמה ו/או המיקרופון שלך:",
+	"pad.ep_webrtc.error.otherCantAccess": "לדפדפן אין גישה למצלמה ו/או למיקרופון שלך. נא לבדוק את ההרשאות בהגדרות הדפדפן שלך, עמך הסליחה. ככל הנראה זאת אינה תקלת חומרה:",
+	"pad.ep_webrtc.error.other": "אירעה שגיאה בלתי־ידועה, עמך הסליחה:",
+	"pad.settings.audioenabledonstart": "השמע פעיל עם ההתחלה",
+	"pad.settings.videoenabledonstart": "הווידאו פעיל עם ההתחלה"
+}

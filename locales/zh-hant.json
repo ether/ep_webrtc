@@ -1,0 +1,19 @@
+{
+	"@metadata": {
+		"authors": [
+			"Kly"
+		]
+	},
+	"pad.settings.enablertc": "啟用音訊/視訊聊天",
+	"pad.ep_webrtc.error.notSupported.sorry": "很抱歉，您的瀏覽器不支援 WebRTC（或許是您在您的設定裡停用了支援）。",
+	"pad.ep_webrtc.error.notSupported.howTo": "要參與此音訊/視訊聊天，您需要使用像是 Chrome、Firefox、Safari、Edge、或是 Opera 這類支援 WebRTC 的瀏覽器。",
+	"pad.ep_webrtc.error.notSupported.findOutMore": "點擊來了解更多。",
+	"pad.ep_webrtc.error.ssl": "很抱歉，您需要安裝用於 Etherpad 執行個體的 SSL 憑證以使用 WebRTC。",
+	"pad.ep_webrtc.error.permission": "很抱歉，您需要授予我們使用您的攝影機與麥克風的權限。",
+	"pad.ep_webrtc.error.notFound": "很抱歉，我們在您的設備上找不到合適的攝影機。若您有攝影機，請確定有設定正確，然後重新整理此網站來重試。",
+	"pad.ep_webrtc.error.notReadable": "很抱歉，發生硬體錯誤導致無法存取您的攝影機以及/或是麥克風。",
+	"pad.ep_webrtc.error.otherCantAccess": "很抱歉，瀏覽器無法存取您的攝影機以及/或是麥克風。請檢查在您瀏覽器設定裡的權限。這可能不是硬體錯誤：",
+	"pad.ep_webrtc.error.other": "很抱歉，發生不明錯誤：",
+	"pad.settings.audioenabledonstart": "在開始時啟用音訊",
+	"pad.settings.videoenabledonstart": "在開始時啟用視訊"
+}

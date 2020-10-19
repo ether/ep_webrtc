@@ -1,0 +1,13 @@
+{
+	"@metadata": {
+		"authors": [
+			"Bengtsson96",
+			"WikiPhoenix"
+		]
+	},
+	"pad.settings.enablertc": "Aktivera ljud-/videochatt",
+	"pad.ep_webrtc.error.notSupported.sorry": "Tyvärr, din webbläsare har inte stöd för WebRTC (eller så har du inaktiverat det i dina inställningar).",
+	"pad.ep_webrtc.error.notSupported.howTo": "För att delta i denna ljud-/videochatt behöver du en webbläsare med stöd för WebRTC som Chrome, Firefox, Safari, Edge eller Opera.",
+	"pad.ep_webrtc.error.notSupported.findOutMore": "Klicka här för att läsa mer.",
+	"pad.ep_webrtc.error.ssl": "Tyvärr, du behöver installera SSL-certifikat för din Etherpad-instans för att använda WebRTC."
+}

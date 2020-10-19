@@ -1,0 +1,15 @@
+{
+	"@metadata": {
+		"authors": [
+			"Mrkczr"
+		]
+	},
+	"pad.settings.enablertc": "I-enable ang Audio/Video Chat",
+	"pad.ep_webrtc.error.notSupported.findOutMore": "I-click para sa karagdagang kaalaman",
+	"pad.ep_webrtc.error.permission": "Pasensiya, kailangang magbigay ka ng permiso para magamit namin ang iyong camera at/o microphone.",
+	"pad.ep_webrtc.error.notReadable": "Pasensiya, nagkaroon ng hardware error na naghadlang sa access sa iyong camera at/o microphone",
+	"pad.ep_webrtc.error.otherCantAccess": "Pasensiya na, ang browser ay walang access sa iyong camera at/o mikropono. Mabuting i-check ang mga permiso sa setting ng inyong browser. Malabong hardware error ito.",
+	"pad.ep_webrtc.error.other": "Paseniya, nagkaroon ng hindi malamang error.",
+	"pad.settings.audioenabledonstart": "I-ON ang Audio at magsimula",
+	"pad.settings.videoenabledonstart": "I-ON ang Video kung magsisimula"
+}
