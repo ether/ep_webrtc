@@ -1,0 +1,19 @@
+{
+	"@metadata": {
+		"authors": [
+			"Robin Owain"
+		]
+	},
+	"pad.settings.enablertc": "Trowch y Sgwrs Sain/Fideo ymlaen",
+	"pad.ep_webrtc.error.notSupported.sorry": "'Dyw eich porwr ddim yn cefnogi WebRTC, neu mae wedi'i analluogi",
+	"pad.ep_webrtc.error.notSupported.howTo": "I gymryd rhan yn y sgwrs fideo/sain, mae'n rhaid cael porwr WebRTC  ee Chrome, Firefox, Safari, Edge, neu Opera.",
+	"pad.ep_webrtc.error.notSupported.findOutMore": "Cliciwch yma i ganfod rhagor.",
+	"pad.ep_webrtc.error.ssl": "Mae'n rhaid gosod tystysgrif SSL ar gyfer eich Etherpad i ddefnyddio WebRTC.",
+	"pad.ep_webrtc.error.permission": "Er mwyn i ni ddefnyddio'ch camera / meic, rhowch ganiatad!",
+	"pad.ep_webrtc.error.notFound": "Methwyd a chael hyd i gamera addas ar eich dyfais.",
+	"pad.ep_webrtc.error.notReadable": "Cafwyd nam yn y caledwedd, ac o'r herwydd ni allwyd cael mynediad i'ch camera a/neu meic:",
+	"pad.ep_webrtc.error.otherCantAccess": "'Does gan y porwr ddim mynediad i'ch camera a meic. Gwirwch eich bod wedi rhoi'r hawliau cywir o fewn eich porwr. Nid nam ar y caledwedd yw hyn.",
+	"pad.ep_webrtc.error.other": "Ymddiheurwn; cafwyd nam na wyddom ddim amdano!",
+	"pad.settings.audioenabledonstart": "Sain YMLAEN ar y dechrau",
+	"pad.settings.videoenabledonstart": "Fideo YMLAEN ar y dechrau"
+}
