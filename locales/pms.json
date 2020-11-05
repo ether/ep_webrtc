@@ -1,0 +1,19 @@
+{
+	"@metadata": {
+		"authors": [
+			"Borichèt"
+		]
+	},
+	"pad.settings.enablertc": "Ativé la conversassion sonora/filmà",
+	"pad.ep_webrtc.error.notSupported.sorry": "An dëspias, sò navigador a res nen WebRTC (o chiel a l'ha disativalo ant ij sò paràmeter).",
+	"pad.ep_webrtc.error.notSupported.howTo": "Për partissipé a costa discussion sonora/filmà, a dev dovré un navigador ch'a peul fé marcé WebRTC tanme Chrome, Firefox, Safari, Edge o Opera.",
+	"pad.ep_webrtc.error.notSupported.findOutMore": "Sgnaché ambelessì për savèjne ëd pi.",
+	"pad.ep_webrtc.error.ssl": "An dëspias, a l'ha damanca d'anstalé dij sertificà SSL për soa istansa Etherpad për dovré WebRTC.",
+	"pad.ep_webrtc.error.permission": "An dëspias, a dev dene ël përmess ëd dovré soa telecàmera e sò micròfon.",
+	"pad.ep_webrtc.error.notFound": "An dëspias, i l'oma nen trovà na telecàmera adata su sò angign. S'a l'ha pro na telecàmera, ch'a contròla ch'a sia configurà për da bin e ch'a rinfrësca ës sit a linia për prové torna.",
+	"pad.ep_webrtc.error.notReadable": "An dëspias, a-i é staje n'eror material che a l'ha ampedì l'acess a sò telecàmera o micròfon:",
+	"pad.ep_webrtc.error.otherCantAccess": "An dëspias, ël navigador a l'ha nen acess a sò telecàmera o micròfon. Për piasì, ch'a contròla j'autorisassion ant ij paràmeter ëd sò navigador. Probabilman a l'é nen n'eror material:",
+	"pad.ep_webrtc.error.other": "An dëspias, a l'é rivaje n'eror nen conossù:",
+	"pad.settings.audioenabledonstart": "Sonor ativà a la partensa",
+	"pad.settings.videoenabledonstart": "Visualisassion ativà a la partensa"
+}
