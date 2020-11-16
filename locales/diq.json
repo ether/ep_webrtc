@@ -1,0 +1,19 @@
+{
+	"@metadata": {
+		"authors": [
+			"1917 Ekim Devrimi"
+		]
+	},
+	"pad.settings.enablertc": "Vengın/Videoyın mewbeti aktiv ke",
+	"pad.ep_webrtc.error.notSupported.sorry": "Eqsey, browserê şıma  WebRTC yi rê desteg nêdano (yana eyaran ra şıma dewre ra veto)",
+	"pad.ep_webrtc.error.notSupported.howTo": "Tewr bıyayışê ne vengın/videoyın mewbeti rê  Chrome, Firefox, Safari, Edge yana zey Opera be terefê WebRTC ra desteg gêriyen yew browser ganiyo.",
+	"pad.ep_webrtc.error.notSupported.findOutMore": "Zêde melumati rê tıyay bıploğne.",
+	"pad.ep_webrtc.error.ssl": "Malesef , misalê Etherpad de karnayışê WebRTC'yi re sertifikay SSL barkerdış ganiyo.",
+	"pad.ep_webrtc.error.permission": "Malesef, kamerau mikrofonê şıma gureynayışi rê marê mısadey şıma lazımo.",
+	"pad.ep_webrtc.error.notFound": "Malesef, ma cihazê şıma de kameraya hewl nêvinaya. Yew kameray şıma esta se, raşt usula saz bıyayışê cıra ho emel bê u reyna cerbnayışi rê nê websitey anewe kerê.",
+	"pad.ep_webrtc.error.notReadable": "Malesef, kamera u/yana mikrofoni resayışi vındarnen yew xetay hardwarey veciyê:",
+	"pad.ep_webrtc.error.otherCantAccess": "Malesef, resayışê browseri ra kamera u mikrofoni rê çıniyo. Kerem kerê eyaranê browserê ho de mısadeyan kontrol kerê. Gerek ke xetay hardwarey nêbo:",
+	"pad.ep_webrtc.error.other": "Eqsey, nêzanıyen yew xeta veciyê:",
+	"pad.settings.audioenabledonstart": "Sıftekerdış de veng AKERDE",
+	"pad.settings.videoenabledonstart": "Sıftekerdış de video AKERDE"
+}
