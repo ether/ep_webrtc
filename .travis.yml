@@ -5,23 +5,14 @@ node_js:
 
 cache: false
 
-before_install:
-  - sudo add-apt-repository -y ppa:libreoffice/ppa
-  - sudo apt-get update
-  - sudo apt-get -y install libreoffice
-  - sudo apt-get -y install libreoffice-pdfimport
-
 services:
   - docker
 
-cache: false
-
 install:
-  - "bin/installDeps.sh"
   - "export GIT_HASH=$(git rev-parse --verify --short HEAD)"
 
-script:
-  - "tests/frontend/travis/runner.sh"
+#script:
+#  - "tests/frontend/travis/runner.sh"
 
 env:
   global:
@@ -30,38 +21,52 @@ env:
 
 jobs:
   include:
-    # we can only frontend tests from the ether/ organization and not from forks.
-    # To request tests to be run ask a maintainer to fork your repo to ether/
-    - if: fork = false
-      name: "Test the Frontend"
+    - name: "Lint test package-lock"
       install:
+        - "npm install lockfile-lint"
+      script:
+        - npx lockfile-lint --path package-lock.json --validate-https --allowed-hosts npm
+    - name: "Run the Backend tests"
+      before_script:
+        - "tests/frontend/travis/sauce_tunnel.sh"
+      before_install:
+        - sudo add-apt-repository -y ppa:libreoffice/ppa
+        - sudo apt-get update
+        - sudo apt-get -y install libreoffice
+        - sudo apt-get -y install libreoffice-pdfimport
+      install:
+        - "npm install"
         - "mkdir ep_webrtc"
         - "mv !(ep_webrtc) ep_webrtc"
         - "git clone https://github.com/ether/etherpad-lite.git etherpad"
         - "cd etherpad"
         - "mkdir node_modules"
         - "mv ../ep_webrtc node_modules"
+        - "bin/installDeps.sh"
+        - "export GIT_HASH=$(git rev-parse --verify --short HEAD)"
+        - "cd src && npm install && cd -"
+      script:
+        - "tests/frontend/travis/runnerBackend.sh"
+    - name: "Test the Frontend"
+      before_script:
         - "tests/frontend/travis/sauce_tunnel.sh"
+      install:
+        - "npm install"
+        - "mkdir ep_webrtc"
+        - "mv !(ep_webrtc) ep_webrtc"
+        - "git clone https://github.com/ether/etherpad-lite.git etherpad"
+        - "cd etherpad"
+        - "mkdir node_modules"
+        - "mv ../ep_webrtc node_modules"
         - "bin/installDeps.sh"
         - "export GIT_HASH=$(git rev-parse --verify --short HEAD)"
       script:
         - "tests/frontend/travis/runner.sh"
-    - name: "Run the Backend tests"
-      install:
-        - "mkdir ep_webrtc"
-        - "mv !(ep_webrtc) ep_webrtc"
-        - "git clone https://github.com/ether/etherpad-lite.git etherpad"
-        - "cd etherpad"
-        - "mkdir node_modules"
-        - "mv ../ep_webrtc node_modules"
-        - "bin/installDeps.sh"
-        - "cd src && npm install && cd -"
-      script:
-        - "tests/frontend/travis/runnerBackend.sh"
 
 notifications:
   irc:
     channels:
       - "irc.freenode.org#etherpad-lite-dev"
 
-##ETHERPAD_TRAVIS_V=2
+##ETHERPAD_TRAVIS_V=7
+## Travis configuration automatically created using bin/plugins/updateAllPluginsScript.sh

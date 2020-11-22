@@ -1,28 +1,28 @@
-(function() {
+(function () {
   if (!navigator.mediaDevices) navigator.mediaDevices = {};
   if (!navigator.mediaDevices.getUserMedia) {
-    var getUserMedia =
+    const getUserMedia =
       navigator.webkitGetUserMedia ||
       navigator.mozGetUserMedia ||
       navigator.msGetUserMedia ||
       navigator.getUserMedia;
 
     if (getUserMedia) {
-      navigator.mediaDevices.getUserMedia = function(constraints) {
-        return new Promise(function(resolve, reject) {
+      navigator.mediaDevices.getUserMedia = function (constraints) {
+        return new Promise((resolve, reject) => {
           getUserMedia(
-            constraints,
-            function(stream) {
-              resolve(stream);
-            },
-            function(error) {
-              reject(error);
-            }
+              constraints,
+              (stream) => {
+                resolve(stream);
+              },
+              (error) => {
+                reject(error);
+              },
           );
         });
       };
     } else {
-      navigator.mediaDevices.getUserMedia = function() {
+      navigator.mediaDevices.getUserMedia = function () {
         // A missing `getUserMedia` seemingly can mean one of two things:
         //
         // 1) WebRTC is unsupported or disabled on this browser
@@ -38,14 +38,14 @@
         // We will attempt to distinguish these two cases by checking for various webrtc-related fields on
         // `window` (inspired by github.com/muaz-khan/DetectRTC). If none of those fields exist, we assume
         // that WebRTC is not supported on this browser.
-        return new Promise(function(resolve, reject) {
+        return new Promise((resolve, reject) => {
           if (!(window.RTCPeerConnection || window.webkitRTCPeerConnection || window.mozRTCPeerConnection || window.RTCIceGatherer)) {
-            var e = new Error("getUserMedia is not supported in this browser.");
+            var e = new Error('getUserMedia is not supported in this browser.');
             // I'd use NotSupportedError but I'm afraid they'll change the spec on us again
             e.name = 'CustomNotSupportedError';
             reject(e);
           } else {
-            var e = new Error("insecure connection");
+            var e = new Error('insecure connection');
             // I'd use NotAllowedError but I'm afraid they'll change the spec on us again
             e.name = 'CustomSecureConnectionError';
             reject(e);
