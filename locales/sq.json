@@ -1,0 +1,19 @@
+{
+	"@metadata": {
+		"authors": [
+			"Besnik b"
+		]
+	},
+	"pad.settings.enablertc": "Aktivizo Fjalosje Audio/Video",
+	"pad.ep_webrtc.error.notSupported.sorry": "Na ndjeni, shfletuesi juaj nuk mbulon WebRTC (ose e keni çaktivizuar te rregullimet tuaja).",
+	"pad.ep_webrtc.error.notSupported.howTo": "Që të merrni pjesë në këtë fjalosje audio/video duhet të përdorni një shfletues me mbulim për WebRTC, bie fjala, Chrome, Firefox, Safari, Edge, ose Opera.",
+	"pad.ep_webrtc.error.notSupported.findOutMore": "Klikoni këtu që të mësoni më tepër.",
+	"pad.ep_webrtc.error.ssl": "Na ndjeni, që të përdorni WebRTC, lypset të instaloni dëshmi SSL për instancën tuaj të Etherpad-it.",
+	"pad.ep_webrtc.error.permission": "Na ndjeni, duhet të na jepni leje të përdorim kamerën dhe mikrofonin tuaj.",
+	"pad.ep_webrtc.error.notFound": "Na ndjeni, s’gjetëm dot një kamera të përshtatshme në pajisjen tuaj. Nëse keni një kamera, sigurohuni ta ujdisni si duhet dhe rifreskoni këtë sajt, që të riprovohet.",
+	"pad.ep_webrtc.error.notReadable": "Na ndjeni, u has një gabim hardware-i që e pengoi hyrjen te kamera dhe/ose mikrofoni juaj:",
+	"pad.ep_webrtc.error.otherCantAccess": "Na ndjeni, shfletuesi, s’ka leje të përdorë kamerën dhe/ose mikrofonin tuaj. Ju lutemi, kontrolloni lejet te rregullimet e shfletuesit tuaj. Kjo ka shumë gjasa të vijë nga një gaibm hardware-i:",
+	"pad.ep_webrtc.error.other": "Na ndjeni, pati një gabim të panjohur:",
+	"pad.settings.audioenabledonstart": "Audio ON që në Nisje",
+	"pad.settings.videoenabledonstart": "Video ON që në Nisje"
+}
