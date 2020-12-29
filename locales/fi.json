@@ -1,0 +1,19 @@
+{
+	"@metadata": {
+		"authors": [
+			"Maantietäjä"
+		]
+	},
+	"pad.settings.enablertc": "Ota ääni- / videopuhelu käyttöön",
+	"pad.ep_webrtc.error.notSupported.sorry": "Valitettavasti selaimesi ei tue WebRTC:tä (tai olet poistanut sen käytöstä asetuksissa).",
+	"pad.ep_webrtc.error.notSupported.howTo": "Osallistuaksesi tähän ääni-/videopuheluun sinun on käytettävä selainta, jolla on WebRTC-tuki, kuten Chromea, Firefoxia, Safariia, Edgeä tai Operaa.",
+	"pad.ep_webrtc.error.notSupported.findOutMore": "Klikkaa tästä lukeaksesi lisää.",
+	"pad.ep_webrtc.error.ssl": "Valitettavasti sinun on asennettava SSL-varmenteet Etherpad-ilmentymään, jotta voit käyttää WebRTC:tä.",
+	"pad.ep_webrtc.error.permission": "Anteeksi, sinun on annettava meille lupa käyttää kameraa ja mikrofonia.",
+	"pad.ep_webrtc.error.notFound": "Valitettavasti laitteestasi ei löytynyt sopivaa kameraa. Jos sinulla on kamera, varmista että se on asetettu oikein ja päivitä tämä sivusto yrittääksesi uudelleen.",
+	"pad.ep_webrtc.error.notReadable": "Valitettavasti tapahtui laitteistovirhe, joka esti kameran ja/tai mikrofonin käytön.",
+	"pad.ep_webrtc.error.otherCantAccess": "Valitettavasti selaimella ei ole pääsyä kamerallesi ja/tai mikrofonillesi. Tarkista käyttöoikeudet selaimesi asetuksista. Tämä ei todennäköisesti ole laitteistovirhe.",
+	"pad.ep_webrtc.error.other": "Anteeksi, tapahtui tuntematon virhe.",
+	"pad.settings.audioenabledonstart": "Ääni PÄÄLLÄ aloitusvaiheessa",
+	"pad.settings.videoenabledonstart": "Video PÄÄLLÄ aloitusvaiheessa"
+}
