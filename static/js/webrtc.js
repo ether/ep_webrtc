@@ -185,7 +185,7 @@ var rtc = (function () {
     },
     activate() {
       $('#options-enablertc').prop('checked', true);
-      if (isActive) return Promise.reject(); // maybe should Promise.resolve()? Doesn't make a difference yet.
+      if (isActive) return Promise.resolve();
       self.show();
       padcookie.setPref('rtcEnabled', true);
       isActive = true;
