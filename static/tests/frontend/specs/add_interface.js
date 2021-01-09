@@ -1,11 +1,12 @@
-function fakeStream(params) {
-  return {
-    getAudioTracks() { return [{enabled: params.audio}]; },
-    getVideoTracks() { return [{enabled: params.video}]; },
-  };
-}
+/* eslint max-len: ["error", { "code": 120 }] */
+'use strict';
 
-describe('test the addInterface function, which creates of the various video interface buttons, under various conditions', function () {
+const fakeStream = (params) => ({
+  getAudioTracks() { return [{enabled: params.audio}]; },
+  getVideoTracks() { return [{enabled: params.video}]; },
+});
+
+describe('addInterface function => interface buttons => various conditions', function () {
   const otherUserId = 'other_user_id';
   const otherVideoId = 'video_other_user_id';
   const otherInterfaceId = 'interface_video_other_user_id';

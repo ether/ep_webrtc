@@ -1,3 +1,6 @@
+/* eslint max-len: ["error", { "code": 120 }] */
+'use strict';
+
 describe('Test the behavior of the interface buttons: Mute, Video Disable, Enlarge', function () {
   let audioTrack;
   let videoTrack;
@@ -31,7 +34,8 @@ describe('Test the behavior of the interface buttons: Mute, Video Disable, Enlar
         cb() {
           const chrome$ = helper.padChrome$;
 
-          helper.waitFor(() => chrome$ && chrome$('#options-enablertc').length === 1, 2000).done(() => {
+          helper.waitFor(() => chrome$ &&
+              chrome$('#options-enablertc').length === 1, 2000).done(() => {
             wrapGetUserMedia();
 
             const $enableRtc = chrome$('#options-enablertc');
@@ -40,10 +44,11 @@ describe('Test the behavior of the interface buttons: Mute, Video Disable, Enlar
             helper.waitFor(() => (
               chrome$('.audio-btn').length === 1 &&
                 chrome$('.video-btn').length === 1 &&
-                audioTrack !== null &&
-                videoTrack !== null
+                audioTrack != null &&
+                videoTrack != null
             ), 1000).done(() => {
-              // Video interface buttons are added twice, and there's no good way besides a timeout to tell when it's done
+              // Video interface buttons are added twice, and there's no good
+              // way besides a timeout to tell when it's done
               // being called the second time. We want it to be finished so our test is stable.
               setTimeout(done, 200);
             });
@@ -143,10 +148,11 @@ describe('Test the behavior of the interface buttons: Mute, Video Disable, Enlar
             helper.waitFor(() => (
               chrome$('.audio-btn').length === 1 &&
                 chrome$('.video-btn').length === 1 &&
-                audioTrack !== null &&
-                videoTrack !== null
+                audioTrack != null &&
+                videoTrack != null
             ), 1000).done(() => {
-              // Video interface buttons are added twice, and there's no good way besides a timeout to tell when it's done
+              // Video interface buttons are added twice,
+              // and there's no good way besides a timeout to tell when it's done
               // being called the second time. We want it to be finished so our test is stable.
               setTimeout(done, 200);
             });
@@ -168,10 +174,12 @@ describe('Test the behavior of the interface buttons: Mute, Video Disable, Enlar
       const $audioBtn = chrome$('.audio-btn');
       $audioBtn.click();
 
-      helper.waitFor(() => chrome$('.audio-btn.muted').length === 0 && audioTrack.enabled === true, 3000).done(() => {
+      helper.waitFor(() => chrome$('.audio-btn.muted').length === 0 &&
+          audioTrack.enabled === true, 3000).done(() => {
         expect(chrome$('.audio-btn').attr('title')).to.be('Mute');
         $audioBtn.click();
-        helper.waitFor(() => chrome$('.audio-btn.muted').length === 1 && audioTrack.enabled === false, 3000).done(() => {
+        helper.waitFor(() => chrome$('.audio-btn.muted').length === 1 &&
+            audioTrack.enabled === false, 3000).done(() => {
           expect(chrome$('.audio-btn').attr('title')).to.be('Unmute');
           done();
         });
@@ -183,7 +191,7 @@ describe('Test the behavior of the interface buttons: Mute, Video Disable, Enlar
 
       const chrome$ = helper.padChrome$;
 
-      helper.waitFor(() => chrome$('.video-btn').length === 1 && videoTrack !== null, 3000).done(() => {
+      helper.waitFor(() => chrome$('.video-btn').length === 1 && videoTrack != null, 3000).done(() => {
         expect(videoTrack.enabled).to.be(false);
         expect(chrome$('.video-btn.off').length).to.be(1);
         expect(chrome$('.video-btn').attr('title')).to.contain('Enable');
@@ -194,7 +202,8 @@ describe('Test the behavior of the interface buttons: Mute, Video Disable, Enlar
         helper.waitFor(() => chrome$('.video-btn.off').length === 0 && videoTrack.enabled === true, 3000).done(() => {
           expect(chrome$('.video-btn').attr('title')).to.contain('Disable');
           $videoBtn.click();
-          helper.waitFor(() => chrome$('.video-btn.off').length === 1 && videoTrack.enabled === false, 3000).done(() => {
+          helper.waitFor(() => chrome$('.video-btn.off').length === 1 &&
+              videoTrack.enabled === false, 3000).done(() => {
             expect(chrome$('.video-btn').attr('title')).to.contain('Enable');
             done();
           });

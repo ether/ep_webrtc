@@ -1,9 +1,11 @@
+/* eslint max-len: ["error", { "code": 120 }] */
+'use strict';
+
 describe('enable and disable webrtc', function () {
   context('WebRTC is disabled', function () {
-    before(function (done) {
-      helper.newPad({
+    before(async function () {
+      await helper.newPad({
         padPrefs: {rtcEnabled: false, fakeWebrtcFirefox: true},
-        cb: done,
       });
       this.timeout(60000);
     });
@@ -23,10 +25,9 @@ describe('enable and disable webrtc', function () {
   });
 
   context('WebRTC is enabled', function () {
-    before(function (done) {
-      helper.newPad({
+    before(async function () {
+      await helper.newPad({
         padPrefs: {rtcEnabled: true, fakeWebrtcFirefox: true},
-        cb: done,
       });
       this.timeout(60000);
     });

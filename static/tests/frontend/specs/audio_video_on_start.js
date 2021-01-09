@@ -1,4 +1,8 @@
+/* eslint max-len: ["error", { "code": 120 }] */
+'use strict';
+
 describe('test that audio and video are on or off on start according to urlVars and cookies', function () {
+  let chrome$;
   context('audio on, video off via cookies', function () {
     before(function (done) {
       this.timeout(60000);
@@ -10,7 +14,6 @@ describe('test that audio and video are on or off on start according to urlVars 
           videoEnabledOnStart: false,
         },
         cb() {
-          let chrome$;
           chrome$ = helper.padChrome$;
           helper.waitFor(() => {
             chrome$ = helper.padChrome$;

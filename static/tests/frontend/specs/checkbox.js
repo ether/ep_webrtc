@@ -1,3 +1,6 @@
+/* eslint max-len: ["error", { "code": 120 }] */
+'use strict';
+
 describe('test settingToCheckbox, which creates checkboxes that are linked to to urlVars and cookies', function () {
   before(function (done) {
     this.timeout(60000);

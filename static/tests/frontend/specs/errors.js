@@ -1,9 +1,14 @@
+/* eslint max-len: ["error", { "code": 120 }] */
+'use strict';
+
 describe('Test that we show the correct error messages when trying to start webrtc', function () {
-  before(function (done) {
+  before(async function () {
     // Make sure webrtc starts disabled so we have time to wrap getUserMedia
-    helper.newPad({
-      padPrefs: {rtcEnabled: true, fakeWebrtcFirefox: true},
-      cb: done,
+    await helper.newPad({
+      padPrefs: {
+        rtcEnabled: true,
+        fakeWebrtcFirefox: true,
+      },
     });
     this.timeout(60000);
   });

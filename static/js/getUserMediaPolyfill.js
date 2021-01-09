@@ -1,3 +1,4 @@
+/* eslint-disable max-len, no-trailing-spaces, no-undef, eslint-comments/disable-enable-pair, no-unused-vars, strict, prefer-arrow/prefer-arrow-functions, prefer-rest-params, no-var, eqeqeq, prefer-spread, no-prototype-builtins, no-use-before-define, prefer-const, camelcase, promise/no-callback-in-promise, no-redeclare */
 'use strict';
 
 (function () {

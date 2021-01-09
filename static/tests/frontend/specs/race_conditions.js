@@ -1,12 +1,18 @@
-describe('Make sure there are no race conditions that leave audio/video track enabled status and icons in an inconsistent state', function () {
+/* eslint max-len: ["error", { "code": 140 }] */
+'use strict';
+
+describe('Race conditions that leave audio/video track enabled', function () {
   // The idea here is to place high value on making sure that the "mute" and "video-off" buttons in the video interfaces
   // match with the audioTrack.enabled/videoTrack.enabled, so that users don't get the wrong idea about whether
   // the audio or video feed are on.
   //
-  // These tests are various ideas for trying to do things in quick succession or "at the same time". We can add more if we think of them.
+  // These tests are various ideas for trying to do things in quick succession
+  // or "at the same time". We can add more if we think of them.
 
   let audioTrack;
   let videoTrack;
+  let originalAudioTrack;
+  let originalVideoTrack;
 
   // wrap getUserMedia such that it grabs a copy of audio and video tracks for inspection after it's done
   function wrapGetUserMedia() {
@@ -22,7 +28,8 @@ describe('Make sure there are no race conditions that leave audio/video track en
     };
   }
 
-  // See if we can trip up the state by "deactivating" webrtc, clicking mute/video-off, and "activating" webrtc in quick succession
+  // See if we can trip up the state by "deactivating" webrtc, clicking mute/video-off,
+  // and "activating" webrtc in quick succession
   // As of this writing, "deactivating" will make the buttons disappear pretty quickly, making the "click" ineffectual,
   // regardless, but in case we ever change things around, perhaps this test will catch something.
   function testDeactivateClickActivate(done) {
@@ -63,7 +70,8 @@ describe('Make sure there are no race conditions that leave audio/video track en
     loop(10);
   }
 
-  // See if we can trip up the state by clicking mute/video-off, "deactivating" webrtc, and "activating" webrtc in quick succession
+  // See if we can trip up the state by clicking mute/video-off,
+  // "deactivating" webrtc, and "activating" webrtc in quick succession
   function testClickDeactivateActivate(done) {
     const chrome$ = helper.padChrome$;
 
@@ -254,10 +262,11 @@ describe('Make sure there are no race conditions that leave audio/video track en
             helper.waitFor(() => (
               chrome$('.audio-btn').length === 1 &&
                   chrome$('.video-btn').length === 1 &&
-                  audioTrack !== null &&
-                  videoTrack !== null
+                  audioTrack != null &&
+                  videoTrack != null
             ), 1000).done(() => {
-              // Video interface buttons are added twice, and there's no good way besides a timeout to tell when it's done
+              // Video interface buttons are added twice,
+              // and there's no good way besides a timeout to tell when it's done
               // being called the second time. We want it to be finished so our test is stable.
               setTimeout(done, 200);
             });
@@ -267,7 +276,7 @@ describe('Make sure there are no race conditions that leave audio/video track en
       this.timeout(60000);
     });
 
-    it('keeps audio track enabled and mute/video icons consistent when clicking, then deactivating, then activating', function (done) {
+    it('keeps audio track enabled => mute/video icons consistent when clicking => deactivating => activating', function (done) {
       this.timeout(5000);
       expect(audioTrack.enabled).to.equal(true);
       expect(videoTrack.enabled).to.equal(true);
@@ -327,8 +336,8 @@ describe('Make sure there are no race conditions that leave audio/video track en
             helper.waitFor(() => (
               chrome$('.audio-btn').length === 1 &&
                   chrome$('.video-btn').length === 1 &&
-                  audioTrack !== null &&
-                  videoTrack !== null
+                  audioTrack != null &&
+                  videoTrack != null
             ), 1000).done(() => {
               // Video interface buttons are added twice, and there's no good way besides a timeout to tell when it's done
               // being called the second time. We want it to be finished so our test is stable.
