@@ -3234,7 +3234,7 @@
           gatherPolicy: this._config.iceTransportPolicy,
         });
         Object.defineProperty(iceGatherer, 'state',
-            {value: 'new', writable: true},
+            {value: 'new', writable: true}
         );
 
         this.transceivers[sdpMLineIndex].bufferedCandidateEvents = [];

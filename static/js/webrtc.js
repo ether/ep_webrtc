@@ -17,10 +17,9 @@
 
 require('./adapter');
 require('./getUserMediaPolyfill');
-var padcookie = require('ep_etherpad-lite/static/js/pad_cookie').padcookie;
-var hooks = require('ep_etherpad-lite/static/js/pluginfw/hooks');
+const padcookie = require('ep_etherpad-lite/static/js/pad_cookie').padcookie;
 
-var rtc = (function () {
+const rtc = (() => {
   const videoSizes = {large: '260px', small: '160px'};
   let isActive = false;
   let urlParamString;
@@ -44,14 +43,15 @@ var rtc = (function () {
   const callQueue = [];
   const enlargedVideos = new Set();
 
-  var self = {
+  const self = {
     // API HOOKS
-    postAceInit(hook, context, callback) {
+    postAceInit: (hook, context, callback) => {
       self.setUrlParamString(window.location.search);
       if (clientVars.webrtc.configError) {
         $.gritter.add({
           title: 'Error',
-          text: 'Ep_webrtc: There is an error with the configuration of this plugin. Please inform the administrators of this site. They will see the details in their logs.',
+          text: `Ep_webrtc: There is an error with the configuration of this plugin.
+          Please inform the administrators of this site. They will see the details in their logs.`,
           sticky: true,
           class_name: 'error',
         });
@@ -69,10 +69,10 @@ var rtc = (function () {
         clientVars.webrtc && clientVars.webrtc.iceServers
           ? clientVars.webrtc.iceServers
           : [
-            {
-              url: 'stun:stun.l.google.com:19302',
-            },
-          ];
+              {
+                url: 'stun:stun.l.google.com:19302',
+              },
+            ];
       if (clientVars.webrtc.video.sizes.large) {
         videoSizes.large = `${clientVars.webrtc.video.sizes.large}px`;
       }
@@ -83,10 +83,10 @@ var rtc = (function () {
       callback();
     },
     // so we can call it from testing
-    setUrlParamString(str) {
+    setUrlParamString: (str) => {
       urlParamString = str;
     },
-    aceSetAuthorStyle(hook, context, callback) {
+    aceSetAuthorStyle: (hook, context, callback) => {
       if (context.author) {
         const user = self.getUserFromId(context.author);
         if (user) {
@@ -97,14 +97,14 @@ var rtc = (function () {
       }
       callback();
     },
-    userJoinOrUpdate(hook, context, callback) {
+    userJoinOrUpdate: (hook, context, callback) => {
       /*
       var userId = context.userInfo.userId;
       console.log('userJoinOrUpdate', context, context.userInfo.userId, pc[userId]);
       */
       callback();
     },
-    userLeave(hook, context, callback) {
+    userLeave: (hook, context, callback) => {
       const userId = context.userInfo.userId;
       // console.log('user left, hang up', userId, context, pc[userId]);
       if (userId && pc[userId]) {
@@ -112,17 +112,17 @@ var rtc = (function () {
       }
       callback();
     },
-    handleClientMessage_RTC_MESSAGE(hook, context, callback) {
+    handleClientMessage_RTC_MESSAGE: (hook, context, callback) => {
       if (isActive) {
         self.receiveMessage(context.payload);
       }
       callback([null]);
     },
     // END OF API HOOKS
-    show() {
+    show: () => {
       $('#rtcbox').css('display', 'flex');
     },
-    showUserMediaError(err) { // show an error returned from getUserMedia
+    showUserMediaError: (err) => { // show an error returned from getUserMedia
       let reason;
       // For reference on standard errors returned by getUserMedia:
       // https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/getUserMedia
@@ -130,9 +130,9 @@ var rtc = (function () {
       switch (err.name) {
         case 'CustomNotSupportedError':
           reason = `${html10n.get('pad.ep_webrtc.error.notSupported.sorry')
-          }<br><br>${
+          } - ${
             html10n.get('pad.ep_webrtc.error.notSupported.howTo')
-          }<br><br><a href="http://www.webrtc.org/" target="_new">${
+          } - <a href="http://www.webrtc.org/" target="_new">${
             html10n.get('pad.ep_webrtc.error.notSupported.findOutMore')
           }</a>`;
           self.sendErrorStat('NotSupported');
@@ -142,10 +142,14 @@ var rtc = (function () {
           self.sendErrorStat('SecureConnection');
           break;
         case 'NotAllowedError':
-          // For certain (I suspect older) browsers, `NotAllowedError` indicates either an insecure connection or the user rejecting camera permissions.
-          // The error for both cases appears to be identical, so our best guess at telling them apart is to guess whether we are in a secure context.
+          // For certain (I suspect older) browsers, `NotAllowedError` indicates either an
+          // insecure connection or the user rejecting camera permissions.
+          // The error for both cases appears to be identical, so our best guess at telling
+          // them apart is to guess whether we are in a secure context.
           // (webrtc is considered secure for https connections or on localhost)
-          if (location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
+          if (location.protocol === 'https:' ||
+            location.hostname === 'localhost' ||
+            location.hostname === '127.0.0.1') {
             reason = html10n.get('pad.ep_webrtc.error.permission');
             self.sendErrorStat('Permission');
           } else {
@@ -158,17 +162,20 @@ var rtc = (function () {
           self.sendErrorStat('NotFound');
           break;
         case 'NotReadableError':
-          // `err.message` might give useful info to the user (not necessarily useful for other error messages)
+          // `err.message` might give useful info to the user (not necessarily
+          // useful for other error messages)
           reason = `${html10n.get('pad.ep_webrtc.error.notReadable')}<br><br>${err.message}`;
           self.sendErrorStat('Hardware');
           break;
         case 'AbortError':
-          // `err.message` might give useful info to the user (not necessarily useful for other error messages)
+          // `err.message` might give useful info to the user (not necessarily useful for
+          // other error messages)
           reason = `${html10n.get('pad.ep_webrtc.error.otherCantAccess')}<br><br>${err.message}`;
           self.sendErrorStat('Abort');
           break;
         default:
-          // `err` as a string might give useful info to the user (not necessarily useful for other error messages)
+          // `err` as a string might give useful info to the user
+          // (not necessarily useful for other error messages)
           reason = `${html10n.get('pad.ep_webrtc.error.other')}<br><br>${err}`;
           self.sendErrorStat('Unknown');
       }
@@ -180,10 +187,10 @@ var rtc = (function () {
       });
       self.hide();
     },
-    hide() {
+    hide: () => {
       $('#rtcbox').hide();
     },
-    activate() {
+    activate: () => {
       $('#options-enablertc').prop('checked', true);
       if (isActive) return Promise.resolve();
       self.show();
@@ -191,7 +198,7 @@ var rtc = (function () {
       isActive = true;
       return self.getUserMedia();
     },
-    deactivate() {
+    deactivate: () => {
       $('#options-enablertc').prop('checked', false);
       if (!isActive) return;
       self.hide();
@@ -201,7 +208,8 @@ var rtc = (function () {
         const videoTrack = localStream.getVideoTracks()[0];
         const audioTrack = localStream.getAudioTracks()[0];
         self.setStream(self._pad.getUserId(), '');
-        if ((videoTrack && videoTrack.stop === undefined) || (audioTrack && audioTrack.stop === undefined)) {
+        if ((videoTrack && videoTrack.stop === undefined) ||
+          (audioTrack && audioTrack.stop === undefined)) {
           // deprecated in 2015, probably disabled by 2020
           // https://developers.google.com/web/updates/2015/07/mediastream-deprecations
           // Perhaps we can obviate this by updating adapter.js?
@@ -218,7 +226,7 @@ var rtc = (function () {
       }
       isActive = false;
     },
-    toggleMuted() {
+    toggleMuted: () => {
       const audioTrack = localStream.getAudioTracks()[0];
       if (audioTrack) {
         audioTrack.enabled = !audioTrack.enabled;
@@ -226,26 +234,27 @@ var rtc = (function () {
       }
       return true; // if there's no audio track, it's muted
     },
-    toggleVideo() {
+    toggleVideo: () => {
       const videoTrack = localStream.getVideoTracks()[0];
       if (videoTrack) {
         videoTrack.enabled = !videoTrack.enabled;
         return !videoTrack.enabled; // returning whether it's disabled, to match toggleMuted
       }
-      return true; // if there's no video track, return true to indicate not enabled (matching toggleMuted)
+      // if there's no video track, return true to indicate not enabled (matching toggleMuted)
+      return true;
     },
-    getUserFromId(userId) {
+    getUserFromId: (userId) => {
       if (!self._pad || !self._pad.collabClient) return null;
       const result = self._pad.collabClient
           .getConnectedUsers()
-          .filter((user) => user.userId == userId);
+          .filter((user) => user.userId === userId);
       const user = result.length > 0 ? result[0] : null;
       // if (user && userId == self.getUserId()) user.name = "Me";
       // Commented by JM because it made every user name "Me"
       return user;
     },
-    setStream(userId, stream) {
-      const isLocal = userId == self.getUserId();
+    setStream: (userId, stream) => {
+      const isLocal = userId === self.getUserId();
       const videoId = `video_${userId.replace(/\./g, '_')}`;
       let video = $(`#${videoId}`)[0];
 
@@ -269,7 +278,7 @@ var rtc = (function () {
               'max-height': videoSizes.small,
             })
             .on({
-              loadedmetadata() {
+              loadedmetadata: () => {
                 self.addInterface(userId, stream);
               },
             })
@@ -288,8 +297,8 @@ var rtc = (function () {
         $(video).parent().remove();
       }
     },
-    addInterface(userId, stream) {
-      const isLocal = userId == self.getUserId();
+    addInterface: (userId, stream) => {
+      const isLocal = userId === self.getUserId();
       const videoId = `video_${userId.replace(/\./g, '_')}`;
       const $video = $(`#${videoId}`);
 
@@ -308,14 +317,14 @@ var rtc = (function () {
           .attr('title',
               audioHardDisabled
                 ? 'Audio disallowed by admin'
-                : (initiallyMuted ? 'Unmute' : 'Mute'),
+                : (initiallyMuted ? 'Unmute' : 'Mute')
           )
           .toggleClass('muted', initiallyMuted || audioHardDisabled)
           .toggleClass('disallowed', audioHardDisabled);
 
       if (!audioHardDisabled) {
         $mute.on({
-          click(event) {
+          click: (event) => {
             let muted;
             if (isLocal) {
               muted = self.toggleMuted();
@@ -347,18 +356,18 @@ var rtc = (function () {
                 videoHardDisabled
                   ? 'Video disallowed by admin'
                   : (initiallyVideoEnabled ? 'Disable video' : 'Enable video'
-                  ),
+                    )
             )
             .toggleClass('off', !initiallyVideoEnabled || videoHardDisabled)
             .toggleClass('disallowed', videoHardDisabled);
         if (!videoHardDisabled) {
           $disableVideo.on({
-            click(event) {
+            click: (event) => {
               const videoEnabled = !self.toggleVideo();
               $disableVideo
                   .attr(
                       'title',
-                      videoEnabled ? 'Disable video' : 'Enable video',
+                      videoEnabled ? 'Disable video' : 'Enable video'
                   )
                   .toggleClass('off', !videoEnabled);
             },
@@ -371,10 +380,10 @@ var rtc = (function () {
       // /////
 
       let videoEnlarged = false;
-      var $largeVideo = $("<span class='interface-btn enlarge-btn buttonicon'>")
+      const $largeVideo = $("<span class='interface-btn enlarge-btn buttonicon'>")
           .attr('title', 'Make video larger')
           .on({
-            click(event) {
+            click: (event) => {
               videoEnlarged = !videoEnlarged;
 
               if (videoEnlarged) {
@@ -386,7 +395,7 @@ var rtc = (function () {
               $largeVideo
                   .attr(
                       'title',
-                      videoEnlarged ? 'Make video smaller' : 'Make video larger',
+                      videoEnlarged ? 'Make video smaller' : 'Make video larger'
                   )
                   .toggleClass('large', videoEnlarged);
 
@@ -411,23 +420,23 @@ var rtc = (function () {
     },
     // Sends a stat to the back end. `statName` must be in the
     // approved list on the server side.
-    sendErrorStat(statName) {
+    sendErrorStat: (statName) => {
       const msg = {component: 'pad',
         type: 'STATS',
         data: {statName, type: 'RTC_MESSAGE'}};
       pad.socket.json.send(msg);
     },
-    sendMessage(to, data) {
+    sendMessage: (to, data) => {
       self._pad.collabClient.sendMessage({
         type: 'RTC_MESSAGE',
         payload: {data, to},
       });
     },
-    receiveMessage(msg) {
+    receiveMessage: (msg) => {
       const peer = msg.from;
       const data = msg.data;
       const type = data.type;
-      if (peer == self.getUserId()) {
+      if (peer === self.getUserId()) {
         // console.log('ignore own messages');
         return;
       }
@@ -435,9 +444,9 @@ var rtc = (function () {
       if (type != 'icecandidate')
         console.log('receivedMessage', 'peer', peer, 'type', type, 'data', data);
       */
-      if (type == 'hangup') {
+      if (type === 'hangup') {
         self.hangup(peer, false);
-      } else if (type == 'offer') {
+      } else if (type === 'offer') {
         if (pc[peer]) {
           console.log('existing connection?', pc[peer]);
           self.hangup(peer, false);
@@ -468,21 +477,21 @@ var rtc = (function () {
                         () => {
                           self.sendMessage(peer, {type: 'answer', answer: desc});
                         },
-                        logError,
+                        logError
                     );
                   },
                   logError,
-                  sdpConstraints,
+                  sdpConstraints
               );
             },
-            logError,
+            logError
         );
-      } else if (type == 'answer') {
+      } else if (type === 'answer') {
         if (pc[peer]) {
           const answer = new RTCSessionDescription(data.answer);
           pc[peer].setRemoteDescription(answer, () => {}, logError);
         }
-      } else if (type == 'icecandidate') {
+      } else if (type === 'icecandidate') {
         if (pc[peer]) {
           const candidate = new RTCIceCandidate(data.candidate);
           const p = pc[peer].addIceCandidate(candidate);
@@ -498,24 +507,23 @@ var rtc = (function () {
         console.log('unknown message', data);
       }
     },
-    hangupAll() {
+    hangupAll: () => {
       Object.keys(pc).forEach((userId) => {
         self.hangup(userId);
       });
     },
-    getUserId() {
-      return self._pad && self._pad.getUserId();
-    },
-    hangup(userId, notify) {
-      notify = arguments.length == 1 ? true : notify;
-      if (pc[userId] && userId != self.getUserId()) {
+    getUserId: () => self._pad && self._pad.getUserId(),
+    hangup: (...args) => {
+      const userId = args[0];
+      const notify = args.length === 1 ? true : notify;
+      if (pc[userId] && userId !== self.getUserId()) {
         self.setStream(userId, '');
         pc[userId].close();
         delete pc[userId];
         notify && self.sendMessage(userId, {type: 'hangup'});
       }
     },
-    call(userId) {
+    call: (userId) => {
       if (!localStream) {
         callQueue.push(userId);
         return;
@@ -524,7 +532,7 @@ var rtc = (function () {
       // temporary measure to remove Moz* constraints in Chrome
       if (webrtcDetectedBrowser === 'chrome') {
         for (const prop in constraints.mandatory) {
-          if (prop.indexOf('Moz') != -1) {
+          if (prop.indexOf('Moz') !== -1) {
             delete constraints.mandatory[prop];
           }
         }
@@ -543,22 +551,22 @@ var rtc = (function () {
                 () => {
                   self.sendMessage(userId, {type: 'offer', offer: desc});
                 },
-                logError,
+                logError
             );
           },
           logError,
-          constraints,
+          constraints
       );
     },
-    createPeerConnection(userId) {
+    createPeerConnection: (userId) => {
       if (pc[userId]) {
         console.log(
             'WARNING creating PC connection even though one exists',
-            userId,
+            userId
         );
       }
       pc[userId] = new RTCPeerConnection(pc_config, pc_constraints);
-      pc[userId].onicecandidate = function (event) {
+      pc[userId].onicecandidate = (event) => {
         if (event.candidate) {
           self.sendMessage(userId, {
             type: 'icecandidate',
@@ -566,11 +574,11 @@ var rtc = (function () {
           });
         }
       };
-      pc[userId].onaddstream = function (event) {
+      pc[userId].onaddstream = (event) => {
         remoteStream[userId] = event.stream;
         self.setStream(userId, event.stream);
       };
-      pc[userId].onremovestream = function (event) {
+      pc[userId].onremovestream = (event) => {
         self.setStream(userId, '');
       };
       /*
@@ -586,7 +594,7 @@ var rtc = (function () {
       };
       */
     },
-    getUserMedia() {
+    getUserMedia: () => {
       const mediaConstraints = {
         audio: clientVars.webrtc.audio.disabled !== 'hard',
         video: clientVars.webrtc.video.disabled !== 'hard' && {
@@ -622,7 +630,7 @@ var rtc = (function () {
             localStream = stream;
             self.setStream(self._pad.getUserId(), stream);
             self._pad.collabClient.getConnectedUsers().forEach((user) => {
-              if (user.userId != self.getUserId()) {
+              if (user.userId !== self.getUserId()) {
                 if (pc[user.userId]) {
                   self.hangup(user.userId);
                 }
@@ -632,7 +640,7 @@ var rtc = (function () {
           })
           .catch((err) => { self.showUserMediaError(err); });
     },
-    avInURL() {
+    avInURL: () => {
       if (urlParamString.indexOf('av=YES') > -1) {
         return true;
       } else {
@@ -649,8 +657,12 @@ var rtc = (function () {
     settingToCheckbox(params) {
       if (params.urlVar === undefined) { throw Error('missing urlVar in settingToCheckbox'); }
       if (params.cookie === undefined) { throw Error('missing cookie in settingToCheckbox'); }
-      if (params.defaultVal === undefined) { throw Error('missing defaultVal in settingToCheckbox'); }
-      if (params.checkboxId === undefined) { throw Error('missing checkboxId in settingToCheckbox'); }
+      if (params.defaultVal === undefined) {
+        throw Error('missing defaultVal in settingToCheckbox');
+      }
+      if (params.checkboxId === undefined) {
+        throw Error('missing checkboxId in settingToCheckbox');
+      }
 
       let value;
 
@@ -678,7 +690,7 @@ var rtc = (function () {
         padcookie.setPref(params.cookie, this.checked);
       });
     },
-    setupCheckboxes(pad) {
+    setupCheckboxes: (pad) => {
       // The checkbox shouldn't even exist if audio is not allowed
       if (clientVars.webrtc.audio.disabled !== 'hard') {
         self.settingToCheckbox({
@@ -740,8 +752,7 @@ var rtc = (function () {
   };
 
   // Normalize RTC implementation between browsers
-  const getUserMedia = window.navigator.mediaDevices.getUserMedia;
-  var attachMediaStream = function (element, stream) {
+  const attachMediaStream = (element, stream) => {
     if (typeof element.srcObject !== 'undefined') {
       element.srcObject = stream;
     } else if (typeof element.mozSrcObject !== 'undefined') {
@@ -752,29 +763,30 @@ var rtc = (function () {
       console.log('Error attaching stream to element.', element);
     }
   };
-  var webrtcDetectedBrowser = 'chrome';
+  const webrtcDetectedBrowser = 'chrome';
 
   // Set Opus as the default audio codec if it's present.
-  function preferOpus(sdp) {
+  const preferOpus = (sdp) => {
     let sdpLines = sdp.split('\r\n');
+    let mLineIndex;
 
     // Search for m line.
-    for (var i = 0; i < sdpLines.length; i++) {
+    for (let i = 0; i < sdpLines.length; i++) {
       if (sdpLines[i].search('m=audio') !== -1) {
-        var mLineIndex = i;
+        mLineIndex = i;
         break;
       }
     }
-    if (mLineIndex === null) return sdp;
+    if (mLineIndex == null) return sdp;
 
     // If Opus is available, set it as the default in m line.
-    for (var i = 0; i < sdpLines.length; i++) {
+    for (let i = 0; i < sdpLines.length; i++) {
       if (sdpLines[i].search('opus/48000') !== -1) {
         const opusPayload = extractSdp(sdpLines[i], /:(\d+) opus\/48000/i);
         if (opusPayload) {
           sdpLines[mLineIndex] = setDefaultCodec(
               sdpLines[mLineIndex],
-              opusPayload,
+              opusPayload
           );
         }
         break;
@@ -786,61 +798,28 @@ var rtc = (function () {
 
     sdp = sdpLines.join('\r\n');
     return sdp;
-  }
+  };
 
-  // Set Opus in stereo if stereo is enabled.
-  function addStereo(sdp) {
-    const sdpLines = sdp.split('\r\n');
-
-    // Find opus payload.
-    for (var i = 0; i < sdpLines.length; i++) {
-      if (sdpLines[i].search('opus/48000') !== -1) {
-        var opusPayload = extractSdp(sdpLines[i], /:(\d+) opus\/48000/i);
-        break;
-      }
-    }
-
-    // Find the payload in fmtp line.
-    for (var i = 0; i < sdpLines.length; i++) {
-      if (sdpLines[i].search('a=fmtp') !== -1) {
-        const payload = extractSdp(sdpLines[i], /a=fmtp:(\d+)/);
-        if (payload === opusPayload) {
-          var fmtpLineIndex = i;
-          break;
-        }
-      }
-    }
-    // No fmtp line found.
-    if (fmtpLineIndex === null) return sdp;
-
-    // append stereo=1 to fmtp line.
-    sdpLines[fmtpLineIndex] = sdpLines[fmtpLineIndex].concat(' stereo=1');
-
-    sdp = sdpLines.join('\r\n');
-    return sdp;
-  }
-
-  function extractSdp(sdpLine, pattern) {
+  const extractSdp = (sdpLine, pattern) => {
     const result = sdpLine.match(pattern);
-    return result && result.length == 2 ? result[1] : null;
-  }
+    return result && result.length === 2 ? result[1] : null;
+  };
 
   // Set the selected codec to the first in m line.
-  function setDefaultCodec(mLine, payload) {
+  const setDefaultCodec = (mLine, payload) => {
     const elements = mLine.split(' ');
-    const newLine = new Array();
+    const newLine = [];
     let index = 0;
     for (let i = 0; i < elements.length; i++) {
-      if (index === 3)
       // Format of media starts from the fourth.
-      { newLine[index++] = payload; } // Put target payload to the first.
+      if (index === 3) newLine[index++] = payload; // Put target payload to the first.
       if (elements[i] !== payload) newLine[index++] = elements[i];
     }
     return newLine.join(' ');
-  }
+  };
 
   // Strip CN from sdp before CN constraints is ready.
-  function removeCN(sdpLines, mLineIndex) {
+  const removeCN = (sdpLines, mLineIndex) => {
     const mLineElements = sdpLines[mLineIndex].split(' ');
     // Scan from end for the convenience of removing an item.
     for (let i = sdpLines.length - 1; i >= 0; i--) {
@@ -858,34 +837,35 @@ var rtc = (function () {
 
     sdpLines[mLineIndex] = mLineElements.join(' ');
     return sdpLines;
-  }
+  };
 
-  function sdpRate(sdp, rate) {
+  const sdpRate = (sdp, rate) => {
     rate = rate || 1638400;
     return sdp.replace(/b=AS:\d+\r/g, `b=AS:${rate}\r`);
-  }
+  };
 
-  function cleanupSdp(sdp) {
+  const cleanupSdp = (sdp) => {
     sdp = preferOpus(sdp);
     sdp = sdpRate(sdp);
     return sdp;
-  }
+  };
 
-  function mergeConstraints(cons1, cons2) {
+  const mergeConstraints = (cons1, cons2) => {
     const merged = cons1;
-    for (const name in cons2.mandatory) {
+    for (const name of Object.keys(cons2.mandatory)) {
       merged.mandatory[name] = cons2.mandatory[name];
     }
     merged.optional.concat(cons2.optional);
     return merged;
-  }
-  function logError(error) {
-    console.log('WebRTC ERROR:', error);
-  }
+  };
+
+  const logError = (error) => console.log('WebRTC ERROR:', error);
 
   self.pc = pc;
   return self;
 })();
 
 exports.rtc = rtc;
-window.ep_webrtc = rtc; // Access to do some unit tests. If there's a more formal way to do this for all plugins, we can change to that.
+window.ep_webrtc = rtc;
+// Access to do some unit tests. If there's a more formal way to do this for all plugins,
+// we can change to that.

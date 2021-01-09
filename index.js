@@ -1,4 +1,4 @@
-// vim: et:ts=2:sw=2:sts=2:ft=javascript
+'use strict';
 /**
  * Copyright 2013 j <j@mailb.org>
  *
@@ -28,7 +28,7 @@ let socketio;
  * @param client the client that send this message
  * @param message the message from the client
  */
-function handleRTCMessage(client, payload) {
+const handleRTCMessage = (client, payload) => {
   const userId = sessioninfos[client.id].author;
   const to = payload.to;
   const padId = sessioninfos[client.id].padId;
@@ -36,7 +36,7 @@ function handleRTCMessage(client, payload) {
   const clients = [];
 
   if (room && room.sockets) {
-    for (const id in room.sockets) {
+    for (const id of Object.keys(room.sockets)) {
       clients.push(socketio.sockets.sockets[id]);
     }
   }
@@ -54,12 +54,12 @@ function handleRTCMessage(client, payload) {
   // Lookup recipient and send message
   for (let i = 0; i < clients.length; i++) {
     const session = sessioninfos[clients[i].id];
-    if (session && session.author == to) {
+    if (session && session.author === to) {
       clients[i].json.send(msg);
       break;
     }
   }
-}
+};
 
 // Make sure any updates to this are reflected in README
 const statErrorNames = [
@@ -72,15 +72,15 @@ const statErrorNames = [
   'Unknown',
 ];
 
-function handleErrorStatMessage(statName) {
+const handleErrorStatMessage = (statName) => {
   if (statErrorNames.indexOf(statName) !== -1) {
     stats.meter(`ep_webrtc_err_${statName}`).mark();
   } else {
     statsLogger.warn(`Invalid ep_webrtc error stat: ${statName}`);
   }
-}
+};
 
-exports.clientVars = function (hook, context, callback) {
+exports.clientVars = (hook, context, callback) => {
   // Validate settings.json now so that the admin notices any errors right away
   if (!validateSettings()) {
     return callback({
@@ -134,11 +134,11 @@ exports.clientVars = function (hook, context, callback) {
   });
 };
 
-exports.handleMessage = function (hook, context, callback) {
-  if (context.message.type == 'COLLABROOM' && context.message.data.type == 'RTC_MESSAGE') {
+exports.handleMessage = (hook, context, callback) => {
+  if (context.message.type === 'COLLABROOM' && context.message.data.type === 'RTC_MESSAGE') {
     handleRTCMessage(context.client, context.message.data.payload);
     callback([null]);
-  } else if (context.message.type == 'STATS' && context.message.data.type == 'RTC_MESSAGE') {
+  } else if (context.message.type === 'STATS' && context.message.data.type === 'RTC_MESSAGE') {
     handleErrorStatMessage(context.message.data.statName);
     callback([null]);
   } else {
@@ -146,12 +146,12 @@ exports.handleMessage = function (hook, context, callback) {
   }
 };
 
-exports.setSocketIO = function (hook, context, callback) {
+exports.setSocketIO = (hook, context, callback) => {
   socketio = context.io;
   callback();
 };
 
-exports.eejsBlock_mySettings = function (hook, context, callback) {
+exports.eejsBlock_mySettings = (hook, context, callback) => {
   const enabled = (settings.ep_webrtc && settings.ep_webrtc.enabled === false)
     ? 'unchecked'
     : 'checked';
@@ -174,22 +174,22 @@ exports.eejsBlock_mySettings = function (hook, context, callback) {
   callback();
 };
 
-exports.eejsBlock_editorContainerBox = function (hook_name, args, cb) {
+exports.eejsBlock_editorContainerBox = (hook_name, args, cb) => {
   args.content += eejs.require('./templates/webrtc.ejs', {}, module);
   return cb();
 };
 
-exports.eejsBlock_styles = function (hook_name, args, cb) {
+exports.eejsBlock_styles = (hook_name, args, cb) => {
   args.content += eejs.require('./templates/styles.html', {}, module);
   return cb();
 };
 
-function validateSettings() {
+const validateSettings = () => {
   if (settings.ep_webrtc && settings.ep_webrtc.audio && settings.ep_webrtc.audio.disabled) {
     if (
-      settings.ep_webrtc.audio.disabled != 'none' &&
-      settings.ep_webrtc.audio.disabled != 'hard' &&
-      settings.ep_webrtc.audio.disabled != 'soft'
+      settings.ep_webrtc.audio.disabled !== 'none' &&
+      settings.ep_webrtc.audio.disabled !== 'hard' &&
+      settings.ep_webrtc.audio.disabled !== 'soft'
     ) {
       configLogger.error('Invalid value in settings.json for ep_webrtc.audio.disabled');
       return false;
@@ -198,13 +198,13 @@ function validateSettings() {
 
   if (settings.ep_webrtc && settings.ep_webrtc.video && settings.ep_webrtc.video.disabled) {
     if (
-      settings.ep_webrtc.video.disabled != 'none' &&
-      settings.ep_webrtc.video.disabled != 'hard' &&
-      settings.ep_webrtc.video.disabled != 'soft'
+      settings.ep_webrtc.video.disabled !== 'none' &&
+      settings.ep_webrtc.video.disabled !== 'hard' &&
+      settings.ep_webrtc.video.disabled !== 'soft'
     ) {
       configLogger.error('Invalid value in settings.json for ep_webrtc.video.disabled');
       return false;
     }
   }
   return true;
-}
+};

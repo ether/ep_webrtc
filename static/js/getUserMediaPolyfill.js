@@ -1,3 +1,5 @@
+'use strict';
+
 (function () {
   if (!navigator.mediaDevices) navigator.mediaDevices = {};
   if (!navigator.mediaDevices.getUserMedia) {
@@ -17,7 +19,7 @@
               },
               (error) => {
                 reject(error);
-              },
+              }
           );
         });
       };

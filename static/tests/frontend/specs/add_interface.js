@@ -30,7 +30,7 @@ describe('test the addInterface function, which creates of the various video int
               .attr('id', otherVideoId)
               .appendTo(
                   $("<div class='video-container'>")
-                      .appendTo(chrome$('#rtcbox')),
+                      .appendTo(chrome$('#rtcbox'))
               );
           // Video interface buttons are added twice, and there's no good way besides a timeout to tell when it's done
           // being called the second time. We want it to be finished so our test is stable.

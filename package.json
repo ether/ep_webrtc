@@ -10,7 +10,7 @@
   "author": "John McLear <john@mclear.co.uk>",
   "contributors": [],
   "engines": {
-    "node": ">=0.6.3"
+    "node": ">=10.13.0"
   },
   "dependencies": {},
   "funding": {
@@ -18,12 +18,14 @@
     "url": "http://etherpad.org/"
   },
   "devDependencies": {
-    "eslint": "^7.14.0",
-    "eslint-config-etherpad": "^1.0.8",
+    "eslint": "^7.17.0",
+    "eslint-config-etherpad": "^1.0.22",
+    "eslint-plugin-eslint-comments": "^3.2.0",
     "eslint-plugin-mocha": "^8.0.0",
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-prefer-arrow": "^1.2.2",
-    "eslint-plugin-promise": "^4.2.1"
+    "eslint-plugin-promise": "^4.2.1",
+    "eslint-plugin-you-dont-need-lodash-underscore": "^6.10.0"
   },
   "eslintConfig": {
     "root": true,
