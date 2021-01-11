@@ -16,7 +16,6 @@
 'use strict';
 
 require('./adapter');
-require('./getUserMediaPolyfill');
 const padcookie = require('ep_etherpad-lite/static/js/pad_cookie').padcookie;
 
 const rtc = (() => {
