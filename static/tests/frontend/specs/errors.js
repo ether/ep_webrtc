@@ -1,4 +1,3 @@
-/* eslint max-len: ["error", { "code": 120 }] */
 'use strict';
 
 describe('Test that we show the correct error messages when trying to start webrtc', function () {
@@ -46,14 +45,6 @@ describe('Test that we show the correct error messages when trying to start webr
       });
     });
   }
-
-  it('gives the right error message for CustomNotSupportedError', function (done) {
-    tryError('CustomNotSupportedError', 'does not support WebRTC', done);
-  });
-
-  it('gives the right error message for CustomSecureConnectionError', function (done) {
-    tryError('CustomSecureConnectionError', 'need to install SSL certificates', done);
-  });
 
   it('gives the right error message for NotAllowedError', function (done) {
     // Hard to test the version of NotAllowedError that is the SSL error

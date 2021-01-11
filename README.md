@@ -174,7 +174,6 @@ connect their camera/microphone:
 * `ep_webrtc_err_NotFound`: Could not find user's camera/microphone.
 * `ep_webrtc_err_Abort`: Some sort of other, non-hardware related connection
   problem on the user's computer.
-* `ep_webrtc_err_NotSupported`: User's environment does not support WebRTC.
 * `ep_webrtc_err_Permission`: User did not grant permission to their
   camera/microphone.
 * `ep_webrtc_err_SecureConnection`: Etherpad is not set up on a secure

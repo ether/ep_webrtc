@@ -75,7 +75,6 @@ const statErrorNames = [
   'Abort',
   'Hardware',
   'NotFound',
-  'NotSupported',
   'Permission',
   'SecureConnection',
   'Unknown',

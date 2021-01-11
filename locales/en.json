@@ -1,9 +1,6 @@
 {
     "pad.settings.enablertc": "Enable Audio/Video Chat",
 
-    "pad.ep_webrtc.error.notSupported.sorry": "Sorry, your browser does not support WebRTC (or you have it disabled in your settings).",
-    "pad.ep_webrtc.error.notSupported.howTo": "To participate in this audio/video chat you have to use a browser with WebRTC support like Chrome, Firefox, Safari, Edge, or Opera.",
-    "pad.ep_webrtc.error.notSupported.findOutMore": "Click here to learn more.",
     "pad.ep_webrtc.error.ssl": "Sorry, you need to install SSL certificates for your Etherpad instance to use WebRTC.",
     "pad.ep_webrtc.error.permission": "Sorry, you need to give us permission to use your camera and microphone.",
     "pad.ep_webrtc.error.notFound": "Sorry, we couldn't find a suitable camera on your device. If you have a camera, make sure it set up correctly and refresh this website to retry.",

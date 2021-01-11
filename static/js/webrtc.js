@@ -16,7 +16,6 @@
 'use strict';
 
 require('./adapter');
-require('./getUserMediaPolyfill');
 const padcookie = require('ep_etherpad-lite/static/js/pad_cookie').padcookie;
 
 const rtc = (() => {
@@ -121,23 +120,7 @@ const rtc = (() => {
       let reason;
       // For reference on standard errors returned by getUserMedia:
       // https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/getUserMedia
-      // However keep in mind that we add our own errors in getUserMediaPolyfill
       switch (err.name) {
-        case 'CustomNotSupportedError':
-          reason = $('<div>')
-              .append($('<p>').text(html10n.get('pad.ep_webrtc.error.notSupported.sorry')))
-              .append($('<p>').text(html10n.get('pad.ep_webrtc.error.notSupported.howTo')))
-              .append($('<p>')
-                  .append($('<a>')
-                      .attr('href', 'http://www.webrtc.org/')
-                      .attr('target', '_new')
-                      .text(html10n.get('pad.ep_webrtc.error.notSupported.findOutMore'))));
-          self.sendErrorStat('NotSupported');
-          break;
-        case 'CustomSecureConnectionError':
-          reason = html10n.get('pad.ep_webrtc.error.ssl');
-          self.sendErrorStat('SecureConnection');
-          break;
         case 'NotAllowedError':
           // For certain (I suspect older) browsers, `NotAllowedError` indicates either an
           // insecure connection or the user rejecting camera permissions.
