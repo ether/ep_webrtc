@@ -1,18 +1,19 @@
 {
-        "@metadata": {
-                "authors": [
-                        "Guilherme Albuquerque"
-                ]
-        },
-        "pad.settings.enablertc": "Ativar videochamada",
-        "pad.ep_webrtc.error.notSupported.sorry": "Erro, O teu navegador não suporta WebRTC (ou foi desativado nas configurações).",
-        "pad.ep_webrtc.error.notSupported.howTo": "Para aderir à videochamada, deves usar um navegador com suporte WebRTC, como Chrome, Firefox, Safari, Edge ou Opera.",
-        "pad.ep_webrtc.error.notSupported.findOutMore": "Clica aqui para saber mais.",
-        "pad.ep_webrtc.error.ssl": "Aviso, É necessária a instalação de certificados SSL para o Etherpad usar o WebRTC.",
-        "pad.ep_webrtc.error.permission": "Aviso, precisas de aceitar a permissão para utilizar a câmera e o microfone.",
-        "pad.ep_webrtc.error.notFound": "Não foi possível encontrar uma câmera adequada no teu dispositivo. Se possuir uma câmera, certifica-te que está configurada corretamente e atualiza este site para tent$        "pad.ep_webrtc.error.notReadable": "Lamentamos, mas ocorreu um erro de hardware que impediu o acesso à câmara e/ou microfone:",
-        "pad.ep_webrtc.error.otherCantAccess": "O navegador não tem acesso à câmera e/ou microfone. Verifica as permissões nas configurações do teu navegador. Provavelmente não é um erro de hardware:",
-        "pad.ep_webrtc.error.other": "Ocorreu um erro desconhecido:",
-        "pad.settings.audioenabledonstart": "Ligar áudio no início",
-        "pad.settings.videoenabledonstart": "Ligar vídeo no início"
+	"@metadata": {
+		"authors": [
+			"Guilherme Albuquerque"
+		]
+	},
+	"pad.settings.enablertc": "Ativar videochamada",
+	"pad.ep_webrtc.error.notSupported.sorry": "Erro, O teu navegador não suporta WebRTC (ou foi desativado nas configurações).",
+	"pad.ep_webrtc.error.notSupported.howTo": "Para aderir à videochamada, deves usar um navegador com suporte WebRTC, como Chrome, Firefox, Safari, Edge ou Opera.",
+	"pad.ep_webrtc.error.notSupported.findOutMore": "Clica aqui para saber mais.",
+	"pad.ep_webrtc.error.ssl": "Aviso, É necessária a instalação de certificados SSL para o Etherpad usar o WebRTC.",
+	"pad.ep_webrtc.error.permission": "Aviso, precisas de aceitar a permissão para utilizar a câmera e o microfone.",
+	"pad.ep_webrtc.error.notFound": "Não foi possível encontrar uma câmera adequada no teu dispositivo. Se possuir uma câmera, certifica-te que está configurada corretamente e atualiza este site para tentar novamente.",
+	"pad.ep_webrtc.error.notReadable": "Lamentamos, mas ocorreu um erro de hardware que impediu o acesso à câmara e/ou microfone:",
+	"pad.ep_webrtc.error.otherCantAccess": "O navegador não tem acesso à câmera e/ou microfone. Verifica as permissões nas configurações do teu navegador. Provavelmente não é um erro de hardware:",
+	"pad.ep_webrtc.error.other": "Ocorreu um erro desconhecido:",
+	"pad.settings.audioenabledonstart": "Ligar áudio no início",
+	"pad.settings.videoenabledonstart": "Ligar vídeo no início"
 }
