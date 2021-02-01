@@ -6,7 +6,11 @@
 	},
 	"pad.settings.enablertc": "Abbilite 'a ciat audio/video",
 	"pad.ep_webrtc.error.notSupported.sorry": "Ne despice, 'u browser tune non ge supporte WebRTC (o tu l'è disabbiltiate jndr'à le 'mbostaziune tune).",
+	"pad.ep_webrtc.error.notSupported.howTo": "Pe partecipà jndr'à sta ciat audio/video a ausà 'nu browser cu 'u supporte WebRTC cumme Chrome, Firefox, Safari, Edge, o Opera.",
 	"pad.ep_webrtc.error.notSupported.findOutMore": "Cazze aqquà pe 'mbarà de cchiù.",
+	"pad.ep_webrtc.error.ssl": "Ne despice, è abbesogne de installà le certificate SSL pe l'instanze de l'Etherpad tune pe ausà WebRTC.",
+	"pad.ep_webrtc.error.permission": "Ne despice, è abbesogne de dà le permesse pe ausà 'a fotocamere e 'u microfone tune.",
+	"pad.ep_webrtc.error.other": "Ne despiace, ha assute 'n'errore scanusciute.",
 	"pad.settings.audioenabledonstart": "Audio appizzecate a l'avvie",
 	"pad.settings.videoenabledonstart": "Video appizzecate a l'avvie"
 }
