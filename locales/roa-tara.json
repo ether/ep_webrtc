@@ -10,6 +10,9 @@
 	"pad.ep_webrtc.error.notSupported.findOutMore": "Cazze aqquà pe 'mbarà de cchiù.",
 	"pad.ep_webrtc.error.ssl": "Ne despice, è abbesogne de installà le certificate SSL pe l'instanze de l'Etherpad tune pe ausà WebRTC.",
 	"pad.ep_webrtc.error.permission": "Ne despice, è abbesogne de dà le permesse pe ausà 'a fotocamere e 'u microfone tune.",
+	"pad.ep_webrtc.error.notFound": "Ne despiace, non ge putime acchià 'na fotocamere disponibbele sus a 'u dispositive tune. Ce tìne 'na fotocamere, assecurate ca jè configurte corrette e aggiorne stu site web pe pruvà arrete.",
+	"pad.ep_webrtc.error.notReadable": "Ne despiace, ha assute 'n'errore harduer ca ave 'mbedite l'accesse a 'a fotocamera e/o 'u microfone tune:",
+	"pad.ep_webrtc.error.otherCantAccess": "Ne despiace, 'u browser non ge tène l'accesse a 'a fotocamere e/o microfone tune. Pe piacere condrolle le permesse jndr'à le 'mbostaziune d'u browser tune. Quiste non ge pare 'n'errore harduer:",
 	"pad.ep_webrtc.error.other": "Ne despiace, ha assute 'n'errore scanusciute.",
 	"pad.settings.audioenabledonstart": "Audio appizzecate a l'avvie",
 	"pad.settings.videoenabledonstart": "Video appizzecate a l'avvie"
