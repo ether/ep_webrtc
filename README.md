@@ -1,3 +1,5 @@
+![Publish Status](https://github.com/ether/ep_webrtc/workflows/Node.js%20Package/badge.svg) ![Backend Tests Status](https://github.com/ether/ep_webrtc/workflows/Backend%20tests/badge.svg)
+
 ep_webrtc
 =========
 
