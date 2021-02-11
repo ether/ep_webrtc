@@ -4,7 +4,14 @@
 			"Ykhwong"
 		]
 	},
+	"pad.settings.enablertc": "오디오/비디오 채팅 활성화",
+	"pad.ep_webrtc.error.notSupported.sorry": "죄송하지만 브라우저가 WebRTC를 지원하지 않습니다(또는 설정에서 비활성화되어 있습니다).",
+	"pad.ep_webrtc.error.notSupported.howTo": "오디오/비디오 채팅에 참여하려면 Chrome, Firefox, Safari, Edge, Opera 등 WebRTC를 지원하는 브라우저를 사용해야 합니다.",
 	"pad.ep_webrtc.error.notSupported.findOutMore": "더 알아보려면 여기를 클릭하십시오.",
+	"pad.ep_webrtc.error.ssl": "죄송합니다. WebRTC를 사용하려면 이더패드 인스턴스를 위해 SSL 인증서를 설치해야 합니다.",
+	"pad.ep_webrtc.error.permission": "죄송합니다. 카메라와 마이크를 사용할 권한을 부여해야 합니다.",
+	"pad.ep_webrtc.error.notFound": "죄송합니다. 장치에 적절한 카메라를 찾지 못했습니다. 카메라가 있으면 적절하게 구성한 다음 이 웹사이트를 새로 고침하여 다시 시도하십시오.",
+	"pad.ep_webrtc.error.notReadable": "죄송합니다. 하드웨어 오류가 발생하여 카메라 및 마이크에 접근할 수 없습니다:",
 	"pad.ep_webrtc.error.otherCantAccess": "브라우저에 카메라 및 마이크 접근 권한이 없습니다. 브라우저의 설정에서 권한을 확인해 주십시오. 하드웨어 오류가 아닐 가능성이 높습니다.",
 	"pad.ep_webrtc.error.other": "알 수 없는 오류가 발생했습니다:",
 	"pad.settings.audioenabledonstart": "시작 시 소리 켜기",
