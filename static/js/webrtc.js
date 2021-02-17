@@ -654,7 +654,7 @@ const rtc = (() => {
     //   default value, in that order
     // If urlVar is found, it will also set the cookie
     // Finally, it sets up to set cookie if the user changes the setting in the gearbox
-    settingToCheckbox(params) {
+    settingToCheckbox: (params) => {
       if (params.urlVar === undefined) { throw Error('missing urlVar in settingToCheckbox'); }
       if (params.cookie === undefined) { throw Error('missing cookie in settingToCheckbox'); }
       if (params.defaultVal === undefined) {
@@ -711,7 +711,7 @@ const rtc = (() => {
         });
       }
     },
-    init(pad) {
+    init: (pad) => {
       self._pad = pad || window.pad;
 
       self.setupCheckboxes();
