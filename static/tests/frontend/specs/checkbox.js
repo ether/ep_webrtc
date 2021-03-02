@@ -102,8 +102,8 @@ describe('test settingToCheckbox, which creates checkboxes that are linked to to
       expect(chrome$('#checkboxId6').prop('checked')).to.equal(false);
 
       // Confirm that the urlVars set the cookies
-      expect(chrome$.window.document.cookie.indexOf('cookie5%22%3Atrue')).to.not.equal(-1);
-      expect(chrome$.window.document.cookie.indexOf('cookie6%22%3Afalse')).to.not.equal(-1);
+      expect(chrome$.window.document.cookie.indexOf('cookie5%22:true')).to.not.equal(-1);
+      expect(chrome$.window.document.cookie.indexOf('cookie6%22:false')).to.not.equal(-1);
 
       chrome$('#checkboxId1').click();
       chrome$('#checkboxId2').click();
@@ -124,12 +124,12 @@ describe('test settingToCheckbox, which creates checkboxes that are linked to to
           chrome$('#checkboxId6').prop('checked') === true
         );
       }, 1000).done(() => {
-        expect(chrome$.window.document.cookie.indexOf('cookie1%22%3Afalse')).to.not.equal(-1);
-        expect(chrome$.window.document.cookie.indexOf('cookie2%22%3Atrue')).to.not.equal(-1);
-        expect(chrome$.window.document.cookie.indexOf('cookie3%22%3Afalse')).to.not.equal(-1);
-        expect(chrome$.window.document.cookie.indexOf('cookie4%22%3Atrue')).to.not.equal(-1);
-        expect(chrome$.window.document.cookie.indexOf('cookie5%22%3Afalse')).to.not.equal(-1);
-        expect(chrome$.window.document.cookie.indexOf('cookie6%22%3Atrue')).to.not.equal(-1);
+        expect(chrome$.window.document.cookie.indexOf('cookie1%22:false')).to.not.equal(-1);
+        expect(chrome$.window.document.cookie.indexOf('cookie2%22:true')).to.not.equal(-1);
+        expect(chrome$.window.document.cookie.indexOf('cookie3%22:false')).to.not.equal(-1);
+        expect(chrome$.window.document.cookie.indexOf('cookie4%22:true')).to.not.equal(-1);
+        expect(chrome$.window.document.cookie.indexOf('cookie5%22:false')).to.not.equal(-1);
+        expect(chrome$.window.document.cookie.indexOf('cookie6%22:true')).to.not.equal(-1);
         done();
       });
     });

@@ -3,9 +3,12 @@
 
 describe('enable and disable webrtc', function () {
   context('WebRTC is disabled', function () {
-    before(async function () {
-      await helper.newPad({
+    before(function (done) {
+      helper.newPad({
         padPrefs: {rtcEnabled: false, fakeWebrtcFirefox: true},
+        cb: () => {
+          helper.waitFor(() => helper.padChrome$, 1000).done(done);
+        }
       });
       this.timeout(60000);
     });
@@ -25,9 +28,12 @@ describe('enable and disable webrtc', function () {
   });
 
   context('WebRTC is enabled', function () {
-    before(async function () {
-      await helper.newPad({
+    before(function (done) {
+      helper.newPad({
         padPrefs: {rtcEnabled: true, fakeWebrtcFirefox: true},
+        cb: () => {
+          helper.waitFor(() => helper.padChrome$, 1000).done(done);
+        }
       });
       this.timeout(60000);
     });

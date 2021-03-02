@@ -63,19 +63,38 @@ describe('Test the behavior of the interface buttons: Mute, Video Disable, Enlar
 
       this.timeout(60000);
 
-      expect(chrome$('video').css('width')).to.be('160px');
-      expect(chrome$('video').css('height')).to.be('116px');
+      // i.e., "160.25px" -> 160.25 the number
+      const num_from_css_size = (size) => {
+        expect(size.slice(-2)).to.be('px')
+        return Number(size.slice(0, -2))
+      }
+
+      // All of these sizes have to allow for tolerances.
+      // I.e. it has come back a quarter pixel off before.
+      const $video = chrome$('video')
+      expect(num_from_css_size($video.css('width'))).to.be.within(159, 161);
+      expect(num_from_css_size($video.css('height'))).to.be.within(115, 117);
 
       const $enlargeBtn = chrome$('.enlarge-btn');
       $enlargeBtn.click();
 
-      helper.waitFor(() => chrome$('video').css('width') === '260px' &&
-               chrome$('video').css('height') === '191px', 1000).done(() => {
+      // Expect it to grow to 260, 190
+      helper.waitFor(() =>
+        (
+          num_from_css_size($video.css('width')) > 259 &&
+          num_from_css_size($video.css('height')) > 190
+        ),
+        1000
+      ).done(() => {
         $enlargeBtn.click();
-        helper.waitFor(() => chrome$('video').css('width') === '160px' &&
-                 chrome$('video').css('height') === '116px', 1000).done(() => {
-          done();
-        });
+        // Expect it to shrink to 160, 116
+        helper.waitFor(() =>
+          (
+            num_from_css_size($video.css('width')) < 161 &&
+            num_from_css_size($video.css('height')) < 117
+          ),
+          1000
+        ).done(done)
       });
     });
 

@@ -2,13 +2,16 @@
 'use strict';
 
 describe('Test that we show the correct error messages when trying to start webrtc', function () {
-  before(async function () {
+  before(function (done) {
     // Make sure webrtc starts disabled so we have time to wrap getUserMedia
-    await helper.newPad({
+    helper.newPad({
       padPrefs: {
         rtcEnabled: true,
         fakeWebrtcFirefox: true,
       },
+      cb: () => {
+        helper.waitFor(() => helper.padChrome$, 1000).done(done);
+      }
     });
     this.timeout(60000);
   });
