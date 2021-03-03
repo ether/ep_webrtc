@@ -23,6 +23,19 @@ const sessioninfos = require('ep_etherpad-lite/node/handler/PadMessageHandler').
 const stats = require('ep_etherpad-lite/node/stats');
 let socketio;
 
+// Copied from:
+// https://github.com/ether/etherpad-lite/blob/f95b09e0b6752a0d226d58d8b246831164dc9533/src/node/handler/PadMessageHandler.js#L1411-L1420
+const _getRoomSockets = (padId) => {
+  const ns = socketio.sockets; // Default namespace.
+  const adapter = ns.adapter;
+  // We could call adapter.clients(), but that method is unnecessarily asynchronous. Replicate what
+  // it does here, but synchronously to avoid a race condition. This code will have to change when
+  // we update to socket.io v3.
+  const room = adapter.rooms[padId];
+  if (!room) return [];
+  return Object.keys(room.sockets).map((id) => ns.connected[id]).filter((s) => s);
+};
+
 /**
  * Handles an RTC Message
  * @param client the client that send this message
@@ -32,14 +45,7 @@ const handleRTCMessage = (client, payload) => {
   const userId = sessioninfos[client.id].author;
   const to = payload.to;
   const padId = sessioninfos[client.id].padId;
-  const room = socketio.sockets.adapter.rooms[padId];
-  const clients = [];
-
-  if (room && room.sockets) {
-    for (const id of Object.keys(room.sockets)) {
-      clients.push(socketio.sockets.sockets[id]);
-    }
-  }
+  const clients = _getRoomSockets(padId);
 
   const msg = {
     type: 'COLLABROOM',
