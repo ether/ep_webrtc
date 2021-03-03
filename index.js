@@ -42,9 +42,11 @@ const _getRoomSockets = (padId) => {
  * @param message the message from the client
  */
 const handleRTCMessage = (client, payload) => {
-  const userId = sessioninfos[client.id].author;
+  const {[client.id]: {author: userId, padId} = {}} = sessioninfos;
+  // The handleMessage hook is executed asynchronously, so the user can disconnect between when the
+  // message arrives at Etherpad and when this function is called.
+  if (userId == null || padId == null) return;
   const to = payload.to;
-  const padId = sessioninfos[client.id].padId;
   const clients = _getRoomSockets(padId);
 
   const msg = {
