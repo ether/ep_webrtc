@@ -47,11 +47,11 @@ const rtc = (() => {
     // API HOOKS
     postAceInit: (hook, context, callback) => {
       self.setUrlParamString(window.location.search);
-      if (clientVars.webrtc.configError) {
+      if (clientVars.webrtc == null || clientVars.webrtc.configError) {
         $.gritter.add({
           title: 'Error',
-          text: `Ep_webrtc: There is an error with the configuration of this plugin.
-          Please inform the administrators of this site. They will see the details in their logs.`,
+          text: 'Ep_webrtc: There is an error with the configuration of this plugin. Please ' +
+              'inform the administrators of this site. They will see the details in their logs.',
           sticky: true,
           class_name: 'error',
         });
@@ -129,12 +129,14 @@ const rtc = (() => {
       // However keep in mind that we add our own errors in getUserMediaPolyfill
       switch (err.name) {
         case 'CustomNotSupportedError':
-          reason = `${html10n.get('pad.ep_webrtc.error.notSupported.sorry')
-          } - ${
-            html10n.get('pad.ep_webrtc.error.notSupported.howTo')
-          } - <a href="http://www.webrtc.org/" target="_new">${
-            html10n.get('pad.ep_webrtc.error.notSupported.findOutMore')
-          }</a>`;
+          reason = $('<div>')
+              .append($('<p>').text(html10n.get('pad.ep_webrtc.error.notSupported.sorry')))
+              .append($('<p>').text(html10n.get('pad.ep_webrtc.error.notSupported.howTo')))
+              .append($('<p>')
+                  .append($('<a>')
+                      .attr('href', 'http://www.webrtc.org/')
+                      .attr('target', '_new')
+                      .text(html10n.get('pad.ep_webrtc.error.notSupported.findOutMore'))));
           self.sendErrorStat('NotSupported');
           break;
         case 'CustomSecureConnectionError':
@@ -164,19 +166,25 @@ const rtc = (() => {
         case 'NotReadableError':
           // `err.message` might give useful info to the user (not necessarily
           // useful for other error messages)
-          reason = `${html10n.get('pad.ep_webrtc.error.notReadable')}<br><br>${err.message}`;
+          reason = $('<div>')
+              .append($('<p>').text(html10n.get('pad.ep_webrtc.error.notReadable')))
+              .append($('<p>').text(err.message));
           self.sendErrorStat('Hardware');
           break;
         case 'AbortError':
           // `err.message` might give useful info to the user (not necessarily useful for
           // other error messages)
-          reason = `${html10n.get('pad.ep_webrtc.error.otherCantAccess')}<br><br>${err.message}`;
+          reason = $('<div>')
+              .append($('<p>').text(html10n.get('pad.ep_webrtc.error.otherCantAccess')))
+              .append($('<p>').text(err.message));
           self.sendErrorStat('Abort');
           break;
         default:
           // `err` as a string might give useful info to the user
           // (not necessarily useful for other error messages)
-          reason = `${html10n.get('pad.ep_webrtc.error.other')}<br><br>${err}`;
+          reason = $('<div>')
+              .append($('<p>').text(html10n.get('pad.ep_webrtc.error.other')))
+              .append($('<p>').text(err));
           self.sendErrorStat('Unknown');
       }
       $.gritter.add({
