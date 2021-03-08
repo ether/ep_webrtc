@@ -106,7 +106,7 @@ To ensure reliable connectivity we recommend setting both a STUN and TURN server
     "ep_webrtc" : {
       "iceServers":[
         {
-          "urls": [ "stun:216.246.6.224:3478", "stun:74.125.140.127:19302", "stun:[2a00:1450:400c:c08::7f]:19302" ]
+          "urls": [ "stun:74.125.140.127:19302", "stun:[2a00:1450:400c:c08::7f]:19302" ]
         }
           ,
         {
