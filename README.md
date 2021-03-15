@@ -2,7 +2,8 @@
 
 # ep_webrtc
 
-WebRTC-based audio/video chat with other users visiting the same pad.
+WebRTC-based audio/video chat and screen sharing with other users visiting the
+same pad.
 
 The audio and video streams are peer-to-peer: every user sends a copy of their
 audio/video streams directly to every other user visiting the same pad. Because

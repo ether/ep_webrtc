@@ -84,6 +84,7 @@ class LocalTracks extends EventTargetPolyfill {
   constructor() {
     super();
     Object.defineProperty(this, 'stream', {value: new MediaStream(), writeable: false});
+    this.videoIsScreenshare = false;
   }
 
   _getTracks(kind) {
@@ -447,7 +448,10 @@ exports.rtc = new class {
       if (newTrack != null) return;
       switch (oldTrack.kind) {
         case 'audio': this._selfViewButtons.audio.enabled = false; break;
-        case 'video': this._selfViewButtons.video.enabled = false; break;
+        case 'video':
+          this._selfViewButtons.video.enabled = false;
+          this._selfViewButtons.screenshare.enabled = false;
+          break;
       }
     });
     this._pad = null;
@@ -651,27 +655,52 @@ exports.rtc = new class {
               (t) => t !== this._disabledSilence && t.readyState === 'live');
       if (addAudioTrack) devices.push('mic');
       const addVideoTrack = updateVideo && this._selfViewButtons.video.enabled &&
-          !this._localTracks.stream.getVideoTracks().some((t) => t.readyState === 'live');
+          (!this._localTracks.stream.getVideoTracks().some((t) => t.readyState === 'live') ||
+           this._localTracks.videoIsScreenshare);
       if (addVideoTrack) devices.push('cam');
-      if (addAudioTrack || addVideoTrack) {
+      const addScreenshareTrack = updateVideo && this._selfViewButtons.screenshare.enabled &&
+          !this._selfViewButtons.video.enabled && // Video button overrides screenshare button.
+          (!this._localTracks.stream.getVideoTracks().some((t) => t.readyState === 'live') ||
+           !this._localTracks.videoIsScreenshare);
+      const getUserMedia = async () => {
+        if (!addAudioTrack && !addVideoTrack) return new MediaStream();
         debug(`requesting permission to access ${devices.join(' and ')}`);
-        let stream;
-        try {
-          stream = await window.navigator.mediaDevices.getUserMedia({
-            audio: addAudioTrack,
-            video: addVideoTrack && {width: {ideal: 320}, height: {ideal: 240}},
-          });
-          debug('successfully accessed device(s)');
-        } catch (err) {
-          // Display but otherwise ignore the error. The button(s) will be toggled back to
-          // disabled below if we failed to access the microphone/camera. The user can re-click
-          // the button to try again.
-          err.devices = devices;
-          (async () => this.showUserMediaError(err))();
-          stream = new MediaStream();
-        }
-        for (const track of stream.getTracks()) this._localTracks.setTrack(track.kind, track);
-      }
+        const stream = await window.navigator.mediaDevices.getUserMedia({
+          audio: addAudioTrack,
+          video: addVideoTrack && {width: {ideal: 320}, height: {ideal: 240}},
+        });
+        debug('successfully accessed device(s)');
+        return stream;
+      };
+      const getDisplayMedia = async () => {
+        if (!addScreenshareTrack) return new MediaStream();
+        debug('requesting permission to access screen');
+        const stream = await window.navigator.mediaDevices.getDisplayMedia({
+          video: {cursor: 'always'},
+        });
+        debug('successfully accessed screen');
+        return new MediaStream(stream.getVideoTracks());
+      };
+      await Promise.all([[getUserMedia, devices], [getDisplayMedia, ['screen']]].map(
+          async ([getMedia, devices]) => {
+            let stream;
+            try {
+              stream = await getMedia();
+            } catch (err) {
+              // Display but otherwise ignore the error. The button(s) will be toggled back to
+              // disabled below if we failed to access the microphone/camera. The user can re-click
+              // the button to try again.
+              err.devices = devices;
+              (async () => this.showUserMediaError(err))();
+              stream = new MediaStream();
+            }
+            for (const track of stream.getTracks()) {
+              if (track.kind === 'video') {
+                this._localTracks.videoIsScreenshare = devices.includes('screen');
+              }
+              this._localTracks.setTrack(track.kind, track);
+            }
+          }));
       if (updateAudio) {
         for (const track of this._localTracks.stream.getAudioTracks()) {
           // Re-check the state of the button because the user might have clicked it while
@@ -685,12 +714,15 @@ exports.rtc = new class {
       if (updateVideo) {
         for (const track of this._localTracks.stream.getVideoTracks()) {
           // Re-check the state of the button because the user might have clicked it while
-          // getUserMedia() was running.
-          track.enabled = this._selfViewButtons.video.enabled;
+          // getUserMedia() or getDisplayMedia() was running.
+          track.enabled = this._localTracks.videoIsScreenshare
+            ? this._selfViewButtons.screenshare.enabled : this._selfViewButtons.video.enabled;
         }
         const hasVideo = this._localTracks.stream.getVideoTracks().some(
             (t) => t.enabled && t.readyState === 'live');
-        this._selfViewButtons.video.enabled = hasVideo;
+        this._selfViewButtons.video.enabled = hasVideo && !this._localTracks.videoIsScreenshare;
+        this._selfViewButtons.screenshare.enabled =
+            hasVideo && this._localTracks.videoIsScreenshare;
       }
     } finally {
       if (updateVideo) this._trackLocks.video.unlock();
@@ -936,10 +968,11 @@ exports.rtc = new class {
     });
 
     // /////
-    // Disable Video button
+    // Video and Screen Sharing Buttons
     // /////
 
     let $videoBtn;
+    let $screenshareBtn;
     if (isLocal) {
       $videoBtn = $('<span>').addClass('interface-btn video-btn buttonicon').appendTo($interface);
       this._selfViewButtons.video = {
@@ -956,11 +989,43 @@ exports.rtc = new class {
       if (videoHardDisabled) {
         $videoBtn.attr('title', 'Video disallowed by admin').addClass('disallowed');
       }
+      const {navigator: {mediaDevices: {getDisplayMedia} = {}} = {}} = window;
+      $screenshareBtn = $('<span>')
+          .addClass('interface-btn screenshare-btn buttonicon')
+          .css('display', typeof getDisplayMedia === 'function' ? '' : 'none')
+          .appendTo($interface);
+      this._selfViewButtons.screenshare = {
+        get enabled() { return !$screenshareBtn.hasClass('off'); },
+        set enabled(val) {
+          $screenshareBtn
+              .toggleClass('off', !val)
+              .attr('title', val ? 'Stop screen share' : 'Start screen share');
+        },
+      };
+      this._selfViewButtons.screenshare.enabled = false;
       addAsyncEventHandlers($videoBtn, videoHardDisabled ? {} : {
         click: async () => {
           const videoEnabled = !this._selfViewButtons.video.enabled;
           _debug(`video button clicked to ${videoEnabled ? 'en' : 'dis'}able video`);
           this._selfViewButtons.video.enabled = videoEnabled;
+          // Unconditionally disable screen sharing. Either the camera was previously disabled in
+          // which case the user now wants to share camera video, or the camera was previously
+          // enabled in which case the user now wants to shut off all video.
+          this._selfViewButtons.screenshare.enabled = false;
+          await this.updateLocalTracks({updateVideo: true});
+          // Don't use `await` here -- see the comment for the audio button click handler above.
+          this.unmuteAndPlayAll();
+        },
+      });
+      addAsyncEventHandlers($screenshareBtn, {
+        click: async () => {
+          const screenshareEnabled = !this._selfViewButtons.screenshare.enabled;
+          _debug(`button clicked to ${screenshareEnabled ? 'en' : 'dis'}able screen sharing`);
+          // Unconditionally disable the camera. Either screen sharing was previously disabled in
+          // which case the user now wants to share the screen, or screen sharing was previously
+          // enabled in which case the user wants to shut off all video.
+          this._selfViewButtons.video.enabled = false;
+          this._selfViewButtons.screenshare.enabled = screenshareEnabled;
           await this.updateLocalTracks({updateVideo: true});
           // Don't use `await` here -- see the comment for the audio button click handler above.
           this.unmuteAndPlayAll();
@@ -1047,7 +1112,7 @@ exports.rtc = new class {
         {
           cls: 'videoended-error-btn',
           title: 'Video stopped unexpectedly. Click to retry.',
-          click: () => $videoBtn.click(),
+          click: () => (this._localTracks.videoIsScreenshare ? $screenshareBtn : $videoBtn).click(),
         },
       ] : []),
     ];

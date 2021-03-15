@@ -5,9 +5,11 @@
     "ep_webrtc_error_permission_cam": "Failed to get permission to access your camera.",
     "ep_webrtc_error_permission_mic": "Failed to get permission to access your microphone.",
     "ep_webrtc_error_permission_cammic": "Failed to get permission to access your camera and microphone.",
+    "ep_webrtc_error_permission_screen": "Failed to get permission to access your screen.",
     "ep_webrtc_error_notFound_cam": "Failed to access your camera.",
     "ep_webrtc_error_notFound_mic": "Failed to access your microphone.",
     "ep_webrtc_error_notFound_cammic": "Failed to access your camera and microphone.",
+    "ep_webrtc_error_notFound_screen": "Failed to access your screen.",
     "ep_webrtc_error_notReadable": "Sorry, a hardware error occurred that prevented access to your camera and/or microphone:",
     "ep_webrtc_error_otherCantAccess": "Sorry, the browser doesn't have access to your camera and/or microphone. Please check permissions in your browser's settings. This is most likely not a hardware error:",
 

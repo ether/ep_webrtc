@@ -102,6 +102,12 @@
 #rtcbox .interface-btn.video-btn:before { content: '\e83b'; }
 #rtcbox .interface-btn.video-btn.off:before { content: '\e83c'; }
 
+#rtcbox .interface-btn.screenshare-btn:before {
+  content: "\f108";
+  font-family: "fontawesome-ep_webrtc";
+}
+#rtcbox .interface-btn.screenshare-btn.off:before { content: "\f109"; }
+
 #rtcbox .interface-btn.enlarge-btn:before { content: '\e840'; }
 #rtcbox .interface-btn.enlarge-btn.large:before { content: '\e83f'; }
 
