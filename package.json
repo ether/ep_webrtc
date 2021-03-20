@@ -28,6 +28,9 @@
     "eslint-plugin-you-dont-need-lodash-underscore": "^6.10.0"
   },
   "eslintConfig": {
+    "ignorePatterns": [
+      "/static/js/adapter.js"
+    ],
     "root": true,
     "extends": "etherpad/plugin"
   },
