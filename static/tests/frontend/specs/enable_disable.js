@@ -8,7 +8,7 @@ describe('enable and disable webrtc', function () {
         padPrefs: {rtcEnabled: false, fakeWebrtcFirefox: true},
         cb: () => {
           helper.waitFor(() => helper.padChrome$, 1000).done(done);
-        }
+        },
       });
       this.timeout(60000);
     });
@@ -33,7 +33,7 @@ describe('enable and disable webrtc', function () {
         padPrefs: {rtcEnabled: true, fakeWebrtcFirefox: true},
         cb: () => {
           helper.waitFor(() => helper.padChrome$, 1000).done(done);
-        }
+        },
       });
       this.timeout(60000);
     });
