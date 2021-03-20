@@ -11,7 +11,7 @@ describe('Test that we show the correct error messages when trying to start webr
       },
       cb: () => {
         helper.waitFor(() => helper.padChrome$, 1000).done(done);
-      }
+      },
     });
     this.timeout(60000);
   });
