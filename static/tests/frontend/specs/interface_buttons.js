@@ -64,7 +64,7 @@ describe('Test the behavior of the interface buttons: Mute, Video Disable, Enlar
       this.timeout(60000);
 
       // i.e., "160.25px" -> 160.25 the number
-      const num_from_css_size = (size) => {
+      const numFromCssSize = (size) => {
         expect(size.slice(-2)).to.be('px');
         return Number(size.slice(0, -2));
       };
@@ -72,24 +72,24 @@ describe('Test the behavior of the interface buttons: Mute, Video Disable, Enlar
       // All of these sizes have to allow for tolerances.
       // I.e. it has come back a quarter pixel off before.
       const $video = chrome$('video');
-      expect(num_from_css_size($video.css('width'))).to.be.within(159, 161);
-      expect(num_from_css_size($video.css('height'))).to.be.within(115, 117);
+      expect(numFromCssSize($video.css('width'))).to.be.within(159, 161);
+      expect(numFromCssSize($video.css('height'))).to.be.within(115, 117);
 
       const $enlargeBtn = chrome$('.enlarge-btn');
       $enlargeBtn.click();
 
       // Expect it to grow to 260, 190
       helper.waitFor(() => (
-        num_from_css_size($video.css('width')) > 259 &&
-          num_from_css_size($video.css('height')) > 190
+        numFromCssSize($video.css('width')) > 259 &&
+          numFromCssSize($video.css('height')) > 190
       ),
       1000
       ).done(() => {
         $enlargeBtn.click();
         // Expect it to shrink to 160, 116
         helper.waitFor(() => (
-          num_from_css_size($video.css('width')) < 161 &&
-            num_from_css_size($video.css('height')) < 117
+          numFromCssSize($video.css('width')) < 161 &&
+            numFromCssSize($video.css('height')) < 117
         ),
         1000
         ).done(done);

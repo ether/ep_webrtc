@@ -23,8 +23,8 @@ const rtc = (() => {
   const videoSizes = {large: '260px', small: '160px'};
   let isActive = false;
   let urlParamString;
-  const pc_config = {};
-  const pc_constraints = {
+  const pcConfig = {};
+  const pcConstraints = {
     optional: [
       {
         DtlsSrtpKeyAgreement: true,
@@ -65,7 +65,7 @@ const rtc = (() => {
           class_name: 'error',
         });
       }
-      pc_config.iceServers =
+      pcConfig.iceServers =
         clientVars.webrtc && clientVars.webrtc.iceServers
           ? clientVars.webrtc.iceServers
           : [
@@ -573,7 +573,7 @@ const rtc = (() => {
             userId
         );
       }
-      pc[userId] = new RTCPeerConnection(pc_config, pc_constraints);
+      pc[userId] = new RTCPeerConnection(pcConfig, pcConstraints);
       pc[userId].onicecandidate = (event) => {
         if (event.candidate) {
           self.sendMessage(userId, {
