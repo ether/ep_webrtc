@@ -182,12 +182,12 @@ exports.eejsBlock_mySettings = (hook, context, callback) => {
   callback();
 };
 
-exports.eejsBlock_editorContainerBox = (hook_name, args, cb) => {
+exports.eejsBlock_editorContainerBox = (hookName, args, cb) => {
   args.content += eejs.require('./templates/webrtc.ejs', {}, module);
   return cb();
 };
 
-exports.eejsBlock_styles = (hook_name, args, cb) => {
+exports.eejsBlock_styles = (hookName, args, cb) => {
   args.content += eejs.require('./templates/styles.html', {}, module);
   return cb();
 };
