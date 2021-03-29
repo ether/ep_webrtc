@@ -1,0 +1,19 @@
+{
+	"@metadata": {
+		"authors": [
+			"Yardom78"
+		]
+	},
+	"pad.settings.enablertc": "Zapnúť Audio/Video rozhovor",
+	"pad.ep_webrtc.error.notSupported.sorry": "Prepáčte, Váš prehliadač nepodporuje WebRTC (alebo ho máte v nastaveniach vypnutý).",
+	"pad.ep_webrtc.error.notSupported.howTo": "Pre zúčastnenie sa na tomto audio/video rozhovore musíte použiť prehliadač s podporou WebRTC ako napríklad Chrome, Firefox, Safari, Edge, alebo Opera.",
+	"pad.ep_webrtc.error.notSupported.findOutMore": "Kliknite sem pre viac informácií.",
+	"pad.ep_webrtc.error.ssl": "Prepáčte, pre používanie WebRTC musíte do Vášho Etherpadu nainštalovať certifikáty SSL.",
+	"pad.ep_webrtc.error.permission": "Prepáčte, musíte povoliť používanie kamery a mikrofónu.",
+	"pad.ep_webrtc.error.notFound": "Prepáčte, na Vašom zariadení sme nenašli vhodnú kameru. Ak máte kameru, uistite sa, že je správne nastavená a obnovte stránku.",
+	"pad.ep_webrtc.error.notReadable": "Prepáčte, došlo k hardvérovej chybe, ktorá znemožňuje prístup k Vašej kamere a/alebo mikrofónu:",
+	"pad.ep_webrtc.error.otherCantAccess": "Prepáčte, prehliadač nemá prístup k Vašej kamere a/alebo mikrofónu. Prosím skontrolujte nastavenia vo Vašom prehliadači.",
+	"pad.ep_webrtc.error.other": "Prepáčte, došlo k neznámej chybe:",
+	"pad.settings.audioenabledonstart": "Pri spustení zapnúť zvuk",
+	"pad.settings.videoenabledonstart": "Pri spustení zapnúť obraz"
+}
