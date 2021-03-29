@@ -440,7 +440,7 @@ const rtc = (() => {
         payload: {data, to},
       });
     },
-    receiveMessage: (msg) => {
+    receiveMessage: async (msg) => {
       const peer = msg.from;
       const data = msg.data;
       const type = data.type;
@@ -500,15 +500,11 @@ const rtc = (() => {
           pc[peer].setRemoteDescription(answer, () => {}, logError);
         }
       } else if (type === 'icecandidate') {
-        if (pc[peer]) {
-          const candidate = new RTCIceCandidate(data.candidate);
-          const p = pc[peer].addIceCandidate(candidate);
-          if (p) {
-            p.then(() => {
-              // Do stuff when the candidate is successfully passed to the ICE agent
-            }).catch(() => {
-              console.log('Error: Failure during addIceCandidate()', data);
-            });
+        if (pc[peer] && data.candidate) {
+          try {
+            await pc[peer].addIceCandidate(data.candidate);
+          } catch (err) {
+            console.error('Failed to add ICE candidate:', err);
           }
         }
       } else {
