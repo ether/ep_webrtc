@@ -1,22 +1,22 @@
 {
-    "parts": [
-        {
-            "name": "ep_webrtc",
-            "hooks": {
-                "clientVars": "ep_webrtc/index:clientVars",
-                "handleMessage" : "ep_webrtc/index:handleMessage",
-                "socketio" : "ep_webrtc/index:setSocketIO",
-                "eejsBlock_mySettings": "ep_webrtc/index",
-                "eejsBlock_editorContainerBox": "ep_webrtc/index",
-                "eejsBlock_styles": "ep_webrtc/index"
-            },
-            "client_hooks": {
-                "postAceInit": "ep_webrtc/static/js/webrtc:rtc.postAceInit",
-                "aceSetAuthorStyle": "ep_webrtc/static/js/webrtc:rtc.aceSetAuthorStyle",
-                "userJoinOrUpdate": "ep_webrtc/static/js/webrtc:rtc.userJoinOrUpdate",
-                "userLeave": "ep_webrtc/static/js/webrtc:rtc.userLeave",
-                "handleClientMessage_RTC_MESSAGE" : "ep_webrtc/static/js/webrtc:rtc.handleClientMessage_RTC_MESSAGE"
-            }
-        }
-    ]
+  "parts": [
+    {
+      "name": "ep_webrtc",
+      "hooks": {
+        "clientVars": "ep_webrtc/index:clientVars",
+        "handleMessage": "ep_webrtc/index:handleMessage",
+        "socketio": "ep_webrtc/index:setSocketIO",
+        "eejsBlock_mySettings": "ep_webrtc/index",
+        "eejsBlock_editorContainerBox": "ep_webrtc/index",
+        "eejsBlock_styles": "ep_webrtc/index"
+      },
+      "client_hooks": {
+        "postAceInit": "ep_webrtc/static/js/webrtc:rtc.postAceInit",
+        "aceSetAuthorStyle": "ep_webrtc/static/js/webrtc:rtc.aceSetAuthorStyle",
+        "userJoinOrUpdate": "ep_webrtc/static/js/webrtc:rtc.userJoinOrUpdate",
+        "userLeave": "ep_webrtc/static/js/webrtc:rtc.userLeave",
+        "handleClientMessage_RTC_MESSAGE": "ep_webrtc/static/js/webrtc:rtc.handleClientMessage_RTC_MESSAGE"
+      }
+    }
+  ]
 }
