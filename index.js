@@ -18,9 +18,10 @@ const log4js = require('ep_etherpad-lite/node_modules/log4js');
 const statsLogger = log4js.getLogger('stats');
 const configLogger = log4js.getLogger('configuration');
 const eejs = require('ep_etherpad-lite/node/eejs/');
-const settings = require('ep_etherpad-lite/node/utils/Settings');
 const sessioninfos = require('ep_etherpad-lite/node/handler/PadMessageHandler').sessioninfos;
 const stats = require('ep_etherpad-lite/node/stats');
+
+let settings;
 let socketio;
 
 // Copied from:
@@ -99,35 +100,35 @@ exports.clientVars = (hook, context, callback) => {
   }
 
   let enabled = true;
-  if (settings.ep_webrtc && settings.ep_webrtc.enabled === false) {
-    enabled = settings.ep_webrtc.enabled;
+  if (settings.enabled === false) {
+    enabled = settings.enabled;
   }
 
   let audioDisabled = 'none';
-  if (settings.ep_webrtc && settings.ep_webrtc.audio) {
-    audioDisabled = settings.ep_webrtc.audio.disabled;
+  if (settings.audio) {
+    audioDisabled = settings.audio.disabled;
   }
 
   let videoDisabled = 'none';
-  if (settings.ep_webrtc && settings.ep_webrtc.video) {
-    videoDisabled = settings.ep_webrtc.video.disabled;
+  if (settings.video) {
+    videoDisabled = settings.video.disabled;
   }
 
   let iceServers = [{url: 'stun:stun.l.google.com:19302'}];
-  if (settings.ep_webrtc && settings.ep_webrtc.iceServers) {
-    iceServers = settings.ep_webrtc.iceServers;
+  if (settings.iceServers) {
+    iceServers = settings.iceServers;
   }
 
   let listenClass = false;
-  if (settings.ep_webrtc && settings.ep_webrtc.listenClass) {
-    listenClass = settings.ep_webrtc.listenClass;
+  if (settings.listenClass) {
+    listenClass = settings.listenClass;
   }
 
   let videoSizes = {};
-  if (settings.ep_webrtc && settings.ep_webrtc.video && settings.ep_webrtc.video.sizes) {
+  if (settings.video && settings.video.sizes) {
     videoSizes = {
-      large: settings.ep_webrtc.video.sizes.large,
-      small: settings.ep_webrtc.video.sizes.small,
+      large: settings.video.sizes.large,
+      small: settings.video.sizes.small,
     };
   }
 
@@ -160,18 +161,18 @@ exports.setSocketIO = (hook, context, callback) => {
 };
 
 exports.eejsBlock_mySettings = (hook, context, callback) => {
-  const enabled = (settings.ep_webrtc && settings.ep_webrtc.enabled === false)
+  const enabled = (settings.enabled === false)
     ? 'unchecked'
     : 'checked';
 
   let audioDisabled = 'none';
-  if (settings.ep_webrtc && settings.ep_webrtc.audio) {
-    audioDisabled = settings.ep_webrtc.audio.disabled;
+  if (settings.audio) {
+    audioDisabled = settings.audio.disabled;
   }
 
   let videoDisabled = 'none';
-  if (settings.ep_webrtc && settings.ep_webrtc.video) {
-    videoDisabled = settings.ep_webrtc.video.disabled;
+  if (settings.video) {
+    videoDisabled = settings.video.disabled;
   }
 
   context.content += eejs.require('./templates/settings.ejs', {
@@ -192,25 +193,15 @@ exports.eejsBlock_styles = (hookName, args, cb) => {
   return cb();
 };
 
-const validateSettings = () => {
-  if (settings.ep_webrtc && settings.ep_webrtc.audio && settings.ep_webrtc.audio.disabled) {
-    if (
-      settings.ep_webrtc.audio.disabled !== 'none' &&
-      settings.ep_webrtc.audio.disabled !== 'hard' &&
-      settings.ep_webrtc.audio.disabled !== 'soft'
-    ) {
-      configLogger.error('Invalid value in settings.json for ep_webrtc.audio.disabled');
-      return false;
-    }
-  }
+exports.loadSettings = async (hookName, {settings: {ep_webrtc = {}}}) => {
+  settings = ep_webrtc;
+};
 
-  if (settings.ep_webrtc && settings.ep_webrtc.video && settings.ep_webrtc.video.disabled) {
-    if (
-      settings.ep_webrtc.video.disabled !== 'none' &&
-      settings.ep_webrtc.video.disabled !== 'hard' &&
-      settings.ep_webrtc.video.disabled !== 'soft'
-    ) {
-      configLogger.error('Invalid value in settings.json for ep_webrtc.video.disabled');
+const validateSettings = () => {
+  for (const k of ['audio', 'video']) {
+    const {[k]: {disabled} = {}} = settings;
+    if (disabled != null && !['none', 'hard', 'soft'].includes(disabled)) {
+      configLogger.error(`Invalid value in settings.json for ep_webrtc.${k}.disabled`);
       return false;
     }
   }

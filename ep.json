@@ -5,6 +5,7 @@
       "hooks": {
         "clientVars": "",
         "handleMessage": "",
+        "loadSettings": "",
         "socketio": ":setSocketIO",
         "eejsBlock_mySettings": "",
         "eejsBlock_editorContainerBox": "",
