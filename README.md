@@ -3,8 +3,6 @@
 ep_webrtc
 =========
 
-[![Travis (.org)](https://img.shields.io/travis/ether/ep_webrtc)](https://travis-ci.org/github/ether/ep_webrtc)
-
 WebRTC based audio/video chat for your documents.
 This plugin creates an audio/video chat with all
 active users of the pad using WebRTC.
