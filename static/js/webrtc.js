@@ -98,15 +98,10 @@ const rtc = (() => {
       callback();
     },
     userJoinOrUpdate: (hook, context, callback) => {
-      /*
-      var userId = context.userInfo.userId;
-      console.log('userJoinOrUpdate', context, context.userInfo.userId, pc[userId]);
-      */
       callback();
     },
     userLeave: (hook, context, callback) => {
       const userId = context.userInfo.userId;
-      // console.log('user left, hang up', userId, context, pc[userId]);
       if (userId && pc[userId]) {
         self.hangup(userId, false);
       }
@@ -257,8 +252,6 @@ const rtc = (() => {
           .getConnectedUsers()
           .filter((user) => user.userId === userId);
       const user = result.length > 0 ? result[0] : null;
-      // if (user && userId == self.getUserId()) user.name = "Me";
-      // Commented by JM because it made every user name "Me"
       return user;
     },
     setStream: (userId, stream) => {
@@ -445,13 +438,8 @@ const rtc = (() => {
       const data = msg.data;
       const type = data.type;
       if (peer === self.getUserId()) {
-        // console.log('ignore own messages');
         return;
       }
-      /*
-      if (type != 'icecandidate')
-        console.log('receivedMessage', 'peer', peer, 'type', type, 'data', data);
-      */
       if (type === 'hangup') {
         self.hangup(peer, false);
       } else if (type === 'offer') {
@@ -585,18 +573,6 @@ const rtc = (() => {
       pc[userId].onremovestream = (event) => {
         self.setStream(userId, '');
       };
-      /*
-      pc[userId].onnsignalingstatechange = function(event) {
-        console.log('onsignalingstatechange;', event);
-      };
-      pc[userId].oniceconnectionstatechange = function(event) {
-        if (event.target.iceConnectionState == 'disconnected'
-            || event.target.iceConnectionState == 'closed') {
-          console.log('hangup due to iceConnectionState', event.target.iceConnectionState);
-          self.hangup(userId, false);
-        }
-      };
-      */
     },
     getUserMedia: () => {
       const mediaConstraints = {
