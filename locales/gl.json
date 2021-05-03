@@ -5,9 +5,6 @@
 		]
 	},
 	"pad.settings.enablertc": "Activar conversa de vídeo/audio",
-	"pad.ep_webrtc.error.notSupported.sorry": "Desculpa, o navegador non soporta WebRTC (ou telo desactivado nos axustes).",
-	"pad.ep_webrtc.error.notSupported.howTo": "Para participar nesta conversa de audio/vídeo tes que usar un navegador compatible con WebRTC como Chrome, Firefox, Safari, Edge ou Opera.",
-	"pad.ep_webrtc.error.notSupported.findOutMore": "Preme aquí para saber máis.",
 	"pad.ep_webrtc.error.ssl": "Desculpa, tes que instalar certificados SSL para que a túa instancia use WebRTC.",
 	"pad.ep_webrtc.error.permission": "Desculpa, tes que darnos permiso para usar a túa cámara e micrófono.",
 	"pad.ep_webrtc.error.notFound": "Desculpa, non atopamos unha cámara dispoñible no teu dispositivo. Se tes unha, asegúrate de que está correctamente configurada e actualiza esta web para reintentalo.",

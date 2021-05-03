@@ -3,9 +3,6 @@
 		"authors": []
 	},
 	"pad.settings.enablertc": "Hang/video csevegés engedélyezése",
-	"pad.ep_webrtc.error.notSupported.sorry": "Sajnáljuk, a böngésző nem támogatja a WebRTC-t (vagy le van tiltva a beállításokban).",
-	"pad.ep_webrtc.error.notSupported.howTo": "A hang- vagy videobeszélgetésben való részvételhez böngészőt kell használnia WebRTC támogatással, például Chrome, Firefox, Safari, Edge vagy Opera.",
-	"pad.ep_webrtc.error.notSupported.findOutMore": "További információért kattintson ide.",
 	"pad.ep_webrtc.error.ssl": "A WebRTC az Etherpad-példány használatához SSL-tanúsítványt kell telepíteni.",
 	"pad.ep_webrtc.error.permission": "Kérjük, engedélyezze a fényképezőgép és a mikrofon engedélyét.",
 	"pad.ep_webrtc.error.notFound": "Sajnos nem találtunk megfelelő fényképezőgépet az eszközén. Ha van fényképezőgépe, ellenőrizze, hogy megfelelően van-e beállítva és frissítse újra ezt a weboldalt az újrapróbálkozáshoz.",

@@ -5,9 +5,6 @@
 		]
 	},
 	"pad.settings.enablertc": "Trowch y Sgwrs Sain/Fideo ymlaen",
-	"pad.ep_webrtc.error.notSupported.sorry": "'Dyw eich porwr ddim yn cefnogi WebRTC, neu mae wedi'i analluogi",
-	"pad.ep_webrtc.error.notSupported.howTo": "I gymryd rhan yn y sgwrs fideo/sain, mae'n rhaid cael porwr WebRTC  ee Chrome, Firefox, Safari, Edge, neu Opera.",
-	"pad.ep_webrtc.error.notSupported.findOutMore": "Cliciwch yma i ganfod rhagor.",
 	"pad.ep_webrtc.error.ssl": "Mae'n rhaid gosod tystysgrif SSL ar gyfer eich Etherpad i ddefnyddio WebRTC.",
 	"pad.ep_webrtc.error.permission": "Er mwyn i ni ddefnyddio'ch camera / meic, rhowch ganiatad!",
 	"pad.ep_webrtc.error.notFound": "Methwyd a chael hyd i gamera addas ar eich dyfais.",

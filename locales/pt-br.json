@@ -6,9 +6,6 @@
 		]
 	},
 	"pad.settings.enablertc": "Ativar bate-papo de áudio/vídeo",
-	"pad.ep_webrtc.error.notSupported.sorry": "Desculpe, seu navegador não suporta WebRTC (ou você o desativou em suas configurações).",
-	"pad.ep_webrtc.error.notSupported.howTo": "Para participar deste bate-papo de áudio/vídeo, você deve usar um navegador com suporte WebRTC, como Chrome, Firefox, Safari, Edge ou Opera.",
-	"pad.ep_webrtc.error.notSupported.findOutMore": "Clique aqui para saber mais.",
 	"pad.ep_webrtc.error.ssl": "Desculpe, você precisa instalar certificados SSL para sua instância Etherpad para usar WebRTC.",
 	"pad.ep_webrtc.error.permission": "Desculpe, você precisa nos dar permissão para usar sua câmera e microfone.",
 	"pad.ep_webrtc.error.notFound": "Não foi possível encontrar uma câmera adequada em seu dispositivo. Se você tiver uma câmera, certifique-se de configurá-la corretamente e atualize este site para tentar novamente.",

@@ -5,9 +5,6 @@
 		]
 	},
 	"pad.settings.enablertc": "Activer la conversation audio/vidéo",
-	"pad.ep_webrtc.error.notSupported.sorry": "Désolé, votre navigateur ne prend pas en charge WebRTC (ou vous l’avez désactivé dans vos paramètres).",
-	"pad.ep_webrtc.error.notSupported.howTo": "Pour participer à cette conversation audio/vidéo, vous devez utiliser un navigateur prenant en charge WebRTC comme Chrome, Firefox, Safari, Edge ou Opera.",
-	"pad.ep_webrtc.error.notSupported.findOutMore": "Cliquez ici pour en savoir plus.",
 	"pad.ep_webrtc.error.ssl": "Désolé, vous devez installer des certificats SSL pour votre instance Etherpad afin d’utiliser WebRTC.",
 	"pad.ep_webrtc.error.permission": "Désolé, vous devez nous autoriser à utiliser votre caméra et votre micro.",
 	"pad.ep_webrtc.error.notFound": "Désolé, nous n’avons trouvé aucune caméra adaptée sur votre appareil. Si vous avez une caméra, assurez-vous qu’elle est correctement configurée et actualisez ce site Web pour réessayer.",
