@@ -168,13 +168,13 @@ const rtc = (() => {
     hide: () => {
       $('#rtcbox').hide();
     },
-    activate: () => {
+    activate: async () => {
       $('#options-enablertc').prop('checked', true);
-      if (isActive) return Promise.resolve();
+      if (isActive) return;
       self.show();
       padcookie.setPref('rtcEnabled', true);
       isActive = true;
-      return self.getUserMedia();
+      await self.getUserMedia();
     },
     deactivate: () => {
       $('#options-enablertc').prop('checked', false);
@@ -507,7 +507,7 @@ const rtc = (() => {
         self.setStream(userId, '');
       };
     },
-    getUserMedia: () => {
+    getUserMedia: async () => {
       const mediaConstraints = {
         audio: clientVars.webrtc.audio.disabled !== 'hard',
         video: clientVars.webrtc.video.disabled !== 'hard' && {
@@ -523,35 +523,35 @@ const rtc = (() => {
         // --use-fake-device-for-media-stream
         mediaConstraints.fake = true;
       }
-      return window.navigator.mediaDevices
-          .getUserMedia(mediaConstraints)
-          .then((stream) => {
-          // Disable audio and/or video according to user/site settings.
-          // Do this before setting `localStream` to avoid a race condition
-          // that might flash the video on for an instant before disabling it.
-            const audioTrack = stream.getAudioTracks()[0];
-            // using `.prop("checked") === true` to make absolutely sure the result is a boolean
-            // we don't want bugs when it comes to muting/turning off video
-            if (audioTrack) {
-              audioTrack.enabled = $('#options-audioenabledonstart').prop('checked') === true;
-            }
-            const videoTrack = stream.getVideoTracks()[0];
-            if (videoTrack) {
-              videoTrack.enabled = $('#options-videoenabledonstart').prop('checked') === true;
-            }
+      try {
+        const stream = await window.navigator.mediaDevices.getUserMedia(mediaConstraints);
+        // Disable audio and/or video according to user/site settings.
+        // Do this before setting `localStream` to avoid a race condition
+        // that might flash the video on for an instant before disabling it.
+        const audioTrack = stream.getAudioTracks()[0];
+        // using `.prop("checked") === true` to make absolutely sure the result is a boolean
+        // we don't want bugs when it comes to muting/turning off video
+        if (audioTrack) {
+          audioTrack.enabled = $('#options-audioenabledonstart').prop('checked') === true;
+        }
+        const videoTrack = stream.getVideoTracks()[0];
+        if (videoTrack) {
+          videoTrack.enabled = $('#options-videoenabledonstart').prop('checked') === true;
+        }
 
-            localStream = stream;
-            self.setStream(self._pad.getUserId(), stream);
-            self._pad.collabClient.getConnectedUsers().forEach((user) => {
-              if (user.userId !== self.getUserId()) {
-                if (pc[user.userId]) {
-                  self.hangup(user.userId);
-                }
-                self.call(user.userId);
-              }
-            });
-          })
-          .catch((err) => { self.showUserMediaError(err); });
+        localStream = stream;
+        self.setStream(self._pad.getUserId(), stream);
+        self._pad.collabClient.getConnectedUsers().forEach((user) => {
+          if (user.userId !== self.getUserId()) {
+            if (pc[user.userId]) {
+              self.hangup(user.userId);
+            }
+            self.call(user.userId);
+          }
+        });
+      } catch (err) {
+        self.showUserMediaError(err);
+      }
     },
     avInURL: () => {
       if (urlParamString.indexOf('av=YES') > -1) {
