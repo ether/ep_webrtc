@@ -23,19 +23,6 @@ const rtc = (() => {
   let isActive = false;
   let urlParamString;
   const pcConfig = {};
-  const pcConstraints = {
-    optional: [
-      {
-        DtlsSrtpKeyAgreement: true,
-      },
-    ],
-  };
-  const sdpConstraints = {
-    mandatory: {
-      OfferToReceiveAudio: true,
-      OfferToReceiveVideo: true,
-    },
-  };
   let localStream;
   const pc = {};
 
@@ -64,11 +51,7 @@ const rtc = (() => {
       pcConfig.iceServers =
         clientVars.webrtc && clientVars.webrtc.iceServers
           ? clientVars.webrtc.iceServers
-          : [
-              {
-                url: 'stun:stun.l.google.com:19302',
-              },
-            ];
+          : [{urls: ['stun:stun.l.google.com:19302']}];
       if (clientVars.webrtc.video.sizes.large) {
         videoSizes.large = `${clientVars.webrtc.video.sizes.large}px`;
       }
@@ -175,23 +158,8 @@ const rtc = (() => {
       padcookie.setPref('rtcEnabled', false);
       self.hangupAll();
       if (localStream) {
-        const videoTrack = localStream.getVideoTracks()[0];
-        const audioTrack = localStream.getAudioTracks()[0];
         self.setStream(self._pad.getUserId(), null);
-        if ((videoTrack && videoTrack.stop === undefined) ||
-          (audioTrack && audioTrack.stop === undefined)) {
-          // deprecated in 2015, probably disabled by 2020
-          // https://developers.google.com/web/updates/2015/07/mediastream-deprecations
-          // Perhaps we can obviate this by updating adapter.js?
-          localStream.stop();
-        } else {
-          if (videoTrack) {
-            videoTrack.stop();
-          }
-          if (audioTrack) {
-            audioTrack.stop();
-          }
-        }
+        for (const track of localStream.getTracks()) track.stop();
         localStream = null;
       }
       isActive = false;
@@ -244,7 +212,7 @@ const rtc = (() => {
         self.addInterface(userId, stream);
       }
       if (stream) {
-        attachMediaStream(video, stream);
+        video.srcObject = stream;
       } else if (video) {
         $(video).parent().remove();
       }
@@ -387,41 +355,25 @@ const rtc = (() => {
       } else if (type === 'offer') {
         if (pc[peer]) self.hangup(peer, false);
         self.createPeerConnection(peer);
-        if (localStream) {
-          if (pc[peer].getLocalStreams) {
-            if (!pc[peer].getLocalStreams().length) {
-              pc[peer].addStream(localStream);
-            }
-          } else if (pc[peer].localStreams) {
-            if (!pc[peer].localStreams.length) {
-              pc[peer].addStream(localStream);
-            }
-          }
+        if (localStream && !pc[peer].getSenders().length) {
+          for (const track of localStream.getTracks()) pc[peer].addTrack(track, localStream);
         }
-        const offer = new RTCSessionDescription(data.offer);
-        pc[peer].setRemoteDescription(
-            offer,
-            () => {
-              pc[peer].createAnswer(
-                  (desc) => {
-                    pc[peer].setLocalDescription(
-                        desc,
-                        () => {
-                          self.sendMessage(peer, {type: 'answer', answer: desc});
-                        },
-                        logError
-                    );
-                  },
-                  logError,
-                  sdpConstraints
-              );
-            },
-            logError
-        );
+        try {
+          await pc[peer].setRemoteDescription(data.offer);
+          await pc[peer].setLocalDescription();
+          self.sendMessage(peer, {type: 'answer', answer: pc[peer].localDescription});
+        } catch (err) {
+          logError(err);
+          return;
+        }
       } else if (type === 'answer') {
         if (pc[peer]) {
-          const answer = new RTCSessionDescription(data.answer);
-          pc[peer].setRemoteDescription(answer, () => {}, logError);
+          try {
+            await pc[peer].setRemoteDescription(data.answer);
+          } catch (err) {
+            logError(err);
+            return;
+          }
         }
       } else if (type === 'icecandidate') {
         if (pc[peer] && data.candidate) {
@@ -448,25 +400,19 @@ const rtc = (() => {
       delete pc[userId];
       notify && self.sendMessage(userId, {type: 'hangup'});
     },
-    call: (userId) => {
+    call: async (userId) => {
       if (!localStream) return;
       if (!pc[userId]) {
         self.createPeerConnection(userId);
       }
-      pc[userId].addStream(localStream);
-      pc[userId].createOffer(
-          (desc) => {
-            pc[userId].setLocalDescription(
-                desc,
-                () => {
-                  self.sendMessage(userId, {type: 'offer', offer: desc});
-                },
-                logError
-            );
-          },
-          logError,
-          sdpConstraints
-      );
+      for (const track of localStream.getTracks()) pc[userId].addTrack(track, localStream);
+      try {
+        await pc[userId].setLocalDescription();
+        self.sendMessage(userId, {type: 'offer', offer: pc[userId].localDescription});
+      } catch (err) {
+        logError(err);
+        return;
+      }
     },
     createPeerConnection: (userId) => {
       if (pc[userId]) {
@@ -475,7 +421,7 @@ const rtc = (() => {
             userId
         );
       }
-      pc[userId] = new RTCPeerConnection(pcConfig, pcConstraints);
+      pc[userId] = new RTCPeerConnection(pcConfig);
       pc[userId].onicecandidate = (event) => {
         if (event.candidate) {
           self.sendMessage(userId, {
@@ -484,22 +430,30 @@ const rtc = (() => {
           });
         }
       };
-      pc[userId].onaddstream = (event) => {
-        self.setStream(userId, event.stream);
-      };
-      pc[userId].onremovestream = (event) => {
-        self.setStream(userId, null);
-      };
+      let stream = null;
+      pc[userId].addEventListener('track', (e) => {
+        if (e.streams.length !== 1) throw new Error('Expected track to be in exactly one stream');
+        const trackStream = e.streams[0];
+        if (stream == null) {
+          stream = trackStream;
+          stream.addEventListener('removetrack', (e) => {
+            if (stream !== trackStream) throw new Error('removetrack event for old stream');
+            if (stream.getTracks().length > 0) return;
+            stream = null;
+            self.setStream(userId, null);
+          });
+          self.setStream(userId, stream);
+        } else if (stream !== trackStream) {
+          throw new Error('New track associated with unexpected stream');
+        }
+      });
     },
     getUserMedia: async () => {
       const mediaConstraints = {
         audio: clientVars.webrtc.audio.disabled !== 'hard',
         video: clientVars.webrtc.video.disabled !== 'hard' && {
-          optional: [],
-          mandatory: {
-            maxWidth: 320,
-            maxHeight: 240,
-          },
+          width: {max: 320},
+          height: {max: 240},
         },
       };
       if (padcookie.getPref('fakeWebrtcFirefox')) {
@@ -632,19 +586,6 @@ const rtc = (() => {
         });
       }
     },
-  };
-
-  // Normalize RTC implementation between browsers
-  const attachMediaStream = (element, stream) => {
-    if (typeof element.srcObject !== 'undefined') {
-      element.srcObject = stream;
-    } else if (typeof element.mozSrcObject !== 'undefined') {
-      element.mozSrcObject = stream;
-    } else if (typeof element.src !== 'undefined') {
-      element.src = URL.createObjectURL(stream);
-    } else {
-      console.log('Error attaching stream to element.', element);
-    }
   };
 
   const logError = (error) => console.log('WebRTC ERROR:', error);

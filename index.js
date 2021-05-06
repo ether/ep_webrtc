@@ -113,7 +113,7 @@ exports.clientVars = async (hookName, context) => {
     videoDisabled = settings.video.disabled;
   }
 
-  let iceServers = [{url: 'stun:stun.l.google.com:19302'}];
+  let iceServers = [{urls: ['stun:stun.l.google.com:19302']}];
   if (settings.iceServers) {
     iceServers = settings.iceServers;
   }

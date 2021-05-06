@@ -118,7 +118,7 @@ To set a custom stun server, set `ep_webrtc.iceServer` in your `settings.json`:
 ```json
   "ep_webrtc": {
     "iceServers": [
-      {"url": "stun:stun.l.google.com:19302"}
+      {"urls": ["stun:stun.l.google.com:19302"]}
     ]
   }
 ```
