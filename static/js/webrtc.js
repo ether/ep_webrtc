@@ -441,9 +441,7 @@ const rtc = (() => {
       });
     },
     getUserId: () => self._pad.getUserId(),
-    hangup: (...args) => {
-      const userId = args[0];
-      const notify = args[1] || true;
+    hangup: (userId, notify = true) => {
       if (!pc[userId]) return;
       self.setStream(userId, null);
       pc[userId].close();
