@@ -237,22 +237,16 @@ const rtc = (() => {
       const user = self.getUserFromId(userId);
 
       if (!video && stream) {
+        const size = videoSizes.small;
         const videoContainer = $("<div class='video-container'>")
-            .css({
-              'width': videoSizes.small,
-              'max-height': videoSizes.small,
-            })
+            .css({'width': size, 'max-height': size})
             .appendTo($('#rtcbox'));
 
         videoContainer.append($('<div class="user-name">').text(user.name));
 
         video = $('<video playsinline>')
             .attr('id', videoId)
-            .css({
-              'border-color': user.colorId,
-              'width': videoSizes.small,
-              'max-height': videoSizes.small,
-            })
+            .css({'border-color': user.colorId, 'width': size, 'max-height': size})
             .appendTo(videoContainer)[0];
 
         video.autoplay = true;
@@ -404,12 +398,8 @@ const rtc = (() => {
       if (type === 'hangup') {
         self.hangup(peer, false);
       } else if (type === 'offer') {
-        if (pc[peer]) {
-          self.hangup(peer, false);
-          self.createPeerConnection(peer);
-        } else {
-          self.createPeerConnection(peer);
-        }
+        if (pc[peer]) self.hangup(peer, false);
+        self.createPeerConnection(peer);
         if (localStream) {
           if (pc[peer].getLocalStreams) {
             if (!pc[peer].getLocalStreams().length) {
@@ -578,13 +568,8 @@ const rtc = (() => {
     // If urlVar is found, it will also set the cookie
     // Finally, it sets up to set cookie if the user changes the setting in the gearbox
     settingToCheckbox: (params) => {
-      if (params.urlVar === undefined) { throw Error('missing urlVar in settingToCheckbox'); }
-      if (params.cookie === undefined) { throw Error('missing cookie in settingToCheckbox'); }
-      if (params.defaultVal === undefined) {
-        throw Error('missing defaultVal in settingToCheckbox');
-      }
-      if (params.checkboxId === undefined) {
-        throw Error('missing checkboxId in settingToCheckbox');
+      for (const prop of ['checkboxId', 'cookie', 'defaultVal', 'urlVar']) {
+        if (params[prop] == null) throw new Error(`missing ${prop} in settingToCheckbox`);
       }
 
       let value;
