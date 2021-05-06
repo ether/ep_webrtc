@@ -185,7 +185,7 @@ const rtc = (() => {
       if (localStream) {
         const videoTrack = localStream.getVideoTracks()[0];
         const audioTrack = localStream.getAudioTracks()[0];
-        self.setStream(self._pad.getUserId(), '');
+        self.setStream(self._pad.getUserId(), null);
         if ((videoTrack && videoTrack.stop === undefined) ||
           (audioTrack && audioTrack.stop === undefined)) {
           // deprecated in 2015, probably disabled by 2020
@@ -458,7 +458,7 @@ const rtc = (() => {
       const userId = args[0];
       const notify = args[1] || true;
       if (pc[userId]) {
-        self.setStream(userId, '');
+        self.setStream(userId, null);
         pc[userId].close();
         delete pc[userId];
         notify && self.sendMessage(userId, {type: 'hangup'});
@@ -504,7 +504,7 @@ const rtc = (() => {
         self.setStream(userId, event.stream);
       };
       pc[userId].onremovestream = (event) => {
-        self.setStream(userId, '');
+        self.setStream(userId, null);
       };
     },
     getUserMedia: async () => {
