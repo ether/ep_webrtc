@@ -80,9 +80,6 @@ const rtc = (() => {
       return [null];
     },
     // END OF API HOOKS
-    show: () => {
-      $('#rtcbox').css('display', 'flex');
-    },
     showUserMediaError: (err) => { // show an error returned from getUserMedia
       let reason;
       // For reference on standard errors returned by getUserMedia:
@@ -138,15 +135,11 @@ const rtc = (() => {
         sticky: true,
         class_name: 'error',
       });
-      self.hide();
-    },
-    hide: () => {
-      $('#rtcbox').hide();
     },
     activate: async () => {
       $('#options-enablertc').prop('checked', true);
       if (isActive) return;
-      self.show();
+      $('#rtcbox').css('display', 'flex');
       padcookie.setPref('rtcEnabled', true);
       isActive = true;
       await self.getUserMedia();
@@ -154,7 +147,7 @@ const rtc = (() => {
     deactivate: () => {
       $('#options-enablertc').prop('checked', false);
       if (!isActive) return;
-      self.hide();
+      $('#rtcbox').hide();
       padcookie.setPref('rtcEnabled', false);
       self.hangupAll();
       if (localStream) {
