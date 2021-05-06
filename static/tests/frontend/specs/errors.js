@@ -63,8 +63,4 @@ describe('Test that we show the correct error messages when trying to start webr
   it('gives the right error message for AbortError', function (done) {
     tryError('AbortError', 'not a hardware error', done);
   });
-
-  it('gives the right error message for an unknown error', function (done) {
-    tryError('asdf', 'there was an unknown error', done);
-  });
 });

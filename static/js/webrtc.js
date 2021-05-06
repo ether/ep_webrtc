@@ -122,12 +122,8 @@ const rtc = (() => {
           self.sendErrorStat('Abort');
           break;
         default:
-          // `err` as a string might give useful info to the user
-          // (not necessarily useful for other error messages)
-          reason = $('<div>')
-              .append($('<p>').text(html10n.get('pad.ep_webrtc.error.other')))
-              .append($('<p>').text(err));
-          self.sendErrorStat('Unknown');
+          // Let Etherpad's error handling handle the error.
+          throw err;
       }
       $.gritter.add({
         title: 'Error',
