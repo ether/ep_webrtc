@@ -49,11 +49,11 @@ describe('Test that we show the correct error messages when trying to start webr
   it('gives the right error message for NotAllowedError', function (done) {
     // Hard to test the version of NotAllowedError that is the SSL error
     // because it requires changing window.location
-    tryError('NotAllowedError', 'need to give us permission', done);
+    tryError('NotAllowedError', 'Failed to get permission to access', done);
   });
 
   it('gives the right error message for NotFoundError', function (done) {
-    tryError('NotFoundError', "couldn't find a suitable camera", done);
+    tryError('NotFoundError', 'Failed to find a camera', done);
   });
 
   it('gives the right error message for NotReadableError', function (done) {
