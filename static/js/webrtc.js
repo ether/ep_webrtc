@@ -553,13 +553,7 @@ const rtc = (() => {
         self.showUserMediaError(err);
       }
     },
-    avInURL: () => {
-      if (urlParamString.includes('av=YES')) {
-        return true;
-      } else {
-        return false;
-      }
-    },
+    avInURL: () => urlParamString.includes('av=YES'),
 
     // Connect a setting to a checkbox. To be called on initialization.
     //
