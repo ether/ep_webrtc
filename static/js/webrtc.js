@@ -347,31 +347,13 @@ const rtc = (() => {
         if (localStream && !pc[peer].getSenders().length) {
           for (const track of localStream.getTracks()) pc[peer].addTrack(track, localStream);
         }
-        try {
-          await pc[peer].setRemoteDescription(data.offer);
-          await pc[peer].setLocalDescription();
-          self.sendMessage(peer, {type: 'answer', answer: pc[peer].localDescription});
-        } catch (err) {
-          logError(err);
-          return;
-        }
+        await pc[peer].setRemoteDescription(data.offer);
+        await pc[peer].setLocalDescription();
+        self.sendMessage(peer, {type: 'answer', answer: pc[peer].localDescription});
       } else if (type === 'answer') {
-        if (pc[peer]) {
-          try {
-            await pc[peer].setRemoteDescription(data.answer);
-          } catch (err) {
-            logError(err);
-            return;
-          }
-        }
+        if (pc[peer]) await pc[peer].setRemoteDescription(data.answer);
       } else if (type === 'icecandidate') {
-        if (pc[peer] && data.candidate) {
-          try {
-            await pc[peer].addIceCandidate(data.candidate);
-          } catch (err) {
-            console.error('Failed to add ICE candidate:', err);
-          }
-        }
+        if (pc[peer] && data.candidate) await pc[peer].addIceCandidate(data.candidate);
       } else {
         console.log('unknown message', data);
       }
@@ -395,13 +377,8 @@ const rtc = (() => {
         self.createPeerConnection(userId);
       }
       for (const track of localStream.getTracks()) pc[userId].addTrack(track, localStream);
-      try {
-        await pc[userId].setLocalDescription();
-        self.sendMessage(userId, {type: 'offer', offer: pc[userId].localDescription});
-      } catch (err) {
-        logError(err);
-        return;
-      }
+      await pc[userId].setLocalDescription();
+      self.sendMessage(userId, {type: 'offer', offer: pc[userId].localDescription});
     },
     createPeerConnection: (userId) => {
       if (pc[userId]) {
@@ -576,8 +553,6 @@ const rtc = (() => {
       }
     },
   };
-
-  const logError = (error) => console.log('WebRTC ERROR:', error);
 
   self.pc = pc;
   return self;
