@@ -93,9 +93,6 @@ const rtc = (() => {
       }
       callback();
     },
-    userJoinOrUpdate: (hook, context, callback) => {
-      callback();
-    },
     userLeave: (hook, context, callback) => {
       const userId = context.userInfo.userId;
       if (userId && pc[userId]) {
