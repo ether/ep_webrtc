@@ -12,10 +12,10 @@
         "eejsBlock_styles": ""
       },
       "client_hooks": {
-        "postAceInit": "ep_webrtc/static/js/webrtc:rtc.postAceInit",
-        "userJoinOrUpdate": "ep_webrtc/static/js/webrtc:rtc.userJoinOrUpdate",
-        "userLeave": "ep_webrtc/static/js/webrtc:rtc.userLeave",
-        "handleClientMessage_RTC_MESSAGE": "ep_webrtc/static/js/webrtc:rtc.handleClientMessage_RTC_MESSAGE"
+        "handleClientMessage_RTC_MESSAGE": "ep_webrtc/static/js/webrtc",
+        "postAceInit": "ep_webrtc/static/js/webrtc",
+        "userJoinOrUpdate": "ep_webrtc/static/js/webrtc",
+        "userLeave": "ep_webrtc/static/js/webrtc"
       }
     }
   ]
