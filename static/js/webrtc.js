@@ -41,7 +41,7 @@ const rtc = (() => {
 
   const self = {
     // API HOOKS
-    postAceInit: (hook, context, callback) => {
+    postAceInit: async (hookName, {pad}) => {
       self.setUrlParamString(window.location.search);
       if (clientVars.webrtc == null || clientVars.webrtc.configError) {
         $.gritter.add({
@@ -75,34 +75,28 @@ const rtc = (() => {
       if (clientVars.webrtc.video.sizes.small) {
         videoSizes.small = `${clientVars.webrtc.video.sizes.small}px`;
       }
-      self.init(context.pad);
-      callback();
+      self.init(pad);
     },
     // so we can call it from testing
     setUrlParamString: (str) => {
       urlParamString = str;
     },
-    aceSetAuthorStyle: (hook, context, callback) => {
-      if (context.author) {
-        const user = self.getUserFromId(context.author);
+    aceSetAuthorStyle: (hookName, {author}) => {
+      if (author) {
+        const user = self.getUserFromId(author);
         if (user) {
-          $(`#video_${context.author.replace(/\./g, '_')}`).css({
+          $(`#video_${author.replace(/\./g, '_')}`).css({
             'border-color': user.colorId,
           }).siblings('.user-name').text(user.name);
         }
       }
-      callback();
     },
-    userLeave: (hook, context, callback) => {
-      const userId = context.userInfo.userId;
+    userLeave: (hookName, {userInfo: {userId}}) => {
       self.hangup(userId, false);
-      callback();
     },
-    handleClientMessage_RTC_MESSAGE: (hook, context, callback) => {
-      if (isActive) {
-        self.receiveMessage(context.payload);
-      }
-      callback([null]);
+    handleClientMessage_RTC_MESSAGE: (hookName, {payload}) => {
+      if (isActive) self.receiveMessage(payload);
+      return [null];
     },
     // END OF API HOOKS
     show: () => {

@@ -39,11 +39,11 @@ const _getRoomSockets = (padId) => {
 
 /**
  * Handles an RTC Message
- * @param client the client that send this message
+ * @param socket The socket.io Socket object for the client that sent the message.
  * @param message the message from the client
  */
-const handleRTCMessage = (client, payload) => {
-  const {[client.id]: {author: userId, padId} = {}} = sessioninfos;
+const handleRTCMessage = (socket, payload) => {
+  const {[socket.id]: {author: userId, padId} = {}} = sessioninfos;
   // The handleMessage hook is executed asynchronously, so the user can disconnect between when the
   // message arrives at Etherpad and when this function is called.
   if (userId == null || padId == null) return;
@@ -88,14 +88,14 @@ const handleErrorStatMessage = (statName) => {
   }
 };
 
-exports.clientVars = (hook, context, callback) => {
+exports.clientVars = async (hookName, context) => {
   // Validate settings.json now so that the admin notices any errors right away
   if (!validateSettings()) {
-    return callback({
+    return {
       webrtc: {
         configError: true,
       },
-    });
+    };
   }
 
   let enabled = true;
@@ -131,7 +131,7 @@ exports.clientVars = (hook, context, callback) => {
     };
   }
 
-  return callback({
+  return {
     webrtc: {
       iceServers,
       enabled,
@@ -139,27 +139,23 @@ exports.clientVars = (hook, context, callback) => {
       video: {disabled: videoDisabled, sizes: videoSizes},
       listenClass,
     },
-  });
+  };
 };
 
-exports.handleMessage = (hook, context, callback) => {
-  if (context.message.type === 'COLLABROOM' && context.message.data.type === 'RTC_MESSAGE') {
-    handleRTCMessage(context.client, context.message.data.payload);
-    callback([null]);
-  } else if (context.message.type === 'STATS' && context.message.data.type === 'RTC_MESSAGE') {
-    handleErrorStatMessage(context.message.data.statName);
-    callback([null]);
-  } else {
-    callback();
+exports.handleMessage = async (hookName, {message, socket}) => {
+  if (message.type === 'COLLABROOM' && message.data.type === 'RTC_MESSAGE') {
+    handleRTCMessage(socket, message.data.payload);
+    return [null];
+  }
+  if (message.type === 'STATS' && message.data.type === 'RTC_MESSAGE') {
+    handleErrorStatMessage(message.data.statName);
+    return [null];
   }
 };
 
-exports.setSocketIO = (hook, context, callback) => {
-  socketio = context.io;
-  callback();
-};
+exports.setSocketIO = (hookName, {io}) => { socketio = io; };
 
-exports.eejsBlock_mySettings = (hook, context, callback) => {
+exports.eejsBlock_mySettings = (hookName, context) => {
   const enabled = (settings.enabled === false)
     ? 'unchecked'
     : 'checked';
@@ -179,17 +175,14 @@ exports.eejsBlock_mySettings = (hook, context, callback) => {
     audio_hard_disabled: audioDisabled === 'hard',
     video_hard_disabled: videoDisabled === 'hard',
   }, module);
-  callback();
 };
 
-exports.eejsBlock_editorContainerBox = (hookName, args, cb) => {
-  args.content += eejs.require('./templates/webrtc.ejs', {}, module);
-  return cb();
+exports.eejsBlock_editorContainerBox = (hookName, context) => {
+  context.content += eejs.require('./templates/webrtc.ejs', {}, module);
 };
 
-exports.eejsBlock_styles = (hookName, args, cb) => {
-  args.content += eejs.require('./templates/styles.html', {}, module);
-  return cb();
+exports.eejsBlock_styles = (hookName, context) => {
+  context.content += eejs.require('./templates/styles.html', {}, module);
 };
 
 exports.loadSettings = async (hookName, {settings: {ep_webrtc = {}}}) => {
