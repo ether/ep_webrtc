@@ -20,9 +20,8 @@ const padcookie = require('ep_etherpad-lite/static/js/pad_cookie').padcookie;
 
 exports.rtc = new class {
   constructor() {
-    this._videoSizes = {large: '260px', small: '160px'};
+    this._settings = null;
     this._isActive = false;
-    this._pcConfig = {};
     this._localStream = null;
     this._pc = {};
   }
@@ -30,7 +29,8 @@ exports.rtc = new class {
   // API HOOKS
 
   async postAceInit(hookName, {pad}) {
-    if (clientVars.webrtc == null || clientVars.webrtc.configError) {
+    this._settings = clientVars.webrtc;
+    if (this._settings == null || this._settings.configError) {
       $.gritter.add({
         title: 'Error',
         text: 'Ep_webrtc: There is an error with the configuration of this plugin. Please ' +
@@ -47,15 +47,6 @@ exports.rtc = new class {
         sticky: true,
         class_name: 'error',
       });
-    }
-    this._pcConfig.iceServers = clientVars.webrtc && clientVars.webrtc.iceServers
-      ? clientVars.webrtc.iceServers
-      : [{urls: ['stun:stun.l.google.com:19302']}];
-    if (clientVars.webrtc.video.sizes.large) {
-      this._videoSizes.large = `${clientVars.webrtc.video.sizes.large}px`;
-    }
-    if (clientVars.webrtc.video.sizes.small) {
-      this._videoSizes.small = `${clientVars.webrtc.video.sizes.small}px`;
     }
     await this.init(pad);
   }
@@ -144,8 +135,8 @@ exports.rtc = new class {
     padcookie.setPref('rtcEnabled', true);
     this._isActive = true;
     const constraints = {
-      audio: clientVars.webrtc.audio.disabled !== 'hard',
-      video: clientVars.webrtc.video.disabled !== 'hard' && {width: {max: 320}, height: {max: 240}},
+      audio: this._settings.audio.disabled !== 'hard',
+      video: this._settings.video.disabled !== 'hard' && {width: {max: 320}, height: {max: 240}},
     };
     if (padcookie.getPref('fakeWebrtcFirefox')) {
       // The equivalent is done for chromium with cli option:
@@ -231,7 +222,7 @@ exports.rtc = new class {
     let video = $(`#${videoId}`)[0];
 
     if (!video && stream) {
-      const size = this._videoSizes.small;
+      const size = `${this._settings.video.sizes.small}px`;
       const videoContainer = $("<div class='video-container'>")
           .css({'width': size, 'max-height': size})
           .appendTo($('#rtcbox'));
@@ -269,7 +260,7 @@ exports.rtc = new class {
     // /////
 
     const audioTrack = stream.getAudioTracks()[0];
-    const audioHardDisabled = clientVars.webrtc.audio.disabled === 'hard';
+    const audioHardDisabled = this._settings.audio.disabled === 'hard';
     let initiallyMuted = true; // if there's no audio track, it's muted
     if (audioTrack) initiallyMuted = !audioTrack.enabled;
 
@@ -305,7 +296,7 @@ exports.rtc = new class {
     let $disableVideo = null;
     if (isLocal) {
       const videoTrack = stream.getVideoTracks()[0];
-      const videoHardDisabled = clientVars.webrtc.video.disabled === 'hard';
+      const videoHardDisabled = this._settings.video.disabled === 'hard';
       let initiallyVideoEnabled = false; // if there's no video track, it's disabled
       if (videoTrack) {
         initiallyVideoEnabled = videoTrack.enabled;
@@ -342,7 +333,7 @@ exports.rtc = new class {
             $largeVideo
                 .attr('title', videoEnlarged ? 'Make video smaller' : 'Make video larger')
                 .toggleClass('large', videoEnlarged);
-            const videoSize = videoEnlarged ? this._videoSizes.large : this._videoSizes.small;
+            const videoSize = `${this._settings.video.sizes[videoEnlarged ? 'large' : 'small']}px`;
             $video.parent().css({'width': videoSize, 'max-height': videoSize});
             $video.css({'width': videoSize, 'max-height': videoSize});
           },
@@ -438,7 +429,7 @@ exports.rtc = new class {
     if (this._pc[userId]) {
       console.log('WARNING creating PC connection even though one exists', userId);
     }
-    this._pc[userId] = new RTCPeerConnection(this._pcConfig);
+    this._pc[userId] = new RTCPeerConnection({iceServers: this._settings.iceServers});
     this._pc[userId].onicecandidate = (event) => {
       if (!event.candidate) return;
       this.sendMessage(userId, {
@@ -509,21 +500,21 @@ exports.rtc = new class {
 
   setupCheckboxes() {
     // The checkbox shouldn't even exist if audio is not allowed
-    if (clientVars.webrtc.audio.disabled !== 'hard') {
+    if (this._settings.audio.disabled !== 'hard') {
       this.settingToCheckbox({
         urlVar: 'webrtcaudioenabled',
         cookie: 'audioEnabledOnStart',
-        defaultVal: clientVars.webrtc.audio.disabled === 'none',
+        defaultVal: this._settings.audio.disabled === 'none',
         checkboxId: '#options-audioenabledonstart',
       });
     }
 
     // The checkbox shouldn't even exist if video is not allowed
-    if (clientVars.webrtc.video.disabled !== 'hard') {
+    if (this._settings.video.disabled !== 'hard') {
       this.settingToCheckbox({
         urlVar: 'webrtcvideoenabled',
         cookie: 'videoEnabledOnStart',
-        defaultVal: clientVars.webrtc.video.disabled === 'none',
+        defaultVal: this._settings.video.disabled === 'none',
         checkboxId: '#options-videoenabledonstart',
       });
     }
@@ -539,8 +530,8 @@ exports.rtc = new class {
     if (typeof rtcEnabled === 'undefined') rtcEnabled = $('#options-enablertc').prop('checked');
     if (this.avInURL()) rtcEnabled = true;
 
-    if (clientVars.webrtc.listenClass) {
-      $(clientVars.webrtc.listenClass).on('click', async () => {
+    if (this._settings.listenClass) {
+      $(this._settings.listenClass).on('click', async () => {
         await this.activate();
       });
     }
