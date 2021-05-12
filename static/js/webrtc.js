@@ -503,17 +503,6 @@ const rtc = (() => {
         callQueue.push(userId);
         return;
       }
-      let constraints = {optional: [], mandatory: {}};
-      // temporary measure to remove Moz* constraints in Chrome
-      if (webrtcDetectedBrowser === 'chrome') {
-        for (const prop in constraints.mandatory) {
-          if (prop.indexOf('Moz') !== -1) {
-            delete constraints.mandatory[prop];
-          }
-        }
-      }
-      constraints = mergeConstraints(constraints, sdpConstraints);
-
       if (!pc[userId]) {
         self.createPeerConnection(userId);
       }
@@ -530,7 +519,7 @@ const rtc = (() => {
             );
           },
           logError,
-          constraints
+          sdpConstraints
       );
     },
     createPeerConnection: (userId) => {
@@ -726,7 +715,6 @@ const rtc = (() => {
       console.log('Error attaching stream to element.', element);
     }
   };
-  const webrtcDetectedBrowser = 'chrome';
 
   // Set Opus as the default audio codec if it's present.
   const preferOpus = (sdp) => {
@@ -811,15 +799,6 @@ const rtc = (() => {
     sdp = preferOpus(sdp);
     sdp = sdpRate(sdp);
     return sdp;
-  };
-
-  const mergeConstraints = (cons1, cons2) => {
-    const merged = cons1;
-    for (const name of Object.keys(cons2.mandatory)) {
-      merged.mandatory[name] = cons2.mandatory[name];
-    }
-    merged.optional.concat(cons2.optional);
-    return merged;
   };
 
   const logError = (error) => console.log('WebRTC ERROR:', error);
