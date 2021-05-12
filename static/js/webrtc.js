@@ -37,7 +37,6 @@ const rtc = (() => {
     },
   };
   let localStream;
-  const remoteStream = {};
   const pc = {};
   const callQueue = [];
   const enlargedVideos = new Set();
@@ -539,7 +538,6 @@ const rtc = (() => {
         }
       };
       pc[userId].onaddstream = (event) => {
-        remoteStream[userId] = event.stream;
         self.setStream(userId, event.stream);
       };
       pc[userId].onremovestream = (event) => {
