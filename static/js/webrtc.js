@@ -498,7 +498,9 @@ exports.rtc = new class {
     });
   }
 
-  setupCheckboxes() {
+  async init(pad) {
+    this._pad = pad;
+
     // The checkbox shouldn't even exist if audio is not allowed
     if (this._settings.audio.disabled !== 'hard') {
       this.settingToCheckbox({
@@ -518,14 +520,7 @@ exports.rtc = new class {
         checkboxId: '#options-videoenabledonstart',
       });
     }
-  }
 
-  async init(pad) {
-    this._pad = pad;
-
-    this.setupCheckboxes();
-
-    // TODO - add this to setupCheckboxes. it's a bit involved.
     let rtcEnabled = padcookie.getPref('rtcEnabled');
     if (typeof rtcEnabled === 'undefined') rtcEnabled = $('#options-enablertc').prop('checked');
     if (this.avInURL()) rtcEnabled = true;
