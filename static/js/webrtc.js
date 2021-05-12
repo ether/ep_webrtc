@@ -624,7 +624,7 @@ const rtc = (() => {
         padcookie.setPref(params.cookie, this.checked);
       });
     },
-    setupCheckboxes: (pad) => {
+    setupCheckboxes: () => {
       // The checkbox shouldn't even exist if audio is not allowed
       if (clientVars.webrtc.audio.disabled !== 'hard') {
         self.settingToCheckbox({
