@@ -58,7 +58,7 @@ const rtc = (() => {
       if (clientVars.webrtc.video.sizes.small) {
         videoSizes.small = `${clientVars.webrtc.video.sizes.small}px`;
       }
-      self.init(pad);
+      await self.init(pad);
     },
     // so we can call it from testing
     setUrlParamString: (str) => {
@@ -177,11 +177,11 @@ const rtc = (() => {
 
       localStream = stream;
       self.setStream(self._pad.getUserId(), stream);
-      self._pad.collabClient.getConnectedUsers().forEach((user) => {
+      await Promise.all(self._pad.collabClient.getConnectedUsers().map(async (user) => {
         if (user.userId === self.getUserId()) return;
         if (pc[user.userId]) self.hangup(user.userId);
-        self.call(user.userId);
-      });
+        await self.call(user.userId);
+      }));
     },
     deactivate: () => {
       $('#options-enablertc').prop('checked', false);
@@ -517,7 +517,7 @@ const rtc = (() => {
         });
       }
     },
-    init: (pad) => {
+    init: async (pad) => {
       self._pad = pad;
 
       self.setupCheckboxes();
@@ -530,13 +530,13 @@ const rtc = (() => {
       if (self.avInURL()) rtcEnabled = true;
 
       if (clientVars.webrtc.listenClass) {
-        $(clientVars.webrtc.listenClass).on('click', () => {
-          self.activate();
+        $(clientVars.webrtc.listenClass).on('click', async () => {
+          await self.activate();
         });
       }
-      $('#options-enablertc').on('change', function () {
+      $('#options-enablertc').on('change', async function () {
         if (this.checked) {
-          self.activate();
+          await self.activate();
         } else {
           self.deactivate();
         }
@@ -547,7 +547,7 @@ const rtc = (() => {
         });
       }
       if (rtcEnabled) {
-        self.activate();
+        await self.activate();
       } else {
         self.deactivate();
       }
