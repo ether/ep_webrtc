@@ -457,7 +457,7 @@ exports.rtc = new class {
   }
 
   avInURL() {
-    return window.location.search.includes('av=YES');
+    return (new URLSearchParams(window.location.search)).get('av') === 'YES';
   }
 
   // Connect a setting to a checkbox. To be called on initialization.
@@ -472,15 +472,16 @@ exports.rtc = new class {
     }
 
     let value;
+    const urlValue = (new URLSearchParams(window.location.search)).get(params.urlVar);
 
     // * If the setting is in the URL: use it, and also set the cookie
     // * If the setting is not in the URL: try to get it from the cookie
     // * If the setting was in neither, go with the site-wide default value
     //   but don't put it in the cookies
-    if (window.location.search.includes(`${params.urlVar}=true`)) {
+    if (urlValue === 'true') {
       padcookie.setPref(params.cookie, true);
       value = true;
-    } else if (window.location.search.includes(`${params.urlVar}=false`)) {
+    } else if (urlValue === 'false') {
       padcookie.setPref(params.cookie, false);
       value = false;
     } else {
