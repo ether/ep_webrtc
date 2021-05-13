@@ -554,7 +554,7 @@ const rtc = (() => {
       }
     },
     avInURL: () => {
-      if (urlParamString.indexOf('av=YES') > -1) {
+      if (urlParamString.includes('av=YES')) {
         return true;
       } else {
         return false;
@@ -578,10 +578,10 @@ const rtc = (() => {
       // * If the setting is not in the URL: try to get it from the cookie
       // * If the setting was in neither, go with the site-wide default value
       //   but don't put it in the cookies
-      if (urlParamString.indexOf(`${params.urlVar}=true`) > -1) {
+      if (urlParamString.includes(`${params.urlVar}=true`)) {
         padcookie.setPref(params.cookie, true);
         value = true;
-      } else if (urlParamString.indexOf(`${params.urlVar}=false`) > -1) {
+      } else if (urlParamString.includes(`${params.urlVar}=false`)) {
         padcookie.setPref(params.cookie, false);
         value = false;
       } else {

@@ -81,7 +81,7 @@ const statErrorNames = [
 ];
 
 const handleErrorStatMessage = (statName) => {
-  if (statErrorNames.indexOf(statName) !== -1) {
+  if (statErrorNames.includes(statName)) {
     stats.meter(`ep_webrtc_err_${statName}`).mark();
   } else {
     statsLogger.warn(`Invalid ep_webrtc error stat: ${statName}`);
