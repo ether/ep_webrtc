@@ -1,76 +1,34 @@
-/* eslint max-len: ["error", { "code": 120 }] */
 'use strict';
 
-describe('test that audio and video are on or off on start according to urlVars and cookies', function () {
-  let chrome$;
-  context('audio on, video off via cookies', function () {
-    before(function (done) {
+describe('audio/video on/off according to query parameters/cookies', function () {
+  const cartesian = function* (head, ...tail) {
+    const remainder = tail.length > 0 ? cartesian(...tail) : [[]];
+    for (const r of remainder) for (const h of head) yield [h, ...r];
+  };
+
+  const testCases = cartesian(['audio', 'video'], [null, false, true], [null, false, true]);
+
+  for (const [avType, cookieVal, queryVal] of testCases) {
+    it(`${avType} cookie=${cookieVal} query=${queryVal}`, async function () {
       this.timeout(60000);
-      helper.newPad({
-        padPrefs: {
+      await helper.aNewPad({
+        padPrefs: Object.assign({
           rtcEnabled: true,
           fakeWebrtcFirefox: true,
-          audioEnabledOnStart: true,
-          videoEnabledOnStart: false,
-        },
-        cb() {
-          chrome$ = helper.padChrome$;
-          helper.waitFor(() => {
-            chrome$ = helper.padChrome$;
-            return chrome$ && chrome$('#rtcbox video').length === 1;
-          }, 1000).done(done);
-        },
+        }, cookieVal == null ? {} : {[`${avType}EnabledOnStart`]: cookieVal}),
+        params: queryVal == null ? {} : {[`webrtc${avType}enabled`]: queryVal},
       });
+      const chrome$ = helper.padChrome$;
+      await helper.waitForPromise(() => chrome$('#rtcbox').data('initialized'));
+      const {disabled} = chrome$.window.clientVars.webrtc[avType];
+      const checkbox = chrome$(`#options-${avType}enabledonstart`);
+      if (disabled === 'hard') {
+        expect(checkbox.length).to.equal(0); // There shouldn't even be a checkbox.
+      } else {
+        const wantChecked = (queryVal || (queryVal == null && cookieVal) ||
+                             (queryVal == null && cookieVal == null && disabled === 'none'));
+        expect(checkbox.prop('checked')).to.equal(wantChecked);
+      }
     });
-
-    it('has the expected checkbox values with and without urlVars', function (done) {
-      chrome$ = helper.padChrome$;
-      expect(chrome$('#options-audioenabledonstart').prop('checked')).to.equal(true);
-      expect(chrome$('#options-videoenabledonstart').prop('checked')).to.equal(false);
-
-      // overriding with url params
-      chrome$.window.ep_webrtc.setUrlParamString('?webrtcaudioenabled=false&webrtcvideoenabled=true');
-      chrome$.window.ep_webrtc.setupCheckboxes();
-      expect(chrome$('#options-audioenabledonstart').prop('checked')).to.equal(false);
-      expect(chrome$('#options-videoenabledonstart').prop('checked')).to.equal(true);
-
-      done();
-    });
-  });
-
-  context('audio off, video on via cookies, no url params', function () {
-    before(function (done) {
-      this.timeout(60000);
-      helper.newPad({
-        padPrefs: {
-          rtcEnabled: true,
-          fakeWebrtcFirefox: true,
-          audioEnabledOnStart: false,
-          videoEnabledOnStart: true,
-        },
-        cb() {
-          let chrome$;
-          chrome$ = helper.padChrome$;
-          helper.waitFor(() => {
-            chrome$ = helper.padChrome$;
-            return chrome$ && chrome$('#rtcbox video').length === 1;
-          }, 1000).done(done);
-        },
-      });
-    });
-
-    it('has the expected checkbox values with and without urlVars', function (done) {
-      chrome$ = helper.padChrome$;
-      expect(chrome$('#options-audioenabledonstart').prop('checked')).to.equal(false);
-      expect(chrome$('#options-videoenabledonstart').prop('checked')).to.equal(true);
-
-      // overriding with url params
-      chrome$.window.ep_webrtc.setUrlParamString('?webrtcaudioenabled=true&webrtcvideoenabled=false');
-      chrome$.window.ep_webrtc.setupCheckboxes();
-      expect(chrome$('#options-audioenabledonstart').prop('checked')).to.equal(true);
-      expect(chrome$('#options-videoenabledonstart').prop('checked')).to.equal(false);
-
-      done();
-    });
-  });
+  }
 });
