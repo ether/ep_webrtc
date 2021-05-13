@@ -456,10 +456,6 @@ exports.rtc = new class {
     });
   }
 
-  avInURL() {
-    return (new URLSearchParams(window.location.search)).get('av') === 'YES';
-  }
-
   // Connect a setting to a checkbox. To be called on initialization.
   //
   // It will check for the value in urlVar, cookie, and the site-wide
@@ -478,7 +474,7 @@ exports.rtc = new class {
     // * If the setting is not in the URL: try to get it from the cookie
     // * If the setting was in neither, go with the site-wide default value
     //   but don't put it in the cookies
-    if (urlValue === 'true') {
+    if (['YES', 'true'].includes(urlValue)) { // 'YES' is for backward compatibility with av=YES.
       padcookie.setPref(params.cookie, true);
       value = true;
     } else if (urlValue === 'false') {
@@ -502,6 +498,13 @@ exports.rtc = new class {
   async init(pad) {
     this._pad = pad;
 
+    this.settingToCheckbox({
+      urlVar: 'av',
+      cookie: 'rtcEnabled',
+      defaultVal: this._settings.enabled,
+      checkboxId: '#options-enablertc',
+    });
+
     // The checkbox shouldn't even exist if audio is not allowed
     if (this._settings.audio.disabled !== 'hard') {
       this.settingToCheckbox({
@@ -522,10 +525,6 @@ exports.rtc = new class {
       });
     }
 
-    let rtcEnabled = padcookie.getPref('rtcEnabled');
-    if (typeof rtcEnabled === 'undefined') rtcEnabled = $('#options-enablertc').prop('checked');
-    if (this.avInURL()) rtcEnabled = true;
-
     if (this._settings.listenClass) {
       $(this._settings.listenClass).on('click', async () => {
         await this.activate();
@@ -540,7 +539,7 @@ exports.rtc = new class {
     });
     $(window).on('beforeunload', () => { this.hangupAll(); });
     $(window).on('unload', () => { this.hangupAll(); });
-    if (rtcEnabled) {
+    if ($('#options-enablertc').prop('checked')) {
       await this.activate();
     } else {
       this.deactivate();

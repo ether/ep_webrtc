@@ -117,7 +117,6 @@ exports.setSocketIO = (hookName, {io}) => { socketio = io; };
 
 exports.eejsBlock_mySettings = (hookName, context) => {
   context.content += eejs.require('./templates/settings.ejs', {
-    enabled: settings.enabled,
     audio_hard_disabled: settings.audio.disabled === 'hard',
     video_hard_disabled: settings.video.disabled === 'hard',
   }, module);

@@ -17,7 +17,8 @@ describe('error handling', function () {
   before(async function () {
     this.timeout(60000);
     await helper.aNewPad({
-      padPrefs: {fakeWebrtcFirefox: true, rtcEnabled: false},
+      padPrefs: {fakeWebrtcFirefox: true},
+      params: {av: false},
     });
     chrome$ = helper.padChrome$;
     await helper.waitForPromise(() => chrome$('#rtcbox').data('initialized'));

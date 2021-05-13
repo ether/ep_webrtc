@@ -35,8 +35,7 @@ clients. See STUN/TURN in settings.
 There's a setting for each user under their settings menu that can turn
 audio/video chat feature off and on. The setting is saved in cookies and will
 apply when they reload the page. The user can also change the value of this
-setting to true by loading the page with `?av=YES` in the URL path (at the
-moment, `av=NO` does not work to turn it off).
+setting by adding `av=true` or `av=false` to the URL query parameters.
 
 ### Site-Wide
 

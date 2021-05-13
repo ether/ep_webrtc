@@ -211,10 +211,10 @@ describe('Test the behavior of the interface buttons: Mute, Video Disable, Enlar
       // Make sure webrtc starts disabled so we have time to wrap getUserMedia
       await helper.aNewPad({
         padPrefs: {
-          // Disable WebRTC so we can change clientVars before activation.
-          rtcEnabled: true,
           fakeWebrtcFirefox: true,
         },
+        // Disable WebRTC so we can change clientVars before activation.
+        params: {av: false},
       });
       const chrome$ = helper.padChrome$;
       chrome$.window.clientVars.webrtc.audio.disabled = 'hard';

@@ -51,8 +51,7 @@ describe('setStream()', function () {
           this.timeout(60000);
           await helper.aNewPad({
             // Disable WebRTC so we can install a mock getUserMedia() before it is called.
-            padPrefs: {rtcEnabled: false},
-            params: tc.params,
+            params: Object.assign({av: false}, tc.params),
           });
           chrome$ = helper.padChrome$;
           chrome$.window.navigator.mediaDevices.getUserMedia =

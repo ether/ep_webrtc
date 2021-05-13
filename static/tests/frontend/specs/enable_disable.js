@@ -6,7 +6,7 @@ describe('enable/disable', function () {
     for (const r of remainder) for (const h of head) yield [h, ...r];
   };
 
-  const testCases = cartesian([null, false, true], [null, 'YES', 'ignored']);
+  const testCases = cartesian([null, false, true], [null, false, true, 'YES', 'ignored']);
 
   for (const [cookieVal, queryVal] of testCases) {
     describe(`cookie=${cookieVal} query=${queryVal}`, function () {
@@ -24,7 +24,10 @@ describe('enable/disable', function () {
         });
         chrome$ = helper.padChrome$;
         // Normalize queryVal to null/false/true.
-        const queryNorm = queryVal === 'YES' ? true : null;
+        const queryNorm =
+            !!queryVal === queryVal ? queryVal // Already boolean.
+            : queryVal === 'YES' ? true
+            : null;
         const defaultChecked = !!chrome$.window.clientVars.webrtc.enabled;
         wantChecked = (queryNorm || (queryNorm == null && cookieVal) ||
                        (queryNorm == null && cookieVal == null && defaultChecked));
