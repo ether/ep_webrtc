@@ -1,191 +1,113 @@
-/* eslint max-len: ["error", { "code": 120 }] */
 'use strict';
 
-describe('test settingToCheckbox, which creates checkboxes that are linked to to urlVars and cookies', function () {
-  before(function (done) {
+describe('settingToCheckbox', function () {
+  const cartesian = function* (head, ...tail) {
+    const remainder = tail.length > 0 ? cartesian(...tail) : [[]];
+    for (const r of remainder) for (const h of head) yield [h, ...r];
+  };
+
+  const testCases = [
+    ...cartesian([false, true], [null, false, true], [null, false, true]),
+  ].map(([defaultVal, cookieVal, queryVal], i) => ({
+    name: `default=${defaultVal} cookie=${cookieVal} query=${queryVal}`,
+    defaultVal,
+    cookieVal,
+    queryVal,
+    i,
+    id: `checkboxId${i}`,
+    want: queryVal ||
+        (queryVal == null && cookieVal) ||
+        (queryVal == null && cookieVal == null && defaultVal),
+  }));
+  let chrome$;
+  let padcookie;
+
+  before(async function () {
     this.timeout(60000);
-    helper.newPad({
-      padPrefs: {
+    await helper.aNewPad({
+      padPrefs: Object.assign({
         rtcEnabled: true,
         fakeWebrtcFirefox: true,
-        cookie3: true,
-        cookie4: false,
-        cookie5: false,
-        cookie6: true,
-      },
-      cb() {
-        let chrome$;
-        chrome$ = helper.padChrome$;
-        chrome$.window.ep_webrtc.setUrlParamString('?urlVar5=true&urlVar6=false');
-        helper.waitFor(() => {
-          chrome$ = helper.padChrome$; // get it again, since we refreshed the page
-          return chrome$ && chrome$('#rtcbox video').length === 1;
-        }, 1000).done(done);
-      },
+      }, ...testCases
+          .filter(({cookieVal}) => cookieVal != null)
+          .map(({cookieVal, i}) => ({[`cookie${i}`]: cookieVal}))),
+      params: Object.assign({}, ...testCases
+          .filter(({queryVal}) => queryVal != null)
+          .map(({queryVal, i}) => ({[`urlVar${i}`]: queryVal}))),
     });
+    chrome$ = helper.padChrome$;
+    padcookie = chrome$.window.require('ep_etherpad-lite/static/js/pad_cookie').padcookie;
+    for (const {id} of testCases) {
+      chrome$('#settings').append(chrome$('<input>').attr('type', 'checkbox').attr('id', id));
+    }
+    await helper.waitForPromise(() => {
+      for (const {id} of testCases) {
+        if (chrome$(`#${id}`).length !== 1) return false;
+      }
+      return true;
+    });
+    for (const {defaultVal, i, id} of testCases) {
+      chrome$.window.ep_webrtc.settingToCheckbox({
+        urlVar: `urlVar${i}`,
+        cookie: `cookie${i}`,
+        defaultVal,
+        checkboxId: `#${id}`,
+      });
+    }
   });
 
-  it('sets up checkboxes with values set by urlVar, cookie and site-wide default', function (done) {
-    let chrome$ = helper.padChrome$;
-
-    chrome$("<input type='checkbox' id='checkboxId1'>").appendTo('#settings');
-    chrome$("<input type='checkbox' id='checkboxId2'>").appendTo('#settings');
-    chrome$("<input type='checkbox' id='checkboxId3'>").appendTo('#settings');
-    chrome$("<input type='checkbox' id='checkboxId4'>").appendTo('#settings');
-    chrome$("<input type='checkbox' id='checkboxId5'>").appendTo('#settings');
-    chrome$("<input type='checkbox' id='checkboxId6'>").appendTo('#settings');
-
-    helper.waitFor(() => {
-      chrome$ = helper.padChrome$;
-      return (chrome$ &&
-        chrome$('#checkboxId1').length === 1 &&
-        chrome$('#checkboxId2').length === 1 &&
-        chrome$('#checkboxId3').length === 1 &&
-        chrome$('#checkboxId4').length === 1 &&
-        chrome$('#checkboxId5').length === 1 &&
-        chrome$('#checkboxId6').length === 1
-      );
-    }, 1000).done(() => {
-      // based on defaultVal set to true
-      chrome$.window.ep_webrtc.settingToCheckbox({
-        urlVar: 'urlVar1', // not set
-        cookie: 'cookie1', // not set
-        defaultVal: true,
-        checkboxId: '#checkboxId1',
+  describe('initially checked/unchecked', function () {
+    for (const {name, want, id} of testCases) {
+      it(name, async function () {
+        expect(chrome$(`#${id}`).prop('checked')).to.equal(want);
       });
-
-      // based on defaultVal set to false
-      chrome$.window.ep_webrtc.settingToCheckbox({
-        urlVar: 'urlVar2', // not set
-        cookie: 'cookie2', // not set
-        defaultVal: false,
-        checkboxId: '#checkboxId2',
-      });
-
-      // based on cookie set to true
-      chrome$.window.ep_webrtc.settingToCheckbox({
-        urlVar: 'urlVar3', // not set
-        cookie: 'cookie3',
-        defaultVal: false, // cookie should override this
-        checkboxId: '#checkboxId3',
-      });
-
-      // based on cookie set to false
-      chrome$.window.ep_webrtc.settingToCheckbox({
-        urlVar: 'urlVar4', // not set
-        cookie: 'cookie4',
-        defaultVal: true, // cookie should override this
-        checkboxId: '#checkboxId4',
-      });
-
-      // based on urlVar set to true
-      chrome$.window.ep_webrtc.settingToCheckbox({
-        urlVar: 'urlVar5',
-        cookie: 'cookie5', // urlVar should override this
-        defaultVal: false, // urlVar should override this
-        checkboxId: '#checkboxId5',
-      });
-
-      // based on urlVar set to false
-      chrome$.window.ep_webrtc.settingToCheckbox({
-        urlVar: 'urlVar6',
-        cookie: 'cookie6', // urlVar should override this
-        defaultVal: true, // urlVar should override this
-        checkboxId: '#checkboxId6',
-      });
-
-      expect(chrome$('#checkboxId1').prop('checked')).to.equal(true);
-      expect(chrome$('#checkboxId2').prop('checked')).to.equal(false);
-      expect(chrome$('#checkboxId3').prop('checked')).to.equal(true);
-      expect(chrome$('#checkboxId4').prop('checked')).to.equal(false);
-      expect(chrome$('#checkboxId5').prop('checked')).to.equal(true);
-      expect(chrome$('#checkboxId6').prop('checked')).to.equal(false);
-
-      // Confirm that the urlVars set the cookies
-      expect(chrome$.window.document.cookie.includes('cookie5%22:true')).to.be(true);
-      expect(chrome$.window.document.cookie.includes('cookie6%22:false')).to.be(true);
-
-      chrome$('#checkboxId1').click();
-      chrome$('#checkboxId2').click();
-      chrome$('#checkboxId3').click();
-      chrome$('#checkboxId4').click();
-      chrome$('#checkboxId5').click();
-      chrome$('#checkboxId6').click();
-
-      // Check that clicking flips the cookies along with the switches themselves
-      helper.waitFor(() => {
-        chrome$ = helper.padChrome$;
-        return (chrome$ &&
-          chrome$('#checkboxId1').prop('checked') === false &&
-          chrome$('#checkboxId2').prop('checked') === true &&
-          chrome$('#checkboxId3').prop('checked') === false &&
-          chrome$('#checkboxId4').prop('checked') === true &&
-          chrome$('#checkboxId5').prop('checked') === false &&
-          chrome$('#checkboxId6').prop('checked') === true
-        );
-      }, 1000).done(() => {
-        expect(chrome$.window.document.cookie.includes('cookie1%22:false')).to.be(true);
-        expect(chrome$.window.document.cookie.includes('cookie2%22:true')).to.be(true);
-        expect(chrome$.window.document.cookie.includes('cookie3%22:false')).to.be(true);
-        expect(chrome$.window.document.cookie.includes('cookie4%22:true')).to.be(true);
-        expect(chrome$.window.document.cookie.includes('cookie5%22:false')).to.be(true);
-        expect(chrome$.window.document.cookie.includes('cookie6%22:true')).to.be(true);
-        done();
-      });
-    });
+    }
   });
 
-  it('throws errors for missing params', function (done) {
-    const chrome$ = helper.padChrome$;
-
-    try {
-      chrome$.window.ep_webrtc.settingToCheckbox({
-        cookie: 'cookie',
-        defaultVal: true,
-        checkboxId: '#checkboxId',
+  describe('query parameter sets cookie', function () {
+    for (const {name, queryVal, i} of testCases.filter(({queryVal}) => queryVal != null)) {
+      it(name, async function () {
+        expect(padcookie.getPref(`cookie${i}`)).to.equal(queryVal);
       });
-      done(Error('expected error message for missing urlVar'));
-      return;
-    } catch (err) {
-      expect(err.message).to.contain('urlVar');
     }
+  });
 
-    try {
-      chrome$.window.ep_webrtc.settingToCheckbox({
-        urlVar: 'urlVar',
-        defaultVal: true,
-        checkboxId: '#checkboxId',
+  describe('no query parameter, no cookie -> cookie not set', function () {
+    for (const {name, queryVal, cookieVal, i} of testCases) {
+      if (queryVal != null || cookieVal != null) continue;
+      it(name, async function () {
+        expect(padcookie.getPref(`cookie${i}`) == null).to.be(true);
       });
-      done(Error('expected error message for missing cookie'));
-      return;
-    } catch (err) {
-      expect(err.message).to.contain('cookie');
     }
+  });
 
-    try {
-      chrome$.window.ep_webrtc.settingToCheckbox({
-        urlVar: 'urlVar',
-        cookie: 'cookie',
-        checkboxId: '#checkboxId',
+  describe('clicking sets cookie', function () {
+    for (const {name, i, id, want} of testCases) {
+      it(name, async function () {
+        const cb = chrome$(`#${id}`);
+        cb.click();
+        await helper.waitForPromise(() => cb.prop('checked') === !want);
+        expect(padcookie.getPref(`cookie${i}`)).to.equal(!want);
       });
-      done(Error('expected error message for missing defaultVal'));
-      return;
-    } catch (err) {
-      expect(err.message).to.contain('defaultVal');
     }
+  });
 
-    try {
-      chrome$.window.ep_webrtc.settingToCheckbox({
-        urlVar: 'urlVar',
-        cookie: 'cookie',
-        defaultVal: true,
+  describe('throws errors for missing params', function () {
+    const params = {
+      urlVar: 'urlVar',
+      cookie: 'cookie',
+      defaultVal: true,
+      checkboxId: '#checkboxId',
+    };
+
+    for (const k of Object.keys(params)) {
+      const badParams = Object.assign({}, params);
+      delete badParams[k];
+
+      it(k, async function () {
+        expect(() => chrome$.window.ep_webrtc.settingToCheckbox(badParams))
+            .to.throwError(new RegExp(k));
       });
-      done(Error('expected error message for missing checkboxId'));
-      return;
-    } catch (err) {
-      expect(err.message).to.contain('checkboxId');
     }
-
-    done();
   });
 });
