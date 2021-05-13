@@ -534,12 +534,6 @@ const rtc = (() => {
           self.activate();
         });
       }
-
-      if (rtcEnabled) {
-        self.activate();
-      } else {
-        self.deactivate();
-      }
       $('#options-enablertc').on('change', function () {
         if (this.checked) {
           self.activate();
@@ -551,6 +545,11 @@ const rtc = (() => {
         $(window).on('unload', () => {
           self.hangupAll();
         });
+      }
+      if (rtcEnabled) {
+        self.activate();
+      } else {
+        self.deactivate();
       }
       $('#rtcbox').data('initialized', true); // Help tests determine when init() is done.
     },
