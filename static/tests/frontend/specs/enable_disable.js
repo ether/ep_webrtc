@@ -1,55 +1,51 @@
-/* eslint max-len: ["error", { "code": 120 }] */
 'use strict';
 
-describe('enable and disable webrtc', function () {
-  context('WebRTC is disabled', function () {
-    before(function (done) {
-      helper.newPad({
-        padPrefs: {rtcEnabled: false, fakeWebrtcFirefox: true},
-        cb: () => {
-          helper.waitFor(() => helper.padChrome$, 1000).done(done);
-        },
+describe('enable/disable', function () {
+  const cartesian = function* (head, ...tail) {
+    const remainder = tail.length > 0 ? cartesian(...tail) : [[]];
+    for (const r of remainder) for (const h of head) yield [h, ...r];
+  };
+
+  const testCases = cartesian([null, false, true], [null, 'YES', 'ignored']);
+
+  for (const [cookieVal, queryVal] of testCases) {
+    describe(`cookie=${cookieVal} query=${queryVal}`, function () {
+      let chrome$;
+      let wantChecked;
+      let checkbox;
+
+      before(async function () {
+        this.timeout(60000);
+        await helper.aNewPad({
+          padPrefs: Object.assign({
+            fakeWebrtcFirefox: true,
+          }, cookieVal == null ? {} : {rtcEnabled: cookieVal}),
+          params: queryVal == null ? {} : {av: queryVal},
+        });
+        chrome$ = helper.padChrome$;
+        // Normalize queryVal to null/false/true.
+        const queryNorm = queryVal === 'YES' ? true : null;
+        const defaultChecked = !!chrome$.window.clientVars.webrtc.enabled;
+        wantChecked = (queryNorm || (queryNorm == null && cookieVal) ||
+                       (queryNorm == null && cookieVal == null && defaultChecked));
+        checkbox = chrome$('#options-enablertc');
+        await helper.waitForPromise(() => chrome$('#rtcbox').data('initialized'));
       });
-      this.timeout(60000);
-    });
 
-    it('enables WebRTC if the user uses the setting', function (done) {
-      const chrome$ = helper.padChrome$;
-      const $enableRtc = chrome$('#options-enablertc');
-      expect($enableRtc.prop('checked')).to.be(false);
-      expect(chrome$('#rtcbox video').length).to.be(0);
-
-      $enableRtc.click();
-
-      expect($enableRtc.prop('checked')).to.be(true);
-
-      helper.waitFor(() => chrome$('#rtcbox video').length === 1, 1000).done(done);
-    });
-  });
-
-  context('WebRTC is enabled', function () {
-    before(function (done) {
-      helper.newPad({
-        padPrefs: {rtcEnabled: true, fakeWebrtcFirefox: true},
-        cb: () => {
-          helper.waitFor(() => helper.padChrome$, 1000).done(done);
-        },
+      it('checkbox is checked/unchecked', async function () {
+        expect(checkbox.prop('checked')).to.equal(wantChecked);
       });
-      this.timeout(60000);
-    });
 
-    it('disables WebRTC if the user uses the setting', function (done) {
-      const chrome$ = helper.padChrome$;
-      const $enableRtc = chrome$('#options-enablertc');
-      expect($enableRtc.prop('checked')).to.be(true);
-      helper.waitFor(() => chrome$('#rtcbox video').length === 1, 1000).done(() => {
-        $enableRtc.click();
+      it('self video element', async function () {
+        expect(chrome$('#rtcbox video').length).to.equal(wantChecked ? 1 : 0);
+      });
 
-        expect($enableRtc.prop('checked')).to.be(false);
-
-        expect(chrome$('#rtcbox video').length).to.be(0);
-        done();
+      it('clicking checkbox toggles state', async function () {
+        checkbox.click();
+        expect(checkbox.prop('checked')).to.equal(!wantChecked);
+        await helper.waitForPromise(
+            () => chrome$('#rtcbox video').length === (wantChecked ? 0 : 1));
       });
     });
-  });
+  }
 });
