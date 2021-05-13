@@ -542,11 +542,7 @@ exports.rtc = new class {
         this.deactivate();
       }
     });
-    if (this._isActive) {
-      $(window).on('unload', () => {
-        this.hangupAll();
-      });
-    }
+    $(window).on('unload', () => { this.hangupAll(); });
     if (rtcEnabled) {
       await this.activate();
     } else {
