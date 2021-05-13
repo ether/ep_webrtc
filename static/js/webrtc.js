@@ -21,7 +21,6 @@ const padcookie = require('ep_etherpad-lite/static/js/pad_cookie').padcookie;
 const rtc = (() => {
   const videoSizes = {large: '260px', small: '160px'};
   let isActive = false;
-  let urlParamString;
   const pcConfig = {};
   let localStream;
   const pc = {};
@@ -29,7 +28,6 @@ const rtc = (() => {
   const self = {
     // API HOOKS
     postAceInit: async (hookName, {pad}) => {
-      self.setUrlParamString(window.location.search);
       if (clientVars.webrtc == null || clientVars.webrtc.configError) {
         $.gritter.add({
           title: 'Error',
@@ -59,10 +57,6 @@ const rtc = (() => {
         videoSizes.small = `${clientVars.webrtc.video.sizes.small}px`;
       }
       await self.init(pad);
-    },
-    // so we can call it from testing
-    setUrlParamString: (str) => {
-      urlParamString = str;
     },
 
     userJoinOrUpdate: (hookName, {userInfo}) => {
@@ -466,7 +460,7 @@ const rtc = (() => {
         }
       });
     },
-    avInURL: () => urlParamString.includes('av=YES'),
+    avInURL: () => window.location.search.includes('av=YES'),
 
     // Connect a setting to a checkbox. To be called on initialization.
     //
@@ -485,10 +479,10 @@ const rtc = (() => {
       // * If the setting is not in the URL: try to get it from the cookie
       // * If the setting was in neither, go with the site-wide default value
       //   but don't put it in the cookies
-      if (urlParamString.includes(`${params.urlVar}=true`)) {
+      if (window.location.search.includes(`${params.urlVar}=true`)) {
         padcookie.setPref(params.cookie, true);
         value = true;
-      } else if (urlParamString.includes(`${params.urlVar}=false`)) {
+      } else if (window.location.search.includes(`${params.urlVar}=false`)) {
         padcookie.setPref(params.cookie, false);
         value = false;
       } else {
