@@ -160,14 +160,12 @@ exports.rtc = new class {
     // Do this before setting `this._localStream` to avoid a race condition
     // that might flash the video on for an instant before disabling it.
     const audioTrack = stream.getAudioTracks()[0];
-    // using `.prop("checked") === true` to make absolutely sure the result is a boolean
-    // we don't want bugs when it comes to muting/turning off video
     if (audioTrack) {
-      audioTrack.enabled = $('#options-audioenabledonstart').prop('checked') === true;
+      audioTrack.enabled = !!$('#options-audioenabledonstart').prop('checked');
     }
     const videoTrack = stream.getVideoTracks()[0];
     if (videoTrack) {
-      videoTrack.enabled = $('#options-videoenabledonstart').prop('checked') === true;
+      videoTrack.enabled = !!$('#options-videoenabledonstart').prop('checked');
     }
 
     this._localStream = stream;
