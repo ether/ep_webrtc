@@ -221,9 +221,8 @@ const rtc = (() => {
       const videoId = `video_${userId.replace(/\./g, '_')}`;
       let video = $(`#${videoId}`)[0];
 
-      const user = self.getUserFromId(userId);
-
       if (!video && stream) {
+        const user = self.getUserFromId(userId);
         const size = videoSizes.small;
         const videoContainer = $("<div class='video-container'>")
             .css({'width': size, 'max-height': size})
