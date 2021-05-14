@@ -68,11 +68,11 @@ const rtc = (() => {
       if (!author) return;
       const user = self.getUserFromId(author);
       if (!user) return;
-      const color =
-          typeof user.colorId === 'number' ? clientVars.colorPalette[user.colorId] : user.colorId;
+      const {name = html10n.get('pad.userlist.unnamed'), colorId = 0} = user;
+      const color = typeof colorId === 'number' ? clientVars.colorPalette[colorId] : colorId;
       $(`#video_${author.replace(/\./g, '_')}`)
           .css({'border-color': color})
-          .siblings('.user-name').text(user.name);
+          .siblings('.user-name').text(name);
     },
     userLeave: (hookName, {userInfo: {userId}}) => {
       self.hangup(userId, false);
@@ -224,15 +224,15 @@ const rtc = (() => {
       let video = $(`#${videoId}`)[0];
 
       if (!video && stream) {
-        const user = self.getUserFromId(userId);
-        const color =
-            typeof user.colorId === 'number' ? clientVars.colorPalette[user.colorId] : user.colorId;
+        const {name = html10n.get('pad.userlist.unnamed'), colorId = 0} =
+            self.getUserFromId(userId) || {};
+        const color = typeof colorId === 'number' ? clientVars.colorPalette[colorId] : colorId;
         const size = videoSizes.small;
         const videoContainer = $("<div class='video-container'>")
             .css({'width': size, 'max-height': size})
             .appendTo($('#rtcbox'));
 
-        videoContainer.append($('<div class="user-name">').text(user.name));
+        videoContainer.append($('<div class="user-name">').text(name));
 
         video = $('<video playsinline>')
             .attr('id', videoId)
