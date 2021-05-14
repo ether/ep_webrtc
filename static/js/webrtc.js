@@ -68,8 +68,10 @@ const rtc = (() => {
       if (!author) return;
       const user = self.getUserFromId(author);
       if (!user) return;
+      const color =
+          typeof user.colorId === 'number' ? clientVars.colorPalette[user.colorId] : user.colorId;
       $(`#video_${author.replace(/\./g, '_')}`)
-          .css({'border-color': user.colorId})
+          .css({'border-color': color})
           .siblings('.user-name').text(user.name);
     },
     userLeave: (hookName, {userInfo: {userId}}) => {
@@ -223,6 +225,8 @@ const rtc = (() => {
 
       if (!video && stream) {
         const user = self.getUserFromId(userId);
+        const color =
+            typeof user.colorId === 'number' ? clientVars.colorPalette[user.colorId] : user.colorId;
         const size = videoSizes.small;
         const videoContainer = $("<div class='video-container'>")
             .css({'width': size, 'max-height': size})
@@ -232,7 +236,7 @@ const rtc = (() => {
 
         video = $('<video playsinline>')
             .attr('id', videoId)
-            .css({'border-color': user.colorId, 'width': size, 'max-height': size})
+            .css({'border-color': color, 'width': size, 'max-height': size})
             .appendTo(videoContainer)[0];
 
         video.autoplay = true;
