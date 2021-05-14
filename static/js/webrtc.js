@@ -82,14 +82,12 @@ const rtc = (() => {
       urlParamString = str;
     },
     aceSetAuthorStyle: (hookName, {author}) => {
-      if (author) {
-        const user = self.getUserFromId(author);
-        if (user) {
-          $(`#video_${author.replace(/\./g, '_')}`).css({
-            'border-color': user.colorId,
-          }).siblings('.user-name').text(user.name);
-        }
-      }
+      if (!author) return;
+      const user = self.getUserFromId(author);
+      if (!user) return;
+      $(`#video_${author.replace(/\./g, '_')}`)
+          .css({'border-color': user.colorId})
+          .siblings('.user-name').text(user.name);
     },
     userLeave: (hookName, {userInfo: {userId}}) => {
       self.hangup(userId, false);
@@ -200,20 +198,15 @@ const rtc = (() => {
     },
     toggleMuted: () => {
       const audioTrack = localStream.getAudioTracks()[0];
-      if (audioTrack) {
-        audioTrack.enabled = !audioTrack.enabled;
-        return !audioTrack.enabled; // returning "Muted" state, which is !enabled
-      }
-      return true; // if there's no audio track, it's muted
+      if (!audioTrack) return true; // if there's no audio track, it's muted
+      audioTrack.enabled = !audioTrack.enabled;
+      return !audioTrack.enabled; // returning "Muted" state, which is !enabled
     },
     toggleVideo: () => {
       const videoTrack = localStream.getVideoTracks()[0];
-      if (videoTrack) {
-        videoTrack.enabled = !videoTrack.enabled;
-        return !videoTrack.enabled; // returning whether it's disabled, to match toggleMuted
-      }
-      // if there's no video track, return true to indicate not enabled (matching toggleMuted)
-      return true;
+      if (!videoTrack) return true; // if there's no video track, it's disabled
+      videoTrack.enabled = !videoTrack.enabled;
+      return !videoTrack.enabled; // returning whether it's disabled, to match toggleMuted
     },
     getUserFromId: (userId) => {
       if (!self._pad || !self._pad.collabClient) return null;
@@ -451,12 +444,11 @@ const rtc = (() => {
     hangup: (...args) => {
       const userId = args[0];
       const notify = args[1] || true;
-      if (pc[userId]) {
-        self.setStream(userId, null);
-        pc[userId].close();
-        delete pc[userId];
-        notify && self.sendMessage(userId, {type: 'hangup'});
-      }
+      if (!pc[userId]) return;
+      self.setStream(userId, null);
+      pc[userId].close();
+      delete pc[userId];
+      notify && self.sendMessage(userId, {type: 'hangup'});
     },
     call: (userId) => {
       if (!localStream) return;
@@ -536,12 +528,9 @@ const rtc = (() => {
         localStream = stream;
         self.setStream(self._pad.getUserId(), stream);
         self._pad.collabClient.getConnectedUsers().forEach((user) => {
-          if (user.userId !== self.getUserId()) {
-            if (pc[user.userId]) {
-              self.hangup(user.userId);
-            }
-            self.call(user.userId);
-          }
+          if (user.userId === self.getUserId()) return;
+          if (pc[user.userId]) self.hangup(user.userId);
+          self.call(user.userId);
         });
       } catch (err) {
         self.showUserMediaError(err);
