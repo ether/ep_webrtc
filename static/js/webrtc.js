@@ -154,7 +154,11 @@ const rtc = (() => {
       try {
         stream = await window.navigator.mediaDevices.getUserMedia(constraints);
       } catch (err) {
-        self.showUserMediaError(err);
+        try {
+          self.showUserMediaError(err);
+        } finally {
+          self.deactivate();
+        }
         return;
       }
       // Disable audio and/or video according to user/site settings.
