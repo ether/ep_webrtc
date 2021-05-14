@@ -64,10 +64,11 @@ const rtc = (() => {
     setUrlParamString: (str) => {
       urlParamString = str;
     },
-    aceSetAuthorStyle: (hookName, {author}) => {
-      if (!author) return;
-      self.updatePeerNameAndColor(author);
+
+    userJoinOrUpdate: (hookName, {userInfo}) => {
+      self.updatePeerNameAndColor(userInfo);
     },
+
     userLeave: (hookName, {userInfo: {userId}}) => {
       self.hangup(userId, false);
     },
@@ -77,9 +78,9 @@ const rtc = (() => {
     },
     // END OF API HOOKS
 
-    updatePeerNameAndColor: (userId) => {
-      const {name = html10n.get('pad.userlist.unnamed'), colorId = 0} =
-          self.getUserFromId(userId) || {};
+    updatePeerNameAndColor: (userInfo) => {
+      if (!userInfo) return;
+      const {userId, name = html10n.get('pad.userlist.unnamed'), colorId = 0} = userInfo;
       const color = typeof colorId === 'number' ? clientVars.colorPalette[colorId] : colorId;
       $(`#video_${userId.replace(/\./g, '_')}`)
           .css({'border-color': color})
@@ -246,7 +247,7 @@ const rtc = (() => {
           video.muted = true;
         }
         self.addInterface(userId, stream);
-        self.updatePeerNameAndColor(userId);
+        self.updatePeerNameAndColor(self.getUserFromId(userId));
       }
       if (stream) {
         video.srcObject = stream;
