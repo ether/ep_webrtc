@@ -150,32 +150,34 @@ const rtc = (() => {
         // --use-fake-device-for-media-stream
         constraints.fake = true;
       }
+      let stream;
       try {
-        const stream = await window.navigator.mediaDevices.getUserMedia(constraints);
-        // Disable audio and/or video according to user/site settings.
-        // Do this before setting `localStream` to avoid a race condition
-        // that might flash the video on for an instant before disabling it.
-        const audioTrack = stream.getAudioTracks()[0];
-        // using `.prop("checked") === true` to make absolutely sure the result is a boolean
-        // we don't want bugs when it comes to muting/turning off video
-        if (audioTrack) {
-          audioTrack.enabled = $('#options-audioenabledonstart').prop('checked') === true;
-        }
-        const videoTrack = stream.getVideoTracks()[0];
-        if (videoTrack) {
-          videoTrack.enabled = $('#options-videoenabledonstart').prop('checked') === true;
-        }
-
-        localStream = stream;
-        self.setStream(self._pad.getUserId(), stream);
-        self._pad.collabClient.getConnectedUsers().forEach((user) => {
-          if (user.userId === self.getUserId()) return;
-          if (pc[user.userId]) self.hangup(user.userId);
-          self.call(user.userId);
-        });
+        stream = await window.navigator.mediaDevices.getUserMedia(constraints);
       } catch (err) {
         self.showUserMediaError(err);
+        return;
       }
+      // Disable audio and/or video according to user/site settings.
+      // Do this before setting `localStream` to avoid a race condition
+      // that might flash the video on for an instant before disabling it.
+      const audioTrack = stream.getAudioTracks()[0];
+      // using `.prop("checked") === true` to make absolutely sure the result is a boolean
+      // we don't want bugs when it comes to muting/turning off video
+      if (audioTrack) {
+        audioTrack.enabled = $('#options-audioenabledonstart').prop('checked') === true;
+      }
+      const videoTrack = stream.getVideoTracks()[0];
+      if (videoTrack) {
+        videoTrack.enabled = $('#options-videoenabledonstart').prop('checked') === true;
+      }
+
+      localStream = stream;
+      self.setStream(self._pad.getUserId(), stream);
+      self._pad.collabClient.getConnectedUsers().forEach((user) => {
+        if (user.userId === self.getUserId()) return;
+        if (pc[user.userId]) self.hangup(user.userId);
+        self.call(user.userId);
+      });
     },
     deactivate: () => {
       $('#options-enablertc').prop('checked', false);
