@@ -554,6 +554,7 @@ const rtc = (() => {
           self.hangupAll();
         });
       }
+      $('#rtcbox').data('initialized', true); // Help tests determine when init() is done.
     },
   };
 
