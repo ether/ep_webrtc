@@ -18,6 +18,15 @@
 require('./adapter');
 const padcookie = require('ep_etherpad-lite/static/js/pad_cookie').padcookie;
 
+// Toggles the enabled state of the first track, then updates the other tracks to match. Returns
+// true iff the result is no enabled tracks (either there are no tracks or all tracks are muted).
+const toggleTracks = (tracks) => {
+  const [{enabled: enabledBefore = true} = {}] = tracks;
+  const enabledAfter = !enabledBefore;
+  for (const track of tracks) track.enabled = enabledAfter;
+  return !enabledAfter; // Return true iff disabled (muted).
+};
+
 exports.rtc = new class {
   constructor() {
     this._settings = null;
@@ -159,13 +168,11 @@ exports.rtc = new class {
     // Disable audio and/or video according to user/site settings.
     // Do this before setting `this._localStream` to avoid a race condition
     // that might flash the video on for an instant before disabling it.
-    const audioTrack = stream.getAudioTracks()[0];
-    if (audioTrack) {
-      audioTrack.enabled = !!$('#options-audioenabledonstart').prop('checked');
+    for (const track of stream.getAudioTracks()) {
+      track.enabled = !!$('#options-audioenabledonstart').prop('checked');
     }
-    const videoTrack = stream.getVideoTracks()[0];
-    if (videoTrack) {
-      videoTrack.enabled = !!$('#options-videoenabledonstart').prop('checked');
+    for (const track of stream.getVideoTracks()) {
+      track.enabled = !!$('#options-videoenabledonstart').prop('checked');
     }
 
     this._localStream = stream;
@@ -192,17 +199,11 @@ exports.rtc = new class {
   }
 
   toggleMuted() {
-    const audioTrack = this._localStream.getAudioTracks()[0];
-    if (!audioTrack) return true; // if there's no audio track, it's muted
-    audioTrack.enabled = !audioTrack.enabled;
-    return !audioTrack.enabled; // returning "Muted" state, which is !enabled
+    return this._localStream == null || toggleTracks(this._localStream.getAudioTracks());
   }
 
   toggleVideo() {
-    const videoTrack = this._localStream.getVideoTracks()[0];
-    if (!videoTrack) return true; // if there's no video track, it's disabled
-    videoTrack.enabled = !videoTrack.enabled;
-    return !videoTrack.enabled; // returning whether it's disabled, to match toggleMuted
+    return this._localStream == null || toggleTracks(this._localStream.getVideoTracks());
   }
 
   getUserFromId(userId) {
