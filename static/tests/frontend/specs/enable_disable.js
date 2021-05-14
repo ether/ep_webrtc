@@ -6,7 +6,7 @@ describe('enable/disable', function () {
     for (const r of remainder) for (const h of head) yield [h, ...r];
   };
 
-  const testCases = cartesian([null, false, true], [null, false, true, 'YES', 'ignored']);
+  const testCases = cartesian([null, false, true], [null, false, true, 'NO', 'YES', 'ignored']);
 
   for (const [cookieVal, queryVal] of testCases) {
     describe(`cookie=${cookieVal} query=${queryVal}`, function () {
@@ -26,6 +26,7 @@ describe('enable/disable', function () {
         // Normalize queryVal to null/false/true.
         const queryNorm =
             !!queryVal === queryVal ? queryVal // Already boolean.
+            : queryVal === 'NO' ? false
             : queryVal === 'YES' ? true
             : null;
         const defaultChecked = !!chrome$.window.clientVars.webrtc.enabled;

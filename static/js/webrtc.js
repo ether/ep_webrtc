@@ -477,7 +477,7 @@ exports.rtc = new class {
     if (['YES', 'true'].includes(urlValue)) { // 'YES' is for backward compatibility with av=YES.
       padcookie.setPref(params.cookie, true);
       value = true;
-    } else if (urlValue === 'false') {
+    } else if (['NO', 'false'].includes(urlValue)) { // 'NO' for symmetry with deprecated av=YES.
       padcookie.setPref(params.cookie, false);
       value = false;
     } else {
