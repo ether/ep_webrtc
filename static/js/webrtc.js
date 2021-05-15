@@ -38,7 +38,6 @@ const rtc = (() => {
   };
   let localStream;
   const pc = {};
-  const callQueue = [];
   const enlargedVideos = new Set();
 
   const self = {
@@ -498,10 +497,7 @@ const rtc = (() => {
       }
     },
     call: (userId) => {
-      if (!localStream) {
-        callQueue.push(userId);
-        return;
-      }
+      if (!localStream) return;
       if (!pc[userId]) {
         self.createPeerConnection(userId);
       }
