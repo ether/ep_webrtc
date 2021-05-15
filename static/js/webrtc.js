@@ -255,11 +255,6 @@ const rtc = (() => {
               'width': videoSizes.small,
               'max-height': videoSizes.small,
             })
-            .on({
-              loadedmetadata: () => {
-                self.addInterface(userId, stream);
-              },
-            })
             .appendTo(videoContainer)[0];
 
         video.autoplay = true;
