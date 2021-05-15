@@ -223,26 +223,7 @@ exports.rtc = new class {
       return;
     }
     if ($video.length === 0) {
-      const isLocal = userId === this.getUserId();
-      const size = `${this._settings.video.sizes.small}px`;
-      $video = $('<video>')
-          .attr({
-            id: videoId,
-            playsinline: '',
-            autoplay: '',
-            muted: isLocal ? '' : null,
-          })
-          .prop('muted', isLocal) // Setting the 'muted' attribute isn't sufficient for some reason.
-          .css({'width': size, 'max-height': size});
-      $('#rtcbox').append(
-          $('<div>')
-              .addClass('video-container')
-              .toggleClass('local-user', isLocal)
-              .css({'width': size, 'max-height': size})
-              .append($('<div>').addClass('user-name'))
-              .append($video));
-      this.addInterface(userId, stream);
-      this.updatePeerNameAndColor(this.getUserFromId(userId));
+      $video = this.addInterface(userId, stream);
     }
     // Avoid flicker by checking if .srcObject already equals stream.
     if ($video[0].srcObject !== stream) $video[0].srcObject = stream;
@@ -251,12 +232,28 @@ exports.rtc = new class {
   addInterface(userId, stream) {
     const isLocal = userId === this.getUserId();
     const videoId = `video_${userId.replace(/\./g, '_')}`;
-    const $video = $(`#${videoId}`);
-
+    const size = `${this._settings.video.sizes.small}px`;
+    const $video = $('<video>')
+        .attr({
+          id: videoId,
+          playsinline: '',
+          autoplay: '',
+          muted: isLocal ? '' : null,
+        })
+        .prop('muted', isLocal) // Setting the 'muted' attribute isn't sufficient for some reason.
+        .css({'width': size, 'max-height': size});
     const $interface = $('<div>')
         .addClass('interface-container')
-        .attr('id', `interface_${videoId}`)
-        .insertAfter($video);
+        .attr('id', `interface_${videoId}`);
+    $('#rtcbox').append(
+        $('<div>')
+            .addClass('video-container')
+            .toggleClass('local-user', isLocal)
+            .css({'width': size, 'max-height': size})
+            .append($('<div>').addClass('user-name'))
+            .append($video)
+            .append($interface));
+    this.updatePeerNameAndColor(this.getUserFromId(userId));
 
     // /////
     // Mute button
@@ -325,6 +322,8 @@ exports.rtc = new class {
             $video.css({'width': videoSize, 'max-height': videoSize});
           },
         }));
+
+    return $video;
   }
 
   // Sends a stat to the back end. `statName` must be in the
