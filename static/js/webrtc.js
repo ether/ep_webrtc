@@ -253,62 +253,57 @@ exports.rtc = new class {
     const videoId = `video_${userId.replace(/\./g, '_')}`;
     const $video = $(`#${videoId}`);
 
+    const $interface = $('<div>')
+        .addClass('interface-container')
+        .attr('id', `interface_${videoId}`)
+        .insertAfter($video);
+
     // /////
     // Mute button
     // /////
 
     const audioHardDisabled = this._settings.audio.disabled === 'hard';
     const hasAudio = stream.getAudioTracks().some((t) => t.enabled);
-    const $mute = $("<span class='interface-btn audio-btn buttonicon'>")
+    $interface.append($('<span>')
+        .addClass('interface-btn audio-btn buttonicon')
         .attr('title',
             audioHardDisabled ? 'Audio disallowed by admin'
             : hasAudio ? 'Mute'
             : 'Unmute')
         .toggleClass('muted', !hasAudio || audioHardDisabled)
-        .toggleClass('disallowed', audioHardDisabled);
-
-    if (!audioHardDisabled) {
-      $mute.on({
-        click: (event) => {
-          let muted;
-          if (isLocal) {
-            muted = this.toggleMuted();
-          } else {
-            $video[0].muted = !$video[0].muted;
-            muted = $video[0].muted;
-          }
-          $mute
-              .attr('title', muted ? 'Unmute' : 'Mute')
-              .toggleClass('muted', muted);
-        },
-      });
-    }
+        .toggleClass('disallowed', audioHardDisabled)
+        .on(audioHardDisabled ? {} : {
+          click: (event) => {
+            const muted = isLocal ? this.toggleMuted() : ($video[0].muted = !$video[0].muted);
+            $(event.currentTarget)
+                .attr('title', muted ? 'Unmute' : 'Mute')
+                .toggleClass('muted', muted);
+          },
+        }));
 
     // /////
     // Disable Video button
     // /////
 
-    let $disableVideo = null;
     if (isLocal) {
       const videoHardDisabled = this._settings.video.disabled === 'hard';
       const hasVideo = stream.getVideoTracks().some((t) => t.enabled);
-      $disableVideo = $("<span class='interface-btn video-btn buttonicon'>")
+      $interface.append($('<span>')
+          .addClass('interface-btn video-btn buttonicon')
           .attr('title',
               videoHardDisabled ? 'Video disallowed by admin'
               : hasVideo ? 'Disable video'
               : 'Enable video')
           .toggleClass('off', !hasVideo || videoHardDisabled)
-          .toggleClass('disallowed', videoHardDisabled);
-      if (!videoHardDisabled) {
-        $disableVideo.on({
-          click: (event) => {
-            const videoEnabled = !this.toggleVideo();
-            $disableVideo
-                .attr('title', videoEnabled ? 'Disable video' : 'Enable video')
-                .toggleClass('off', !videoEnabled);
-          },
-        });
-      }
+          .toggleClass('disallowed', videoHardDisabled)
+          .on(videoHardDisabled ? {} : {
+            click: (event) => {
+              const videoEnabled = !this.toggleVideo();
+              $(event.currentTarget)
+                  .attr('title', videoEnabled ? 'Disable video' : 'Enable video')
+                  .toggleClass('off', !videoEnabled);
+            },
+          }));
     }
 
     // /////
@@ -316,31 +311,20 @@ exports.rtc = new class {
     // /////
 
     let videoEnlarged = false;
-    const $largeVideo = $("<span class='interface-btn enlarge-btn buttonicon'>")
+    $interface.append($('<span>')
+        .addClass('interface-btn enlarge-btn buttonicon')
         .attr('title', 'Make video larger')
         .on({
           click: (event) => {
             videoEnlarged = !videoEnlarged;
-            $largeVideo
+            $(event.currentTarget)
                 .attr('title', videoEnlarged ? 'Make video smaller' : 'Make video larger')
                 .toggleClass('large', videoEnlarged);
             const videoSize = `${this._settings.video.sizes[videoEnlarged ? 'large' : 'small']}px`;
             $video.parent().css({'width': videoSize, 'max-height': videoSize});
             $video.css({'width': videoSize, 'max-height': videoSize});
           },
-        });
-
-
-    // /////
-    // Combining
-    // /////
-
-    $("<div class='interface-container'>")
-        .attr('id', `interface_${videoId}`)
-        .append($mute)
-        .append($disableVideo)
-        .append($largeVideo)
-        .insertAfter($video);
+        }));
   }
 
   // Sends a stat to the back end. `statName` must be in the
