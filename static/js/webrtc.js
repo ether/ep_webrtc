@@ -216,37 +216,36 @@ exports.rtc = new class {
   }
 
   setStream(userId, stream) {
-    const isLocal = userId === this.getUserId();
     const videoId = `video_${userId.replace(/\./g, '_')}`;
-    let video = $(`#${videoId}`)[0];
-
-    if (!video && stream) {
+    let $video = $(`#${videoId}`);
+    if (!stream) {
+      $video.parent().remove();
+      return;
+    }
+    if ($video.length === 0) {
+      const isLocal = userId === this.getUserId();
       const size = `${this._settings.video.sizes.small}px`;
-      const videoContainer = $("<div class='video-container'>")
-          .css({'width': size, 'max-height': size})
-          .appendTo($('#rtcbox'));
-
-      videoContainer.append($('<div class="user-name">'));
-
-      video = $('<video playsinline>')
-          .attr('id', videoId)
-          .css({'width': size, 'max-height': size})
-          .appendTo(videoContainer)[0];
-
-      video.autoplay = true;
-      if (isLocal) {
-        videoContainer.addClass('local-user');
-        video.muted = true;
-      }
+      $video = $('<video>')
+          .attr({
+            id: videoId,
+            playsinline: '',
+            autoplay: '',
+            muted: isLocal ? '' : null,
+          })
+          .prop('muted', isLocal) // Setting the 'muted' attribute isn't sufficient for some reason.
+          .css({'width': size, 'max-height': size});
+      $('#rtcbox').append(
+          $('<div>')
+              .addClass('video-container')
+              .toggleClass('local-user', isLocal)
+              .css({'width': size, 'max-height': size})
+              .append($('<div>').addClass('user-name'))
+              .append($video));
       this.addInterface(userId, stream);
       this.updatePeerNameAndColor(this.getUserFromId(userId));
     }
-    if (stream) {
-      // Avoid flicker by checking if .srcObject already equals stream.
-      if (video.srcObject !== stream) video.srcObject = stream;
-    } else if (video) {
-      $(video).parent().remove();
-    }
+    // Avoid flicker by checking if .srcObject already equals stream.
+    if ($video[0].srcObject !== stream) $video[0].srcObject = stream;
   }
 
   addInterface(userId, stream) {
