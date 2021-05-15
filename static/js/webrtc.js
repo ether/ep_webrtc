@@ -375,7 +375,6 @@ const rtc = (() => {
       // Combining
       // /////
 
-      $(`#interface_${videoId}`).remove();
       $("<div class='interface-container'>")
           .attr('id', `interface_${videoId}`)
           .append($mute)
