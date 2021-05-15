@@ -38,7 +38,6 @@ const rtc = (() => {
   };
   let localStream;
   const pc = {};
-  const enlargedVideos = new Set();
 
   const self = {
     // API HOOKS
@@ -367,20 +366,12 @@ const rtc = (() => {
           .on({
             click: (event) => {
               videoEnlarged = !videoEnlarged;
-
-              if (videoEnlarged) {
-                enlargedVideos.add(userId);
-              } else {
-                enlargedVideos.delete(userId);
-              }
-
               $largeVideo
                   .attr(
                       'title',
                       videoEnlarged ? 'Make video smaller' : 'Make video larger'
                   )
                   .toggleClass('large', videoEnlarged);
-
               const videoSize = videoEnlarged ? videoSizes.large : videoSizes.small;
               $video.parent().css({'width': videoSize, 'max-height': videoSize});
               $video.css({'width': videoSize, 'max-height': videoSize});
