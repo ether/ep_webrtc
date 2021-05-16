@@ -257,17 +257,14 @@ exports.rtc = new class {
     // Mute button
     // /////
 
-    const audioTrack = stream.getAudioTracks()[0];
     const audioHardDisabled = this._settings.audio.disabled === 'hard';
-    let initiallyMuted = true; // if there's no audio track, it's muted
-    if (audioTrack) initiallyMuted = !audioTrack.enabled;
-
+    const hasAudio = stream.getAudioTracks().some((t) => t.enabled);
     const $mute = $("<span class='interface-btn audio-btn buttonicon'>")
         .attr('title',
             audioHardDisabled ? 'Audio disallowed by admin'
-            : initiallyMuted ? 'Unmute'
-            : 'Mute')
-        .toggleClass('muted', initiallyMuted || audioHardDisabled)
+            : hasAudio ? 'Mute'
+            : 'Unmute')
+        .toggleClass('muted', !hasAudio || audioHardDisabled)
         .toggleClass('disallowed', audioHardDisabled);
 
     if (!audioHardDisabled) {
@@ -293,18 +290,14 @@ exports.rtc = new class {
 
     let $disableVideo = null;
     if (isLocal) {
-      const videoTrack = stream.getVideoTracks()[0];
       const videoHardDisabled = this._settings.video.disabled === 'hard';
-      let initiallyVideoEnabled = false; // if there's no video track, it's disabled
-      if (videoTrack) {
-        initiallyVideoEnabled = videoTrack.enabled;
-      }
+      const hasVideo = stream.getVideoTracks().some((t) => t.enabled);
       $disableVideo = $("<span class='interface-btn video-btn buttonicon'>")
           .attr('title',
               videoHardDisabled ? 'Video disallowed by admin'
-              : initiallyVideoEnabled ? 'Disable video'
+              : hasVideo ? 'Disable video'
               : 'Enable video')
-          .toggleClass('off', !initiallyVideoEnabled || videoHardDisabled)
+          .toggleClass('off', !hasVideo || videoHardDisabled)
           .toggleClass('disallowed', videoHardDisabled);
       if (!videoHardDisabled) {
         $disableVideo.on({
