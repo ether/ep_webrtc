@@ -222,15 +222,33 @@ exports.rtc = new class {
       $video.parent().remove();
       return;
     }
-    if ($video.length === 0) {
-      $video = this.addInterface(userId, stream);
+    const isLocal = userId === this.getUserId();
+    if ($video.length === 0) $video = this.addInterface(userId, isLocal);
+    if (isLocal) {
+      // Sync the interface for the self view with the state of the outgoing stream.
+      const $interface = $video.siblings('.interface-container');
+      const hasAudio = stream.getAudioTracks().some((t) => t.enabled);
+      if (this._settings.audio.disabled !== 'hard') {
+        $interface.children('.audio-btn')
+            .attr('title', hasAudio ? 'Mute' : 'Unmute')
+            .toggleClass('muted', !hasAudio);
+      } else if (hasAudio) {
+        throw new Error('audio is hard disabled but local stream has audio');
+      }
+      const hasVideo = stream.getVideoTracks().some((t) => t.enabled);
+      if (this._settings.video.disabled !== 'hard') {
+        $interface.children('.video-btn')
+            .attr('title', hasVideo ? 'Disable video' : 'Enable video')
+            .toggleClass('off', !hasVideo);
+      } else if (hasVideo) {
+        throw new Error('video is hard disabled but local stream has video');
+      }
     }
     // Avoid flicker by checking if .srcObject already equals stream.
     if ($video[0].srcObject !== stream) $video[0].srcObject = stream;
   }
 
-  addInterface(userId, stream) {
-    const isLocal = userId === this.getUserId();
+  addInterface(userId, isLocal) {
     const videoId = `video_${userId.replace(/\./g, '_')}`;
     const size = `${this._settings.video.sizes.small}px`;
     const $video = $('<video>')
@@ -260,14 +278,10 @@ exports.rtc = new class {
     // /////
 
     const audioHardDisabled = isLocal && this._settings.audio.disabled === 'hard';
-    const hasAudio = !isLocal || stream.getAudioTracks().some((t) => t.enabled);
     $interface.append($('<span>')
         .addClass('interface-btn audio-btn buttonicon')
-        .attr('title',
-            audioHardDisabled ? 'Audio disallowed by admin'
-            : hasAudio ? 'Mute'
-            : 'Unmute')
-        .toggleClass('muted', !hasAudio || audioHardDisabled)
+        .attr('title', audioHardDisabled ? 'Audio disallowed by admin' : 'Mute')
+        .toggleClass('muted', audioHardDisabled)
         .toggleClass('disallowed', audioHardDisabled)
         .on(audioHardDisabled ? {} : {
           click: (event) => {
@@ -284,14 +298,10 @@ exports.rtc = new class {
 
     if (isLocal) {
       const videoHardDisabled = this._settings.video.disabled === 'hard';
-      const hasVideo = stream.getVideoTracks().some((t) => t.enabled);
       $interface.append($('<span>')
           .addClass('interface-btn video-btn buttonicon')
-          .attr('title',
-              videoHardDisabled ? 'Video disallowed by admin'
-              : hasVideo ? 'Disable video'
-              : 'Enable video')
-          .toggleClass('off', !hasVideo || videoHardDisabled)
+          .attr('title', videoHardDisabled ? 'Video disallowed by admin' : 'Disable video')
+          .toggleClass('off', videoHardDisabled)
           .toggleClass('disallowed', videoHardDisabled)
           .on(videoHardDisabled ? {} : {
             click: (event) => {
