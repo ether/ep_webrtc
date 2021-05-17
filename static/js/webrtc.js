@@ -66,13 +66,7 @@ const rtc = (() => {
     },
     aceSetAuthorStyle: (hookName, {author}) => {
       if (!author) return;
-      const user = self.getUserFromId(author);
-      if (!user) return;
-      const {name = html10n.get('pad.userlist.unnamed'), colorId = 0} = user;
-      const color = typeof colorId === 'number' ? clientVars.colorPalette[colorId] : colorId;
-      $(`#video_${author.replace(/\./g, '_')}`)
-          .css({'border-color': color})
-          .siblings('.user-name').text(name);
+      self.updatePeerNameAndColor(author);
     },
     userLeave: (hookName, {userInfo: {userId}}) => {
       self.hangup(userId, false);
@@ -82,6 +76,16 @@ const rtc = (() => {
       return [null];
     },
     // END OF API HOOKS
+
+    updatePeerNameAndColor: (userId) => {
+      const {name = html10n.get('pad.userlist.unnamed'), colorId = 0} =
+          self.getUserFromId(userId) || {};
+      const color = typeof colorId === 'number' ? clientVars.colorPalette[colorId] : colorId;
+      $(`#video_${userId.replace(/\./g, '_')}`)
+          .css({'border-color': color})
+          .siblings('.user-name').text(name);
+    },
+
     showUserMediaError: (err) => { // show an error returned from getUserMedia
       let reason;
       // For reference on standard errors returned by getUserMedia:
@@ -224,19 +228,16 @@ const rtc = (() => {
       let video = $(`#${videoId}`)[0];
 
       if (!video && stream) {
-        const {name = html10n.get('pad.userlist.unnamed'), colorId = 0} =
-            self.getUserFromId(userId) || {};
-        const color = typeof colorId === 'number' ? clientVars.colorPalette[colorId] : colorId;
         const size = videoSizes.small;
         const videoContainer = $("<div class='video-container'>")
             .css({'width': size, 'max-height': size})
             .appendTo($('#rtcbox'));
 
-        videoContainer.append($('<div class="user-name">').text(name));
+        videoContainer.append($('<div class="user-name">'));
 
         video = $('<video playsinline>')
             .attr('id', videoId)
-            .css({'border-color': color, 'width': size, 'max-height': size})
+            .css({'width': size, 'max-height': size})
             .appendTo(videoContainer)[0];
 
         video.autoplay = true;
@@ -245,6 +246,7 @@ const rtc = (() => {
           video.muted = true;
         }
         self.addInterface(userId, stream);
+        self.updatePeerNameAndColor(userId);
       }
       if (stream) {
         video.srcObject = stream;
