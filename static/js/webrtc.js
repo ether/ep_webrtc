@@ -61,6 +61,10 @@ class ClosedEvent extends CustomEvent {
   }
 }
 
+// The WebRTC negotiation logic used here is based on the "Perfect Negotiation Example" at
+// https://www.w3.org/TR/2021/REC-webrtc-20210126/#perfect-negotiation-example. See there for
+// details about how it works.
+//
 // Events:
 //   * 'stream' (see StreamEvent): Emitted when the remote stream is ready. For every 'stream' event
 //     there will be a corresponding 'streamgone' event. Once a stream is added another stream will
@@ -70,9 +74,10 @@ class ClosedEvent extends CustomEvent {
 //   * 'closed' (see ClosedEvent): Emitted when the PeerState is closed, except when closed by a
 //     call to close(). The PeerState must not be used after it is closed.
 class PeerState extends EventTarget {
-  constructor(pcConfig, sendMessage, localTracks) {
+  constructor(pcConfig, polite, sendMessage, localTracks) {
     super();
     this._pcConfig = pcConfig;
+    this._polite = polite;
     this._sendMessage = (msg) => sendMessage(Object.assign({ids: this._ids}, msg));
     this._localTracks = localTracks;
     this._ids = {
@@ -129,6 +134,15 @@ class PeerState extends EventTarget {
   _resetConnection() {
     this._setRemoteStream(null);
     this._remoteIds = {session: null, instance: null};
+    // This negotiation state is captured in closures (instead of doing something like
+    // this._negotiationState) because this._resetConnection() needs to be sure that all of the
+    // event handlers for the old RTCPeerConnection do not mutate the negotiation state for the new
+    // RTCPeerConnection.
+    const negotiationState = {
+      makingOffer: false,
+      ignoreOffer: false,
+      isSettingRemoteAnswerPending: false,
+    };
     const pc = new RTCPeerConnection(this._pcConfig);
     pc.addEventListener('track', ({track, streams}) => {
       if (streams.length !== 1) throw new Error('Expected track to be in exactly one stream');
@@ -136,8 +150,13 @@ class PeerState extends EventTarget {
     });
     pc.addEventListener('icecandidate', ({candidate}) => this._sendMessage({candidate}));
     pc.addEventListener('negotiationneeded', async () => {
-      await pc.setLocalDescription();
-      this._sendMessage({description: pc.localDescription});
+      try {
+        negotiationState.makingOffer = true;
+        await pc.setLocalDescription();
+        this._sendMessage({description: pc.localDescription});
+      } finally {
+        negotiationState.makingOffer = false;
+      }
     });
     pc.addEventListener('connectionstatechange', () => {
       switch (pc.connectionState) {
@@ -161,13 +180,30 @@ class PeerState extends EventTarget {
     if (this._pc != null) this._pc.close();
     this._pc = pc;
     this._setRemoteDescription = async (description) => {
+      const readyForOffer = !negotiationState.makingOffer &&
+          (pc.signalingState === 'stable' || negotiationState.isSettingRemoteAnswerPending);
+      const offerCollision = description.type === 'offer' && !readyForOffer;
+      negotiationState.ignoreOffer = !this._polite && offerCollision;
+      if (negotiationState.ignoreOffer) return;
+      negotiationState.isSettingRemoteAnswerPending = description.type === 'answer';
       await pc.setRemoteDescription(description);
+      // The "Perfect Negotiation Example" doesn't put this next line inside a `finally` block. It
+      // is unclear whether that is intentional. Fortunately it doesn't matter here: If the above
+      // pc.setRemoteDescription() call throws, _resetConnection() is called to restart the
+      // negotiation anyway.
+      negotiationState.isSettingRemoteAnswerPending = false;
       if (description.type === 'offer') {
         await pc.setLocalDescription();
         this._sendMessage({description: pc.localDescription});
       }
     };
-    this._addIceCandidate = async (candidate) => await pc.addIceCandidate(candidate);
+    this._addIceCandidate = async (candidate) => {
+      try {
+        await pc.addIceCandidate(candidate);
+      } catch (err) {
+        if (!negotiationState.ignoreOffer) throw err;
+      }
+    };
 
     const tracks = this._localTracks.stream.getTracks();
     for (const track of tracks) pc.addTrack(track, this._localTracks.stream);
@@ -229,6 +265,16 @@ const toggleTracks = (tracks) => {
   const enabledAfter = !enabledBefore;
   for (const track of tracks) track.enabled = enabledAfter;
   return !enabledAfter; // Return true iff disabled (muted).
+};
+
+const isPolite = (myId, otherId) => {
+  // Compare user IDs to determine which of the two users is the "polite" user.
+  const polite = myId.localeCompare(otherId) < 0;
+  if ((otherId.localeCompare(myId) < 0) === polite) {
+    // One peer must be polite and the other must be impolite.
+    throw new Error(`Peer ID ${otherId} compares equivalent to own ID ${myId}`);
+  }
+  return polite;
 };
 
 // Periods in element IDs make it hard to build a selector string because period is for class match.
@@ -643,6 +689,7 @@ exports.rtc = new class {
     if (peer == null) {
       peer = new PeerState(
           {iceServers: this._settings.iceServers},
+          isPolite(this.getUserId(), userId),
           (msg) => this.sendMessage(userId, msg),
           this._localTracks);
       this._peers.set(userId, peer);
