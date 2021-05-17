@@ -259,8 +259,8 @@ exports.rtc = new class {
     // Mute button
     // /////
 
-    const audioHardDisabled = this._settings.audio.disabled === 'hard';
-    const hasAudio = stream.getAudioTracks().some((t) => t.enabled);
+    const audioHardDisabled = isLocal && this._settings.audio.disabled === 'hard';
+    const hasAudio = !isLocal || stream.getAudioTracks().some((t) => t.enabled);
     $interface.append($('<span>')
         .addClass('interface-btn audio-btn buttonicon')
         .attr('title',
