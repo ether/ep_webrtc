@@ -431,7 +431,6 @@ const rtc = (() => {
             () => {
               pc[peer].createAnswer(
                   (desc) => {
-                    desc.sdp = cleanupSdp(desc.sdp);
                     pc[peer].setLocalDescription(
                         desc,
                         () => {
@@ -487,7 +486,6 @@ const rtc = (() => {
       pc[userId].addStream(localStream);
       pc[userId].createOffer(
           (desc) => {
-            desc.sdp = cleanupSdp(desc.sdp);
             pc[userId].setLocalDescription(
                 desc,
                 () => {
@@ -691,91 +689,6 @@ const rtc = (() => {
     } else {
       console.log('Error attaching stream to element.', element);
     }
-  };
-
-  // Set Opus as the default audio codec if it's present.
-  const preferOpus = (sdp) => {
-    let sdpLines = sdp.split('\r\n');
-    let mLineIndex;
-
-    // Search for m line.
-    for (let i = 0; i < sdpLines.length; i++) {
-      if (sdpLines[i].search('m=audio') !== -1) {
-        mLineIndex = i;
-        break;
-      }
-    }
-    if (mLineIndex == null) return sdp;
-
-    // If Opus is available, set it as the default in m line.
-    for (let i = 0; i < sdpLines.length; i++) {
-      if (sdpLines[i].search('opus/48000') !== -1) {
-        const opusPayload = extractSdp(sdpLines[i], /:(\d+) opus\/48000/i);
-        if (opusPayload) {
-          sdpLines[mLineIndex] = setDefaultCodec(
-              sdpLines[mLineIndex],
-              opusPayload
-          );
-        }
-        break;
-      }
-    }
-
-    // Remove CN in m line and sdp.
-    sdpLines = removeCN(sdpLines, mLineIndex);
-
-    sdp = sdpLines.join('\r\n');
-    return sdp;
-  };
-
-  const extractSdp = (sdpLine, pattern) => {
-    const result = sdpLine.match(pattern);
-    return result && result.length === 2 ? result[1] : null;
-  };
-
-  // Set the selected codec to the first in m line.
-  const setDefaultCodec = (mLine, payload) => {
-    const elements = mLine.split(' ');
-    const newLine = [];
-    let index = 0;
-    for (let i = 0; i < elements.length; i++) {
-      // Format of media starts from the fourth.
-      if (index === 3) newLine[index++] = payload; // Put target payload to the first.
-      if (elements[i] !== payload) newLine[index++] = elements[i];
-    }
-    return newLine.join(' ');
-  };
-
-  // Strip CN from sdp before CN constraints is ready.
-  const removeCN = (sdpLines, mLineIndex) => {
-    const mLineElements = sdpLines[mLineIndex].split(' ');
-    // Scan from end for the convenience of removing an item.
-    for (let i = sdpLines.length - 1; i >= 0; i--) {
-      const payload = extractSdp(sdpLines[i], /a=rtpmap:(\d+) CN\/\d+/i);
-      if (payload) {
-        const cnPos = mLineElements.indexOf(payload);
-        if (cnPos !== -1) {
-          // Remove CN payload from m line.
-          mLineElements.splice(cnPos, 1);
-        }
-        // Remove CN line in sdp
-        sdpLines.splice(i, 1);
-      }
-    }
-
-    sdpLines[mLineIndex] = mLineElements.join(' ');
-    return sdpLines;
-  };
-
-  const sdpRate = (sdp, rate) => {
-    rate = rate || 1638400;
-    return sdp.replace(/b=AS:\d+\r/g, `b=AS:${rate}\r`);
-  };
-
-  const cleanupSdp = (sdp) => {
-    sdp = preferOpus(sdp);
-    sdp = sdpRate(sdp);
-    return sdp;
   };
 
   const logError = (error) => console.log('WebRTC ERROR:', error);
