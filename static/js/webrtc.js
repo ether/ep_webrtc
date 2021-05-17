@@ -27,6 +27,9 @@ const toggleTracks = (tracks) => {
   return !enabledAfter; // Return true iff disabled (muted).
 };
 
+// Periods in element IDs make it hard to build a selector string because period is for class match.
+const getVideoId = (userId) => `video_${userId.replace(/\./g, '_')}`;
+
 exports.rtc = new class {
   constructor() {
     this._settings = null;
@@ -79,7 +82,7 @@ exports.rtc = new class {
     if (!userInfo) return;
     const {userId, name = html10n.get('pad.userlist.unnamed'), colorId = 0} = userInfo;
     const color = typeof colorId === 'number' ? clientVars.colorPalette[colorId] : colorId;
-    $(`#video_${userId.replace(/\./g, '_')}`)
+    $(`#${getVideoId(userId)}`)
         .css({'border-color': color})
         .siblings('.user-name').text(name);
   }
@@ -216,8 +219,7 @@ exports.rtc = new class {
   }
 
   setStream(userId, stream) {
-    const videoId = `video_${userId.replace(/\./g, '_')}`;
-    let $video = $(`#${videoId}`);
+    let $video = $(`#${getVideoId(userId)}`);
     if (!stream) {
       $video.parent().remove();
       return;
@@ -249,7 +251,7 @@ exports.rtc = new class {
   }
 
   addInterface(userId, isLocal) {
-    const videoId = `video_${userId.replace(/\./g, '_')}`;
+    const videoId = getVideoId(userId);
     const size = `${this._settings.video.sizes.small}px`;
     const $video = $('<video>')
         .attr({
