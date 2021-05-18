@@ -193,8 +193,8 @@ exports.rtc = new class {
     $('#rtcbox').hide();
     padcookie.setPref('rtcEnabled', false);
     this.hangupAll();
+    this.setStream(this._pad.getUserId(), null);
     if (this._localStream) {
-      this.setStream(this._pad.getUserId(), null);
       for (const track of this._localStream.getTracks()) track.stop();
       this._localStream = null;
     }
