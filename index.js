@@ -59,9 +59,6 @@ const handleRTCMessage = (socket, payload) => {
   // The handleMessage hook is executed asynchronously, so the user can disconnect between when the
   // message arrives at Etherpad and when this function is called.
   if (userId == null || padId == null) return;
-  const to = payload.to;
-  const clients = _getRoomSockets(padId);
-
   const msg = {
     type: 'COLLABROOM',
     data: {
@@ -72,12 +69,15 @@ const handleRTCMessage = (socket, payload) => {
       },
     },
   };
-  // Lookup recipient and send message
-  for (let i = 0; i < clients.length; i++) {
-    const session = sessioninfos[clients[i].id];
-    if (session && session.author === to) {
-      clients[i].json.send(msg);
-      break;
+  if (payload.to == null) {
+    socket.to(padId).json.send(msg);
+  } else {
+    for (const socket of _getRoomSockets(padId)) {
+      const session = sessioninfos[socket.id];
+      if (session && session.author === payload.to) {
+        socket.json.send(msg);
+        break;
+      }
     }
   }
 };
