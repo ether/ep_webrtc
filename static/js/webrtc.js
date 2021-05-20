@@ -71,8 +71,8 @@ exports.rtc = new class {
     this.hangup(userId, false);
   }
 
-  handleClientMessage_RTC_MESSAGE(hookName, {payload}) {
-    if (this._isActive) this.receiveMessage(payload);
+  handleClientMessage_RTC_MESSAGE(hookName, {payload: {from, data}}) {
+    if (this._isActive) this.receiveMessage(from, data);
     return [null];
   }
 
@@ -357,14 +357,13 @@ exports.rtc = new class {
     });
   }
 
-  async receiveMessage(msg) {
-    const peer = msg.from;
-    const data = msg.data;
-    const type = data.type;
+  async receiveMessage(peer, {offer, answer, candidate, hangup}) {
     if (peer === this.getUserId()) return;
-    if (type === 'hangup') {
+    if (hangup != null) {
       this.hangup(peer, false);
-    } else if (type === 'offer') {
+      return;
+    }
+    if (offer != null) {
       if (this._pc[peer]) this.hangup(peer, false);
       this.createPeerConnection(peer);
       if (this._localStream && !this._pc[peer].getSenders().length) {
@@ -372,15 +371,15 @@ exports.rtc = new class {
           this._pc[peer].addTrack(track, this._localStream);
         }
       }
-      await this._pc[peer].setRemoteDescription(data.offer);
+      await this._pc[peer].setRemoteDescription(offer);
       await this._pc[peer].setLocalDescription();
-      this.sendMessage(peer, {type: 'answer', answer: this._pc[peer].localDescription});
-    } else if (type === 'answer') {
-      if (this._pc[peer]) await this._pc[peer].setRemoteDescription(data.answer);
-    } else if (type === 'icecandidate') {
-      if (this._pc[peer] && data.candidate) await this._pc[peer].addIceCandidate(data.candidate);
-    } else {
-      console.log('unknown message', data);
+      this.sendMessage(peer, {answer: this._pc[peer].localDescription});
+    }
+    if (answer != null) {
+      if (this._pc[peer]) await this._pc[peer].setRemoteDescription(answer);
+    }
+    if (candidate != null) {
+      if (this._pc[peer]) await this._pc[peer].addIceCandidate(candidate);
     }
   }
 
@@ -399,7 +398,7 @@ exports.rtc = new class {
     this.setStream(userId, null);
     this._pc[userId].close();
     delete this._pc[userId];
-    if (notify) this.sendMessage(userId, {type: 'hangup'});
+    if (notify) this.sendMessage(userId, {hangup: 'hangup'});
   }
 
   async call(userId) {
@@ -409,7 +408,7 @@ exports.rtc = new class {
       this._pc[userId].addTrack(track, this._localStream);
     }
     await this._pc[userId].setLocalDescription();
-    this.sendMessage(userId, {type: 'offer', offer: this._pc[userId].localDescription});
+    this.sendMessage(userId, {offer: this._pc[userId].localDescription});
   }
 
   createPeerConnection(userId) {
@@ -419,10 +418,7 @@ exports.rtc = new class {
     this._pc[userId] = new RTCPeerConnection({iceServers: this._settings.iceServers});
     this._pc[userId].onicecandidate = (event) => {
       if (!event.candidate) return;
-      this.sendMessage(userId, {
-        type: 'icecandidate',
-        candidate: event.candidate,
-      });
+      this.sendMessage(userId, {candidate: event.candidate});
     };
     let stream = null;
     this._pc[userId].addEventListener('track', (e) => {
