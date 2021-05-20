@@ -226,9 +226,7 @@ exports.rtc = new class {
     this._localStream = stream;
     this.setStream(this.getUserId(), stream);
     this.hangupAll();
-    for (const {userId} of this._pad.collabClient.getConnectedUsers()) {
-      if (userId !== this.getUserId()) this.createPeerConnection(userId);
-    }
+    this.invitePeer(null); // Broadcast an invite to everyone.
   }
 
   deactivate() {
@@ -425,6 +423,10 @@ exports.rtc = new class {
     Object.keys(this._pc).forEach((userId) => {
       this.hangup(userId);
     });
+    // Broadcast a hangup message to everyone, even to peers that we did not have a WebRTC
+    // connection with. This prevents inconsistent state if the user disables WebRTC after an invite
+    // is sent but before the remote peer initiates the connection.
+    this.sendMessage(null, {hangup: 'hangup'});
   }
 
   getUserId() {
@@ -437,6 +439,17 @@ exports.rtc = new class {
     this._pc[userId].close();
     delete this._pc[userId];
     if (notify) this.sendMessage(userId, {hangup: 'hangup'});
+  }
+
+  // See if the peer is interested in establishing a WebRTC connection. If the peer isn't interested
+  // it will ignore the invite; if it is interested, it will initiate a WebRTC connection. If an
+  // uninterested peer later becomes interested, the peer will send an invite.
+  //
+  // DO NOT connect to the peer unless invited by the peer because an uninterested peer will discard
+  // the WebRTC signaling messages. This is bad because WebRTC assumes reliable, in-order delivery
+  // of signaling messages, so the discards will break future connection attempts.
+  invitePeer(userId) {
+    this.sendMessage(userId, {invite: 'invite'});
   }
 
   createPeerConnection(userId) {
