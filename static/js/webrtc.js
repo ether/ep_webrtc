@@ -366,11 +366,6 @@ exports.rtc = new class {
     if (offer != null) {
       if (this._pc[peer]) this.hangup(peer, false);
       this.createPeerConnection(peer);
-      if (this._localStream && !this._pc[peer].getSenders().length) {
-        for (const track of this._localStream.getTracks()) {
-          this._pc[peer].addTrack(track, this._localStream);
-        }
-      }
       await this._pc[peer].setRemoteDescription(offer);
       await this._pc[peer].setLocalDescription();
       this.sendMessage(peer, {answer: this._pc[peer].localDescription});
@@ -404,9 +399,6 @@ exports.rtc = new class {
   async call(userId) {
     if (!this._localStream) return;
     if (!this._pc[userId]) this.createPeerConnection(userId);
-    for (const track of this._localStream.getTracks()) {
-      this._pc[userId].addTrack(track, this._localStream);
-    }
     await this._pc[userId].setLocalDescription();
     this.sendMessage(userId, {offer: this._pc[userId].localDescription});
   }
@@ -437,6 +429,11 @@ exports.rtc = new class {
         throw new Error('New track associated with unexpected stream');
       }
     });
+    if (this._localStream != null) {
+      for (const track of this._localStream.getTracks()) {
+        this._pc[userId].addTrack(track, this._localStream);
+      }
+    }
   }
 
   // Connect a setting to a checkbox. To be called on initialization.
