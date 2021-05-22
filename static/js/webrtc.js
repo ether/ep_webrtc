@@ -442,58 +442,70 @@ exports.rtc = new class {
   }
 
   async activate() {
-    $('#options-enablertc').prop('checked', true);
+    const $checkbox = $('#options-enablertc');
+    $checkbox.prop('checked', true);
     if (this._isActive) return;
-    $('#rtcbox').css('display', 'flex');
-    padcookie.setPref('rtcEnabled', true);
-    this._isActive = true;
-    const constraints = {
-      audio: this._settings.audio.disabled !== 'hard',
-      video: this._settings.video.disabled !== 'hard' && {width: {max: 320}, height: {max: 240}},
-    };
-    if (padcookie.getPref('fakeWebrtcFirefox')) {
-      // The equivalent is done for chromium with cli option:
-      // --use-fake-device-for-media-stream
-      constraints.fake = true;
-    }
-    let stream = new MediaStream();
-    if (constraints.audio || constraints.video) {
-      try {
-        stream = await window.navigator.mediaDevices.getUserMedia(constraints);
-      } catch (err) {
-        try {
-          this.showUserMediaError(err);
-        } finally {
-          this.deactivate();
-        }
-        return;
+    $checkbox.prop('disabled', true);
+    try {
+      $('#rtcbox').css('display', 'flex');
+      padcookie.setPref('rtcEnabled', true);
+      this._isActive = true;
+      const constraints = {
+        audio: this._settings.audio.disabled !== 'hard',
+        video: this._settings.video.disabled !== 'hard' && {width: {max: 320}, height: {max: 240}},
+      };
+      if (padcookie.getPref('fakeWebrtcFirefox')) {
+        // The equivalent is done for chromium with cli option:
+        // --use-fake-device-for-media-stream
+        constraints.fake = true;
       }
+      let stream = new MediaStream();
+      if (constraints.audio || constraints.video) {
+        try {
+          stream = await window.navigator.mediaDevices.getUserMedia(constraints);
+        } catch (err) {
+          try {
+            this.showUserMediaError(err);
+          } finally {
+            this.deactivate();
+          }
+          return;
+        }
+      }
+      for (const track of stream.getAudioTracks()) {
+        track.enabled = !!$('#options-audioenabledonstart').prop('checked');
+      }
+      for (const track of stream.getVideoTracks()) {
+        track.enabled = !!$('#options-videoenabledonstart').prop('checked');
+      }
+      for (const track of stream.getTracks()) {
+        this._localTracks.setTrack(track.kind, track);
+      }
+      this.setStream(this.getUserId(), this._localTracks.stream);
+      this.hangupAll();
+      this.invitePeer(null); // Broadcast an invite to everyone.
+    } finally {
+      $checkbox.prop('disabled', false);
     }
-    for (const track of stream.getAudioTracks()) {
-      track.enabled = !!$('#options-audioenabledonstart').prop('checked');
-    }
-    for (const track of stream.getVideoTracks()) {
-      track.enabled = !!$('#options-videoenabledonstart').prop('checked');
-    }
-    for (const track of stream.getTracks()) {
-      this._localTracks.setTrack(track.kind, track);
-    }
-    this.setStream(this.getUserId(), this._localTracks.stream);
-    this.hangupAll();
-    this.invitePeer(null); // Broadcast an invite to everyone.
   }
 
   deactivate() {
-    $('#options-enablertc').prop('checked', false);
+    const $checkbox = $('#options-enablertc');
+    $checkbox.prop('checked', false);
     if (!this._isActive) return;
-    $('#rtcbox').hide();
-    padcookie.setPref('rtcEnabled', false);
-    this.hangupAll();
-    this.setStream(this.getUserId(), null);
-    for (const track of this._localTracks.stream.getTracks()) {
-      this._localTracks.setTrack(track.kind, null);
+    $checkbox.prop('disabled', true);
+    try {
+      $('#rtcbox').hide();
+      padcookie.setPref('rtcEnabled', false);
+      this.hangupAll();
+      this.setStream(this.getUserId(), null);
+      for (const track of this._localTracks.stream.getTracks()) {
+        this._localTracks.setTrack(track.kind, null);
+      }
+      this._isActive = false;
+    } finally {
+      $checkbox.prop('disabled', false);
     }
-    this._isActive = false;
   }
 
   toggleMuted() {
