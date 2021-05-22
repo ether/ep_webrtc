@@ -401,7 +401,7 @@ exports.rtc = new class {
     });
   }
 
-  async receiveMessage(peer, {offer, answer, candidate, hangup}) {
+  async receiveMessage(peer, {description, candidate, hangup}) {
     if (peer === this.getUserId()) return;
     if (hangup != null) {
       this.hangup(peer, false);
@@ -409,13 +409,12 @@ exports.rtc = new class {
     }
     if (this._pc[peer] == null) this.createPeerConnection(peer);
     const pc = this._pc[peer];
-    if (offer != null) {
-      await pc.setRemoteDescription(offer);
-      await pc.setLocalDescription();
-      this.sendMessage(peer, {answer: pc.localDescription});
-    }
-    if (answer != null) {
-      await pc.setRemoteDescription(answer);
+    if (description != null) {
+      await pc.setRemoteDescription(description);
+      if (description.type === 'offer') {
+        await pc.setLocalDescription();
+        this.sendMessage(peer, {description: pc.localDescription});
+      }
     }
     if (candidate != null) {
       await pc.addIceCandidate(candidate);
@@ -452,7 +451,7 @@ exports.rtc = new class {
     };
     this._pc[userId].addEventListener('negotiationneeded', async () => {
       await this._pc[userId].setLocalDescription();
-      this.sendMessage(userId, {offer: this._pc[userId].localDescription});
+      this.sendMessage(userId, {description: this._pc[userId].localDescription});
     });
     let stream = null;
     this._pc[userId].addEventListener('track', (e) => {
