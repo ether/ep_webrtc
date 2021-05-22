@@ -181,9 +181,9 @@ exports.rtc = new class {
     this._localStream = stream;
     this.setStream(this._pad.getUserId(), stream);
     this.hangupAll();
-    await Promise.all(this._pad.collabClient.getConnectedUsers().map(async (user) => {
-      if (user.userId === this.getUserId()) return;
-      await this.call(user.userId);
+    await Promise.all(this._pad.collabClient.getConnectedUsers().map(async ({userId}) => {
+      if (userId === this.getUserId()) return;
+      await this.call(userId);
     }));
   }
 
