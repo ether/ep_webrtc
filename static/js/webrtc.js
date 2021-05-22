@@ -35,12 +35,14 @@ exports.rtc = new class {
     this._settings = null;
     this._isActive = false;
     this._localStream = null;
+    this._pad = null;
     this._pc = {};
   }
 
   // API HOOKS
 
   async postAceInit(hookName, {pad}) {
+    this._pad = pad;
     this._settings = clientVars.webrtc;
     if (this._settings == null || this._settings.configError) {
       $.gritter.add({
@@ -60,7 +62,50 @@ exports.rtc = new class {
         class_name: 'error',
       });
     }
-    await this.init(pad);
+
+    this.settingToCheckbox({
+      urlVar: 'av',
+      cookie: 'rtcEnabled',
+      defaultVal: this._settings.enabled,
+      checkboxId: '#options-enablertc',
+    });
+    if (this._settings.audio.disabled !== 'hard') {
+      this.settingToCheckbox({
+        urlVar: 'webrtcaudioenabled',
+        cookie: 'audioEnabledOnStart',
+        defaultVal: this._settings.audio.disabled === 'none',
+        checkboxId: '#options-audioenabledonstart',
+      });
+    }
+    if (this._settings.video.disabled !== 'hard') {
+      this.settingToCheckbox({
+        urlVar: 'webrtcvideoenabled',
+        cookie: 'videoEnabledOnStart',
+        defaultVal: this._settings.video.disabled === 'none',
+        checkboxId: '#options-videoenabledonstart',
+      });
+    }
+
+    if (this._settings.listenClass) {
+      $(this._settings.listenClass).on('click', async () => {
+        await this.activate();
+      });
+    }
+    $('#options-enablertc').on('change', async (event) => {
+      if (event.currentTarget.checked) {
+        await this.activate();
+      } else {
+        this.deactivate();
+      }
+    });
+    $(window).on('beforeunload', () => { this.hangupAll(); });
+    $(window).on('unload', () => { this.hangupAll(); });
+    if ($('#options-enablertc').prop('checked')) {
+      await this.activate();
+    } else {
+      this.deactivate();
+    }
+    $('#rtcbox').data('initialized', true); // Help tests determine when initialization is done.
   }
 
   userJoinOrUpdate(hookName, {userInfo}) {
@@ -469,58 +514,6 @@ exports.rtc = new class {
     $(params.checkboxId).on('change', function () {
       padcookie.setPref(params.cookie, this.checked);
     });
-  }
-
-  async init(pad) {
-    this._pad = pad;
-
-    this.settingToCheckbox({
-      urlVar: 'av',
-      cookie: 'rtcEnabled',
-      defaultVal: this._settings.enabled,
-      checkboxId: '#options-enablertc',
-    });
-
-    // The checkbox shouldn't even exist if audio is not allowed
-    if (this._settings.audio.disabled !== 'hard') {
-      this.settingToCheckbox({
-        urlVar: 'webrtcaudioenabled',
-        cookie: 'audioEnabledOnStart',
-        defaultVal: this._settings.audio.disabled === 'none',
-        checkboxId: '#options-audioenabledonstart',
-      });
-    }
-
-    // The checkbox shouldn't even exist if video is not allowed
-    if (this._settings.video.disabled !== 'hard') {
-      this.settingToCheckbox({
-        urlVar: 'webrtcvideoenabled',
-        cookie: 'videoEnabledOnStart',
-        defaultVal: this._settings.video.disabled === 'none',
-        checkboxId: '#options-videoenabledonstart',
-      });
-    }
-
-    if (this._settings.listenClass) {
-      $(this._settings.listenClass).on('click', async () => {
-        await this.activate();
-      });
-    }
-    $('#options-enablertc').on('change', async (event) => {
-      if (event.currentTarget.checked) {
-        await this.activate();
-      } else {
-        this.deactivate();
-      }
-    });
-    $(window).on('beforeunload', () => { this.hangupAll(); });
-    $(window).on('unload', () => { this.hangupAll(); });
-    if ($('#options-enablertc').prop('checked')) {
-      await this.activate();
-    } else {
-      this.deactivate();
-    }
-    $('#rtcbox').data('initialized', true); // Help tests determine when init() is done.
   }
 }();
 
