@@ -226,12 +226,9 @@ exports.rtc = new class {
     this._localStream = stream;
     this.setStream(this.getUserId(), stream);
     this.hangupAll();
-    await Promise.all(this._pad.collabClient.getConnectedUsers().map(async ({userId}) => {
-      if (userId === this.getUserId()) return;
-      this.createPeerConnection(userId);
-      await this._pc[userId].setLocalDescription();
-      this.sendMessage(userId, {offer: this._pc[userId].localDescription});
-    }));
+    for (const {userId} of this._pad.collabClient.getConnectedUsers()) {
+      if (userId !== this.getUserId()) this.createPeerConnection(userId);
+    }
   }
 
   deactivate() {
@@ -453,6 +450,10 @@ exports.rtc = new class {
       if (!event.candidate) return;
       this.sendMessage(userId, {candidate: event.candidate});
     };
+    this._pc[userId].addEventListener('negotiationneeded', async () => {
+      await this._pc[userId].setLocalDescription();
+      this.sendMessage(userId, {offer: this._pc[userId].localDescription});
+    });
     let stream = null;
     this._pc[userId].addEventListener('track', (e) => {
       if (e.streams.length !== 1) throw new Error('Expected track to be in exactly one stream');
