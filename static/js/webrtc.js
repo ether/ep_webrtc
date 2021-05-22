@@ -406,6 +406,7 @@ exports.rtc = new class {
   createPeerConnection(userId) {
     if (this._pc[userId]) {
       console.log('WARNING creating PC connection even though one exists', userId);
+      this._pc[userId].close();
     }
     this._pc[userId] = new RTCPeerConnection({iceServers: this._settings.iceServers});
     this._pc[userId].onicecandidate = (event) => {
