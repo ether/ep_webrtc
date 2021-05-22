@@ -109,6 +109,9 @@ exports.rtc = new class {
   }
 
   userJoinOrUpdate(hookName, {userInfo}) {
+    const {userId} = userInfo;
+    if (!this._isActive || !userId) return;
+    if (userId !== this.getUserId()) this.invitePeer(userId);
     this.updatePeerNameAndColor(userInfo);
   }
 
