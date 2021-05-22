@@ -183,7 +183,9 @@ exports.rtc = new class {
     this.hangupAll();
     await Promise.all(this._pad.collabClient.getConnectedUsers().map(async ({userId}) => {
       if (userId === this.getUserId()) return;
-      await this.call(userId);
+      this.createPeerConnection(userId);
+      await this._pc[userId].setLocalDescription();
+      this.sendMessage(userId, {offer: this._pc[userId].localDescription});
     }));
   }
 
@@ -394,13 +396,6 @@ exports.rtc = new class {
     this._pc[userId].close();
     delete this._pc[userId];
     if (notify) this.sendMessage(userId, {hangup: 'hangup'});
-  }
-
-  async call(userId) {
-    if (!this._localStream) return;
-    if (!this._pc[userId]) this.createPeerConnection(userId);
-    await this._pc[userId].setLocalDescription();
-    this.sendMessage(userId, {offer: this._pc[userId].localDescription});
   }
 
   createPeerConnection(userId) {
