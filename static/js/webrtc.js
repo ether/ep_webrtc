@@ -563,7 +563,7 @@ exports.rtc = new class {
     if ($video.length === 0) $video = this.addInterface(userId, isLocal);
     if (isLocal) {
       // Sync the interface for the self view with the state of the outgoing stream.
-      const $interface = $video.siblings('.interface-container');
+      const $interface = $(`#interface_${getVideoId(userId)}`);
       const hasAudio = stream.getAudioTracks().some((t) => t.enabled);
       if (this._settings.audio.disabled !== 'hard') {
         $interface.children('.audio-btn')
