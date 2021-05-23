@@ -638,7 +638,7 @@ const rtc = (() => {
       }
     },
     init: (pad) => {
-      self._pad = pad || window.pad;
+      self._pad = pad;
 
       self.setupCheckboxes();
 
