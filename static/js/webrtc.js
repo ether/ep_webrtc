@@ -95,9 +95,7 @@ const rtc = (() => {
     },
     userLeave: (hook, context, callback) => {
       const userId = context.userInfo.userId;
-      if (userId && pc[userId]) {
-        self.hangup(userId, false);
-      }
+      self.hangup(userId, false);
       callback();
     },
     handleClientMessage_RTC_MESSAGE: (hook, context, callback) => {
@@ -469,7 +467,7 @@ const rtc = (() => {
     hangup: (...args) => {
       const userId = args[0];
       const notify = args[1] || true;
-      if (pc[userId] && userId !== self.getUserId()) {
+      if (pc[userId]) {
         self.setStream(userId, '');
         pc[userId].close();
         delete pc[userId];
