@@ -116,7 +116,7 @@ exports.rtc = new class {
   }
 
   userLeave(hookName, {userInfo: {userId}}) {
-    this.hangup(userId, false);
+    this.hangup(userId);
   }
 
   handleClientMessage_RTC_MESSAGE(hookName, {payload: {from, data}}) {
@@ -405,7 +405,7 @@ exports.rtc = new class {
   async receiveMessage(peer, {description, candidate, hangup}) {
     if (peer === this.getUserId()) return;
     if (hangup != null) {
-      this.hangup(peer, false);
+      this.hangup(peer);
       return;
     }
     if (this._pc[peer] == null) this.createPeerConnection(peer);
@@ -436,12 +436,12 @@ exports.rtc = new class {
     return this._pad.getUserId();
   }
 
-  hangup(userId, notify = true) {
+  hangup(userId) {
     if (!this._pc[userId]) return;
     this.setStream(userId, null);
     this._pc[userId].close();
     delete this._pc[userId];
-    if (notify) this.sendMessage(userId, {hangup: 'hangup'});
+    this.sendMessage(userId, {hangup: 'hangup'});
   }
 
   // See if the peer is interested in establishing a WebRTC connection. If the peer isn't interested
