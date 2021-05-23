@@ -466,7 +466,7 @@ const rtc = (() => {
         self.hangup(userId);
       });
     },
-    getUserId: () => self._pad && self._pad.getUserId(),
+    getUserId: () => self._pad.getUserId(),
     hangup: (...args) => {
       const userId = args[0];
       const notify = args[1] || true;
