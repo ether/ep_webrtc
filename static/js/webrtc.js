@@ -437,8 +437,8 @@ exports.rtc = new class {
   }
 
   hangup(userId) {
-    if (!this._pc[userId]) return;
     this.setStream(userId, null);
+    if (!this._pc[userId]) return;
     this._pc[userId].close();
     delete this._pc[userId];
     this.sendMessage(userId, {hangup: 'hangup'});
