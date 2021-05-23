@@ -224,7 +224,7 @@ exports.rtc = new class {
     }
 
     this._localStream = stream;
-    this.setStream(this._pad.getUserId(), stream);
+    this.setStream(this.getUserId(), stream);
     this.hangupAll();
     await Promise.all(this._pad.collabClient.getConnectedUsers().map(async ({userId}) => {
       if (userId === this.getUserId()) return;
@@ -240,7 +240,7 @@ exports.rtc = new class {
     $('#rtcbox').hide();
     padcookie.setPref('rtcEnabled', false);
     this.hangupAll();
-    this.setStream(this._pad.getUserId(), null);
+    this.setStream(this.getUserId(), null);
     if (this._localStream) {
       for (const track of this._localStream.getTracks()) track.stop();
       this._localStream = null;
