@@ -157,16 +157,18 @@ const rtc = (() => {
         // --use-fake-device-for-media-stream
         constraints.fake = true;
       }
-      let stream;
-      try {
-        stream = await window.navigator.mediaDevices.getUserMedia(constraints);
-      } catch (err) {
+      let stream = new MediaStream();
+      if (constraints.audio || constraints.video) {
         try {
-          self.showUserMediaError(err);
-        } finally {
-          self.deactivate();
+          stream = await window.navigator.mediaDevices.getUserMedia(constraints);
+        } catch (err) {
+          try {
+            self.showUserMediaError(err);
+          } finally {
+            self.deactivate();
+          }
+          return;
         }
-        return;
       }
       // Disable audio and/or video according to user/site settings.
       // Do this before setting `localStream` to avoid a race condition
