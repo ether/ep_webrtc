@@ -523,10 +523,12 @@ exports.rtc = new class {
     debug('deactivating');
     $checkbox.prop('disabled', true);
     try {
-      $('#rtcbox').hide();
       padcookie.setPref('rtcEnabled', false);
       this.hangupAll();
       this.setStream(this.getUserId(), null);
+      const $rtcbox = $('#rtcbox');
+      $rtcbox.empty(); // In case any peer videos didn't get cleaned up for some reason.
+      $rtcbox.hide();
       for (const track of this._localTracks.stream.getTracks()) {
         this._localTracks.setTrack(track.kind, null);
       }
