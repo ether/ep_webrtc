@@ -605,10 +605,23 @@ exports.rtc = new class {
       if (err.name === 'NotAllowedError' && !$video[0].muted) {
         // The self view is always muted, so this click() only applies to videos of remote peers.
         $(`#interface_${$video.attr('id')} .audio-btn`).click();
+        $video.data('automuted', true);
         return await this.playVideo($video);
       }
       throw err;
     }
+  }
+
+  // Tries to unmute and play any videos that were auto-muted (perhaps the browser prohibited
+  // autoplay). If unmuting a video fails (perhaps the browser still thinks we're trying to
+  // autoplay), the video is auto-muted again.
+  async unmuteAutoMuted() {
+    await Promise.all($('#rtcbox video').map(async (i, video) => {
+      const $video = $(video);
+      if (!$video.data('automuted')) return;
+      $(`#interface_${$video.attr('id')} .audio-btn`).click();
+      await this.playVideo($video);
+    }).get());
   }
 
   addInterface(userId, isLocal) {
@@ -645,6 +658,12 @@ exports.rtc = new class {
         .toggleClass('disallowed', audioHardDisabled)
         .on(audioHardDisabled ? {} : {
           click: (event) => {
+            $video.removeData('automuted');
+            // Do not use `await` when calling unmuteAutoMuted() because unmuting is best-effort
+            // (success of this handler does not depend on the ability to unmute). Call
+            // unmuteAutoMuted() early so that the browser can work on unmuting the video in
+            // parallel with the rest of this handler.
+            this.unmuteAutoMuted();
             const muted = isLocal ? this.toggleMuted() : ($video[0].muted = !$video[0].muted);
             $(event.currentTarget)
                 .attr('title', muted ? 'Unmute' : 'Mute')
@@ -665,6 +684,8 @@ exports.rtc = new class {
           .toggleClass('disallowed', videoHardDisabled)
           .on(videoHardDisabled ? {} : {
             click: (event) => {
+              // Don't use `await` here -- see the comment for the audio button click handler above.
+              this.unmuteAutoMuted();
               const videoEnabled = !this.toggleVideo();
               $(event.currentTarget)
                   .attr('title', videoEnabled ? 'Disable video' : 'Enable video')
@@ -683,6 +704,8 @@ exports.rtc = new class {
         .attr('title', 'Make video larger')
         .on({
           click: (event) => {
+            // Don't use `await` here -- see the comment for the audio button click handler above.
+            this.unmuteAutoMuted();
             videoEnlarged = !videoEnlarged;
             $(event.currentTarget)
                 .attr('title', videoEnlarged ? 'Make video smaller' : 'Make video larger')
