@@ -599,6 +599,14 @@ exports.rtc = new class {
       // is starting. The video element will be deleted shortly (if it hasn't already been deleted)
       // so it's OK to ignore the error.
       if (err.name === 'AbortError') return;
+      // Browsers won't allow autoplayed video with sound until the user has interacted with the
+      // page or the page is already capturing audio or video. If playback is not permitted, mute
+      // the video and try again.
+      if (err.name === 'NotAllowedError' && !$video[0].muted) {
+        // The self view is always muted, so this click() only applies to videos of remote peers.
+        $(`#interface_${$video.attr('id')} .audio-btn`).click();
+        return await this.playVideo($video);
+      }
       throw err;
     }
   }

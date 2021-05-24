@@ -89,7 +89,10 @@ describe('setStream()', function () {
         it('peer interface', async function () {
           const $audioBtn = chrome$(`#${otherInterfaceId} .audio-btn`);
           expect($audioBtn.length).to.equal(1);
-          expect($audioBtn.hasClass('muted')).to.equal(!tc.peer.audio);
+          // Only initially muted if the browser doesn't give permission to autoplay unless muted.
+          // (A peer without an audio track might later add an audio track; if so, the audio should
+          // start playing locally without the local user clicking anything.)
+          expect($audioBtn.hasClass('muted')).to.equal(chrome$(`#${otherVideoId}`).prop('muted'));
           const $videoBtn = chrome$(`#${otherInterfaceId} .video-btn`);
           expect($videoBtn.length).to.equal(0);
           const $enlargeBtn = chrome$(`#${otherInterfaceId} .enlarge-btn`);
@@ -148,7 +151,11 @@ describe('setStream()', function () {
     it('peer interface', async function () {
       const $audioBtn = chrome$(`#${otherInterfaceId} .audio-btn`);
       expect($audioBtn.length).to.equal(1);
-      expect($audioBtn.hasClass('muted')).to.equal(true);
+      // Mute state only depends on whether the browser gives permission to autoplay when unmuted.
+      // Hard disabling only affects what the local client sends; it doesn't affect what the remote
+      // peer sends. (Both the local client and the remote peer should see the same settings,
+      // however.)
+      expect($audioBtn.hasClass('muted')).to.equal(chrome$(`#${otherVideoId}`).prop('muted'));
       const $videoBtn = chrome$(`#${otherInterfaceId} .video-btn`);
       expect($videoBtn.length).to.equal(0);
       const $enlargeBtn = chrome$(`#${otherInterfaceId} .enlarge-btn`);
