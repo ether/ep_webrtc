@@ -467,6 +467,35 @@ exports.rtc = new class {
     });
   }
 
+  async updateLocalTracks() {
+    const addAudioTrack = this._settings.audio.disabled !== 'hard';
+    const addVideoTrack = this._settings.video.disabled !== 'hard';
+    if (addAudioTrack || addVideoTrack) {
+      debug(`requesting permission to access ${
+        addAudioTrack && addVideoTrack ? 'camera and microphone'
+        : addAudioTrack ? 'microphone'
+        : 'camera'}`);
+      const constraints = {
+        audio: addAudioTrack,
+        video: addVideoTrack && {width: {max: 320}, height: {max: 240}},
+      };
+      if (padcookie.getPref('fakeWebrtcFirefox')) {
+        // The equivalent is done for chromium with cli option:
+        // --use-fake-device-for-media-stream
+        constraints.fake = true;
+      }
+      const stream = await window.navigator.mediaDevices.getUserMedia(constraints);
+      debug('successfully accessed device(s)');
+      for (const track of stream.getTracks()) this._localTracks.setTrack(track.kind, track);
+    }
+    for (const track of this._localTracks.stream.getAudioTracks()) {
+      track.enabled = !!$('#options-audioenabledonstart').prop('checked');
+    }
+    for (const track of this._localTracks.stream.getVideoTracks()) {
+      track.enabled = !!$('#options-videoenabledonstart').prop('checked');
+    }
+  }
+
   async activate() {
     const $checkbox = $('#options-enablertc');
     $checkbox.prop('checked', true);
@@ -477,39 +506,18 @@ exports.rtc = new class {
       $('#rtcbox').css('display', 'flex');
       padcookie.setPref('rtcEnabled', true);
       this._isActive = true;
-      const constraints = {
-        audio: this._settings.audio.disabled !== 'hard',
-        video: this._settings.video.disabled !== 'hard' && {width: {max: 320}, height: {max: 240}},
-      };
-      if (padcookie.getPref('fakeWebrtcFirefox')) {
-        // The equivalent is done for chromium with cli option:
-        // --use-fake-device-for-media-stream
-        constraints.fake = true;
-      }
-      let stream = new MediaStream();
-      if (constraints.audio || constraints.video) {
+      try {
+        await this.updateLocalTracks();
+      } catch (err) {
         try {
-          stream = await window.navigator.mediaDevices.getUserMedia(constraints);
-        } catch (err) {
-          try {
-            this.showUserMediaError(err);
-          } finally {
-            this.deactivate();
-          }
-          return;
+          this.showUserMediaError(err);
+        } finally {
+          this.deactivate();
         }
+        return;
       }
       this.hangupAll();
       this.invitePeer(null); // Broadcast an invite to everyone.
-      for (const track of stream.getAudioTracks()) {
-        track.enabled = !!$('#options-audioenabledonstart').prop('checked');
-      }
-      for (const track of stream.getVideoTracks()) {
-        track.enabled = !!$('#options-videoenabledonstart').prop('checked');
-      }
-      for (const track of stream.getTracks()) {
-        this._localTracks.setTrack(track.kind, track);
-      }
       await this.setStream(this.getUserId(), this._localTracks.stream);
     } finally {
       $checkbox.prop('disabled', false);
