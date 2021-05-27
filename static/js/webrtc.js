@@ -542,6 +542,7 @@ exports.rtc = new class {
         this.deactivate();
       }
     });
+    $(window).on('beforeunload', () => { this.hangupAll(); });
     $(window).on('unload', () => { this.hangupAll(); });
     if (rtcEnabled) {
       await this.activate();
