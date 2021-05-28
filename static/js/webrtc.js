@@ -18,6 +18,107 @@
 require('./adapter');
 const padcookie = require('ep_etherpad-lite/static/js/pad_cookie').padcookie;
 
+class StreamEvent extends CustomEvent {
+  constructor(type, stream) {
+    super(type, {detail: stream});
+    this.stream = stream;
+  }
+}
+
+class ClosedEvent extends CustomEvent {
+  constructor() {
+    super('closed');
+  }
+}
+
+// Events:
+//   * 'stream' (see StreamEvent): Emitted when the remote stream is ready. For every 'stream' event
+//     there will be a corresponding 'streamgone' event. Once a stream is added another stream will
+//     not be added until after the original stream is removed.
+//   * 'streamgone' (see StreamEvent): Emitted when the remote stream goes away, including when the
+//     PeerState is closed.
+//   * 'closed' (see ClosedEvent): Emitted when the PeerState is closed, except when closed by a
+//     call to close(). The PeerState must not be used after it is closed.
+class PeerState extends EventTarget {
+  constructor(pcConfig, sendMessage, localStream) {
+    super();
+    this._pcConfig = pcConfig;
+    this._sendMessage = sendMessage;
+    this._localStream = localStream;
+    this._closed = false;
+    this._pc = null;
+    this._remoteStream = null;
+    this._onremovetrack =
+        () => { if (this._remoteStream.getTracks().length === 0) this._setRemoteStream(null); };
+
+    this._resetConnection();
+  }
+
+  _setRemoteStream(stream) {
+    if (stream == null) {
+      if (this._remoteStream == null) return;
+      const oldStream = this._remoteStream;
+      oldStream.removeEventListener('removetrack', this._onremovetrack);
+      this._remoteStream = null;
+      this.dispatchEvent(new StreamEvent('streamgone', oldStream));
+    } else if (this._remoteStream == null) {
+      this._remoteStream = stream;
+      stream.addEventListener('removetrack', this._onremovetrack);
+      this.dispatchEvent(new StreamEvent('stream', stream));
+    } else if (stream !== this._remoteStream) {
+      throw new Error('New remote stream added before old stream was removed');
+    }
+  }
+
+  _resetConnection() {
+    this._setRemoteStream(null);
+    const pc = new RTCPeerConnection(this._pcConfig);
+    pc.addEventListener('track', ({track, streams}) => {
+      if (streams.length !== 1) throw new Error('Expected track to be in exactly one stream');
+      this._setRemoteStream(streams[0]);
+    });
+    pc.addEventListener('icecandidate', ({candidate}) => this._sendMessage({candidate}));
+    pc.addEventListener('negotiationneeded', async () => {
+      await pc.setLocalDescription();
+      this._sendMessage({description: pc.localDescription});
+    });
+
+    if (this._pc != null) this._pc.close();
+    this._pc = pc;
+
+    const tracks = this._localStream.getTracks();
+    for (const track of tracks) pc.addTrack(track, this._localStream);
+  }
+
+  async receiveMessage({candidate, description, hangup}) {
+    if (this._closed) throw new Error('Unable to process message because PeerState is closed');
+    if (hangup != null) {
+      this.close(true);
+      return;
+    }
+    if (description != null) {
+      await this._pc.setRemoteDescription(description);
+      if (description.type === 'offer') {
+        await this._pc.setLocalDescription();
+        this._sendMessage({description: this._pc.localDescription});
+      }
+    }
+    if (candidate != null) {
+      await this._pc.addIceCandidate(candidate);
+    }
+  }
+
+  close(emitClosedEvent = false) {
+    if (this._closed) return;
+    this._closed = true;
+    this._pc.close();
+    this._pc = null;
+    this._setRemoteStream(null);
+    this._sendMessage({hangup: 'hangup'});
+    if (emitClosedEvent) this.dispatchEvent(new ClosedEvent());
+  }
+}
+
 // Toggles the enabled state of the first track, then updates the other tracks to match. Returns
 // true iff the result is no enabled tracks (either there are no tracks or all tracks are muted).
 const toggleTracks = (tracks) => {
@@ -36,7 +137,7 @@ exports.rtc = new class {
     this._isActive = false;
     this._localStream = new MediaStream();
     this._pad = null;
-    this._pc = new Map();
+    this._peers = new Map();
   }
 
   // API HOOKS
@@ -120,7 +221,10 @@ exports.rtc = new class {
   }
 
   handleClientMessage_RTC_MESSAGE(hookName, {payload: {from, data}}) {
-    if (this._isActive) this.receiveMessage(from, data);
+    if (this._isActive && from !== this.getUserId() &&
+        (this._peers.has(from) || data.hangup == null)) {
+      this.getPeerConnection(from).receiveMessage(data);
+    }
     return [null];
   }
 
@@ -400,28 +504,8 @@ exports.rtc = new class {
     });
   }
 
-  async receiveMessage(peer, {description, candidate, hangup}) {
-    if (peer === this.getUserId()) return;
-    if (hangup != null) {
-      this.hangup(peer);
-      return;
-    }
-    if (!this._pc.has(peer)) this.createPeerConnection(peer);
-    const pc = this._pc.get(peer);
-    if (description != null) {
-      await pc.setRemoteDescription(description);
-      if (description.type === 'offer') {
-        await pc.setLocalDescription();
-        this.sendMessage(peer, {description: pc.localDescription});
-      }
-    }
-    if (candidate != null) {
-      await pc.addIceCandidate(candidate);
-    }
-  }
-
   hangupAll() {
-    for (const userId of this._pc.keys()) this.hangup(userId);
+    for (const userId of this._peers.keys()) this.hangup(userId);
     // Broadcast a hangup message to everyone, even to peers that we did not have a WebRTC
     // connection with. This prevents inconsistent state if the user disables WebRTC after an invite
     // is sent but before the remote peer initiates the connection.
@@ -434,11 +518,10 @@ exports.rtc = new class {
 
   hangup(userId) {
     this.setStream(userId, null);
-    const pc = this._pc.get(userId);
-    if (pc == null) return;
-    pc.close();
-    this._pc.delete(userId);
-    this.sendMessage(userId, {hangup: 'hangup'});
+    const peer = this._peers.get(userId);
+    if (peer == null) return;
+    peer.close();
+    this._peers.delete(userId);
   }
 
   // See if the peer is interested in establishing a WebRTC connection. If the peer isn't interested
@@ -452,40 +535,25 @@ exports.rtc = new class {
     this.sendMessage(userId, {invite: 'invite'});
   }
 
-  createPeerConnection(userId) {
-    let pc = this._pc.get(userId);
-    if (pc != null) {
-      console.log('WARNING creating PC connection even though one exists', userId);
-      pc.close();
-    }
-    pc = new RTCPeerConnection({iceServers: this._settings.iceServers});
-    this._pc.add(userId, pc);
-    pc.onicecandidate = (event) => {
-      if (!event.candidate) return;
-      this.sendMessage(userId, {candidate: event.candidate});
-    };
-    pc.addEventListener('negotiationneeded', async () => {
-      await pc.setLocalDescription();
-      this.sendMessage(userId, {description: pc.localDescription});
-    });
-    let stream = null;
-    pc.addEventListener('track', (e) => {
-      if (e.streams.length !== 1) throw new Error('Expected track to be in exactly one stream');
-      const trackStream = e.streams[0];
-      if (stream == null) {
-        stream = trackStream;
-        stream.addEventListener('removetrack', (e) => {
-          if (stream !== trackStream) throw new Error('removetrack event for old stream');
-          if (stream.getTracks().length > 0) return;
-          stream = null;
-          this.setStream(userId, null);
-        });
+  getPeerConnection(userId) {
+    let peer = this._peers.get(userId);
+    if (peer == null) {
+      peer = new PeerState(
+          {iceServers: this._settings.iceServers},
+          (msg) => this.sendMessage(userId, msg),
+          this._localStream);
+      this._peers.set(userId, peer);
+      peer.addEventListener('stream', ({stream}) => {
         this.setStream(userId, stream);
-      } else if (stream !== trackStream) {
-        throw new Error('New track associated with unexpected stream');
-      }
-    });
-    for (const track of this._localStream.getTracks()) pc.addTrack(track, this._localStream);
+      });
+      peer.addEventListener('streamgone', ({stream}) => {
+        this.setStream(userId, null);
+      });
+      peer.addEventListener('closed', () => {
+        this.hangup(userId);
+      });
+    }
+    return peer;
   }
 
   // Connect a setting to a checkbox. To be called on initialization.
