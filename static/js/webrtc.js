@@ -36,7 +36,7 @@ exports.rtc = new class {
     this._isActive = false;
     this._localStream = null;
     this._pad = null;
-    this._pc = {};
+    this._pc = new Map();
   }
 
   // API HOOKS
@@ -408,8 +408,8 @@ exports.rtc = new class {
       this.hangup(peer);
       return;
     }
-    if (this._pc[peer] == null) this.createPeerConnection(peer);
-    const pc = this._pc[peer];
+    if (!this._pc.has(peer)) this.createPeerConnection(peer);
+    const pc = this._pc.get(peer);
     if (description != null) {
       await pc.setRemoteDescription(description);
       if (description.type === 'offer') {
@@ -423,9 +423,7 @@ exports.rtc = new class {
   }
 
   hangupAll() {
-    Object.keys(this._pc).forEach((userId) => {
-      this.hangup(userId);
-    });
+    for (const userId of this._pc.keys()) this.hangup(userId);
     // Broadcast a hangup message to everyone, even to peers that we did not have a WebRTC
     // connection with. This prevents inconsistent state if the user disables WebRTC after an invite
     // is sent but before the remote peer initiates the connection.
@@ -438,9 +436,10 @@ exports.rtc = new class {
 
   hangup(userId) {
     this.setStream(userId, null);
-    if (!this._pc[userId]) return;
-    this._pc[userId].close();
-    delete this._pc[userId];
+    const pc = this._pc.get(userId);
+    if (pc == null) return;
+    pc.close();
+    this._pc.delete(userId);
     this.sendMessage(userId, {hangup: 'hangup'});
   }
 
@@ -456,21 +455,23 @@ exports.rtc = new class {
   }
 
   createPeerConnection(userId) {
-    if (this._pc[userId]) {
+    let pc = this._pc.get(userId);
+    if (pc != null) {
       console.log('WARNING creating PC connection even though one exists', userId);
-      this._pc[userId].close();
+      pc.close();
     }
-    this._pc[userId] = new RTCPeerConnection({iceServers: this._settings.iceServers});
-    this._pc[userId].onicecandidate = (event) => {
+    pc = new RTCPeerConnection({iceServers: this._settings.iceServers});
+    this._pc.add(userId, pc);
+    pc.onicecandidate = (event) => {
       if (!event.candidate) return;
       this.sendMessage(userId, {candidate: event.candidate});
     };
-    this._pc[userId].addEventListener('negotiationneeded', async () => {
-      await this._pc[userId].setLocalDescription();
-      this.sendMessage(userId, {description: this._pc[userId].localDescription});
+    pc.addEventListener('negotiationneeded', async () => {
+      await pc.setLocalDescription();
+      this.sendMessage(userId, {description: pc.localDescription});
     });
     let stream = null;
-    this._pc[userId].addEventListener('track', (e) => {
+    pc.addEventListener('track', (e) => {
       if (e.streams.length !== 1) throw new Error('Expected track to be in exactly one stream');
       const trackStream = e.streams[0];
       if (stream == null) {
@@ -487,9 +488,7 @@ exports.rtc = new class {
       }
     });
     if (this._localStream != null) {
-      for (const track of this._localStream.getTracks()) {
-        this._pc[userId].addTrack(track, this._localStream);
-      }
+      for (const track of this._localStream.getTracks()) pc.addTrack(track, this._localStream);
     }
   }
 
