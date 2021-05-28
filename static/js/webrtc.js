@@ -407,18 +407,18 @@ exports.rtc = new class {
       this.hangup(peer, false);
       return;
     }
+    if (this._pc[peer] == null) this.createPeerConnection(peer);
+    const pc = this._pc[peer];
     if (offer != null) {
-      if (this._pc[peer]) this.hangup(peer, false);
-      this.createPeerConnection(peer);
-      await this._pc[peer].setRemoteDescription(offer);
-      await this._pc[peer].setLocalDescription();
-      this.sendMessage(peer, {answer: this._pc[peer].localDescription});
+      await pc.setRemoteDescription(offer);
+      await pc.setLocalDescription();
+      this.sendMessage(peer, {answer: pc.localDescription});
     }
     if (answer != null) {
-      if (this._pc[peer]) await this._pc[peer].setRemoteDescription(answer);
+      await pc.setRemoteDescription(answer);
     }
     if (candidate != null) {
-      if (this._pc[peer]) await this._pc[peer].addIceCandidate(candidate);
+      await pc.addIceCandidate(candidate);
     }
   }
 
