@@ -18,6 +18,33 @@
 require('./adapter');
 const padcookie = require('ep_etherpad-lite/static/js/pad_cookie').padcookie;
 
+class LocalTracks extends EventTarget {
+  constructor() {
+    super();
+    Object.defineProperty(this, 'stream', {value: new MediaStream(), writeable: false});
+    this._tracks = new Map();
+  }
+
+  setTrack(kind, newTrack) {
+    newTrack = newTrack || null; // Convert undefined to null.
+    let oldTrack = null;
+    const tracks =
+          kind === 'audio' ? this.stream.getAudioTracks()
+          : kind === 'video' ? this.stream.getVideoTracks()
+          : this.stream.getTracks();
+    for (const track of tracks) {
+      if (track.kind !== kind) continue;
+      if (track === newTrack) return; // No change.
+      oldTrack = track;
+      this.stream.removeTrack(oldTrack);
+      break;
+    }
+    if (newTrack != null) this.stream.addTrack(newTrack);
+    this.dispatchEvent(Object.assign(new CustomEvent('trackchanged'), {oldTrack, newTrack}));
+    if (oldTrack != null) oldTrack.stop();
+  }
+}
+
 class StreamEvent extends CustomEvent {
   constructor(type, stream) {
     super(type, {detail: stream});
@@ -40,11 +67,11 @@ class ClosedEvent extends CustomEvent {
 //   * 'closed' (see ClosedEvent): Emitted when the PeerState is closed, except when closed by a
 //     call to close(). The PeerState must not be used after it is closed.
 class PeerState extends EventTarget {
-  constructor(pcConfig, sendMessage, localStream) {
+  constructor(pcConfig, sendMessage, localTracks) {
     super();
     this._pcConfig = pcConfig;
     this._sendMessage = sendMessage;
-    this._localStream = localStream;
+    this._localTracks = localTracks;
     this._closed = false;
     this._pc = null;
     this._remoteStream = null;
@@ -52,6 +79,25 @@ class PeerState extends EventTarget {
         () => { if (this._remoteStream.getTracks().length === 0) this._setRemoteStream(null); };
 
     this._resetConnection();
+
+    this._ontrackchanged = async ({oldTrack, newTrack}) => {
+      if (oldTrack != null) {
+        for (const sender of this._pc.getSenders()) {
+          if (sender.track !== oldTrack) continue;
+          if (newTrack != null) {
+            try {
+              return await sender.replaceTrack(newTrack);
+            } catch (err) {
+              // Renegotiation is required.
+            }
+          }
+          this._pc.removeTrack(sender);
+          break;
+        }
+      }
+      if (newTrack != null) this._pc.addTrack(newTrack, this._localTracks.stream);
+    };
+    this._localTracks.addEventListener('trackchanged', this._ontrackchanged);
   }
 
   _setRemoteStream(stream) {
@@ -86,8 +132,14 @@ class PeerState extends EventTarget {
     if (this._pc != null) this._pc.close();
     this._pc = pc;
 
-    const tracks = this._localStream.getTracks();
-    for (const track of tracks) pc.addTrack(track, this._localStream);
+    const tracks = this._localTracks.stream.getTracks();
+    for (const track of tracks) pc.addTrack(track, this._localTracks.stream);
+    // Creating an RTCPeerConnection doesn't actually generate any control messages until
+    // RTCPeerConnection.addTrack() is called. It is possible that the last invite sent to the peer
+    // was sent before the peer was ready to accept invites. If that is the case and there are no
+    // local tracks to trigger a WebRTC message exchange, the peer won't know that it is OK to
+    // connect back. Send another invite just in case. The peer will ignore any superfluous invites.
+    if (tracks.length === 0) this._sendMessage({invite: 'invite'});
   }
 
   async receiveMessage({candidate, description, hangup}) {
@@ -111,6 +163,7 @@ class PeerState extends EventTarget {
   close(emitClosedEvent = false) {
     if (this._closed) return;
     this._closed = true;
+    this._localTracks.removeEventListener('trackchanged', this._ontrackchanged);
     this._pc.close();
     this._pc = null;
     this._setRemoteStream(null);
@@ -135,7 +188,7 @@ exports.rtc = new class {
   constructor() {
     this._settings = null;
     this._isActive = false;
-    this._localStream = new MediaStream();
+    this._localTracks = new LocalTracks();
     this._pad = null;
     this._peers = new Map();
   }
@@ -327,9 +380,9 @@ exports.rtc = new class {
       track.enabled = !!$('#options-videoenabledonstart').prop('checked');
     }
     for (const track of stream.getTracks()) {
-      this._localStream.addTrack(track);
+      this._localTracks.setTrack(track.kind, track);
     }
-    this.setStream(this.getUserId(), this._localStream);
+    this.setStream(this.getUserId(), this._localTracks.stream);
     this.hangupAll();
     this.invitePeer(null); // Broadcast an invite to everyone.
   }
@@ -341,19 +394,18 @@ exports.rtc = new class {
     padcookie.setPref('rtcEnabled', false);
     this.hangupAll();
     this.setStream(this.getUserId(), null);
-    for (const track of this._localStream.getTracks()) {
-      track.stop();
-      this._localStream.removeTrack(track);
+    for (const track of this._localTracks.stream.getTracks()) {
+      this._localTracks.setTrack(track.kind, null);
     }
     this._isActive = false;
   }
 
   toggleMuted() {
-    return toggleTracks(this._localStream.getAudioTracks());
+    return toggleTracks(this._localTracks.stream.getAudioTracks());
   }
 
   toggleVideo() {
-    return toggleTracks(this._localStream.getVideoTracks());
+    return toggleTracks(this._localTracks.stream.getVideoTracks());
   }
 
   getUserFromId(userId) {
@@ -525,8 +577,9 @@ exports.rtc = new class {
   }
 
   // See if the peer is interested in establishing a WebRTC connection. If the peer isn't interested
-  // it will ignore the invite; if it is interested, it will initiate a WebRTC connection. If an
-  // uninterested peer later becomes interested, the peer will send an invite.
+  // it will ignore the invite; if it is interested, it will either initiate a WebRTC connection (if
+  // it has a track to stream) or it send back an invite of its own (if it doesn't have a track to
+  // stream). If an uninterested peer later becomes interested, the peer will send an invite.
   //
   // DO NOT connect to the peer unless invited by the peer because an uninterested peer will discard
   // the WebRTC signaling messages. This is bad because WebRTC assumes reliable, in-order delivery
@@ -541,7 +594,7 @@ exports.rtc = new class {
       peer = new PeerState(
           {iceServers: this._settings.iceServers},
           (msg) => this.sendMessage(userId, msg),
-          this._localStream);
+          this._localTracks);
       this._peers.set(userId, peer);
       peer.addEventListener('stream', ({stream}) => {
         this.setStream(userId, stream);
