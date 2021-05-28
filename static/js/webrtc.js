@@ -160,6 +160,14 @@ class PeerState extends EventTarget {
 
     if (this._pc != null) this._pc.close();
     this._pc = pc;
+    this._setRemoteDescription = async (description) => {
+      await pc.setRemoteDescription(description);
+      if (description.type === 'offer') {
+        await pc.setLocalDescription();
+        this._sendMessage({description: pc.localDescription});
+      }
+    };
+    this._addIceCandidate = async (candidate) => await pc.addIceCandidate(candidate);
 
     const tracks = this._localTracks.stream.getTracks();
     for (const track of tracks) pc.addTrack(track, this._localTracks.stream);
@@ -192,16 +200,8 @@ class PeerState extends EventTarget {
       }
     }
     try {
-      if (description != null) {
-        await this._pc.setRemoteDescription(description);
-        if (description.type === 'offer') {
-          await this._pc.setLocalDescription();
-          this._sendMessage({description: this._pc.localDescription});
-        }
-      }
-      if (candidate != null) {
-        await this._pc.addIceCandidate(candidate);
-      }
+      if (description != null) await this._setRemoteDescription(description);
+      if (candidate != null) await this._addIceCandidate(candidate);
     } catch (err) {
       console.error('Error processing message from peer:', err);
       this._ids.instance++; // Let the peer know that it must reset its state.
