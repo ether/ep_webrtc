@@ -407,7 +407,6 @@ const rtc = (() => {
         self.hangup(peer, false);
       } else if (type === 'offer') {
         if (pc[peer]) {
-          console.log('existing connection?', pc[peer]);
           self.hangup(peer, false);
           self.createPeerConnection(peer);
         } else {
