@@ -252,7 +252,8 @@ const rtc = (() => {
         self.updatePeerNameAndColor(self.getUserFromId(userId));
       }
       if (stream) {
-        video.srcObject = stream;
+        // Avoid flicker by checking if .srcObject already equals stream.
+        if (video.srcObject !== stream) video.srcObject = stream;
       } else if (video) {
         $(video).parent().remove();
       }
