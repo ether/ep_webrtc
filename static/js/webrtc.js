@@ -128,6 +128,21 @@ class PeerState extends EventTarget {
       await pc.setLocalDescription();
       this._sendMessage({description: pc.localDescription});
     });
+    pc.addEventListener('connectionstatechange', () => {
+      switch (pc.connectionState) {
+        case 'closed': this.close(true); break;
+        // From reading the spec it is not clear what the possible state transitions are, but it
+        // seems that on at least Chrome 90 the 'failed' state is terminal (it can never go back to
+        // working).
+        case 'failed': this.close(true); break;
+      }
+    });
+    pc.addEventListener('iceconnectionstatechange', () => {
+      switch (pc.iceConnectionState) {
+        case 'closed': this.close(true); break;
+        case 'failed': pc.restartIce(); break;
+      }
+    });
 
     if (this._pc != null) this._pc.close();
     this._pc = pc;
