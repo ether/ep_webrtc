@@ -34,7 +34,7 @@ exports.rtc = new class {
   constructor() {
     this._settings = null;
     this._isActive = false;
-    this._localStream = null;
+    this._localStream = new MediaStream();
     this._pad = null;
     this._pc = new Map();
   }
@@ -216,18 +216,16 @@ exports.rtc = new class {
         return;
       }
     }
-    // Disable audio and/or video according to user/site settings.
-    // Do this before setting `this._localStream` to avoid a race condition
-    // that might flash the video on for an instant before disabling it.
     for (const track of stream.getAudioTracks()) {
       track.enabled = !!$('#options-audioenabledonstart').prop('checked');
     }
     for (const track of stream.getVideoTracks()) {
       track.enabled = !!$('#options-videoenabledonstart').prop('checked');
     }
-
-    this._localStream = stream;
-    this.setStream(this.getUserId(), stream);
+    for (const track of stream.getTracks()) {
+      this._localStream.addTrack(track);
+    }
+    this.setStream(this.getUserId(), this._localStream);
     this.hangupAll();
     this.invitePeer(null); // Broadcast an invite to everyone.
   }
@@ -239,19 +237,19 @@ exports.rtc = new class {
     padcookie.setPref('rtcEnabled', false);
     this.hangupAll();
     this.setStream(this.getUserId(), null);
-    if (this._localStream) {
-      for (const track of this._localStream.getTracks()) track.stop();
-      this._localStream = null;
+    for (const track of this._localStream.getTracks()) {
+      track.stop();
+      this._localStream.removeTrack(track);
     }
     this._isActive = false;
   }
 
   toggleMuted() {
-    return this._localStream == null || toggleTracks(this._localStream.getAudioTracks());
+    return toggleTracks(this._localStream.getAudioTracks());
   }
 
   toggleVideo() {
-    return this._localStream == null || toggleTracks(this._localStream.getVideoTracks());
+    return toggleTracks(this._localStream.getVideoTracks());
   }
 
   getUserFromId(userId) {
@@ -487,9 +485,7 @@ exports.rtc = new class {
         throw new Error('New track associated with unexpected stream');
       }
     });
-    if (this._localStream != null) {
-      for (const track of this._localStream.getTracks()) pc.addTrack(track, this._localStream);
-    }
+    for (const track of this._localStream.getTracks()) pc.addTrack(track, this._localStream);
   }
 
   // Connect a setting to a checkbox. To be called on initialization.
