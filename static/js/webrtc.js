@@ -18,6 +18,9 @@
 require('./adapter');
 const padcookie = require('ep_etherpad-lite/static/js/pad_cookie').padcookie;
 
+// Used to help remote peers detect when this user reloads the page.
+const sessionId = `${Date.now()}_${Math.floor(Math.random() * (1 << 16)).toString(16)}`;
+
 class LocalTracks extends EventTarget {
   constructor() {
     super();
@@ -70,8 +73,15 @@ class PeerState extends EventTarget {
   constructor(pcConfig, sendMessage, localTracks) {
     super();
     this._pcConfig = pcConfig;
-    this._sendMessage = sendMessage;
+    this._sendMessage = (msg) => sendMessage(Object.assign({ids: this._ids}, msg));
     this._localTracks = localTracks;
+    this._ids = {
+      // Only changes when the user reloads the page.
+      session: sessionId,
+      // Counter that is increased when WebRTC renegotiation is necessary due to an error.
+      instance: 0,
+    };
+    this._remoteIds = null;
     this._closed = false;
     this._pc = null;
     this._remoteStream = null;
@@ -118,6 +128,7 @@ class PeerState extends EventTarget {
 
   _resetConnection() {
     this._setRemoteStream(null);
+    this._remoteIds = {session: null, instance: null};
     const pc = new RTCPeerConnection(this._pcConfig);
     pc.addEventListener('track', ({track, streams}) => {
       if (streams.length !== 1) throw new Error('Expected track to be in exactly one stream');
@@ -133,8 +144,11 @@ class PeerState extends EventTarget {
         case 'closed': this.close(true); break;
         // From reading the spec it is not clear what the possible state transitions are, but it
         // seems that on at least Chrome 90 the 'failed' state is terminal (it can never go back to
-        // working).
-        case 'failed': this.close(true); break;
+        // working) so a new RTCPeerConnection must be made.
+        case 'failed':
+          this._ids.instance++; // Let the peer know that it must reset its state.
+          this._resetConnection();
+          break;
       }
     });
     pc.addEventListener('iceconnectionstatechange', () => {
@@ -157,21 +171,42 @@ class PeerState extends EventTarget {
     if (tracks.length === 0) this._sendMessage({invite: 'invite'});
   }
 
-  async receiveMessage({candidate, description, hangup}) {
+  async receiveMessage({ids, candidate, description, hangup}) {
     if (this._closed) throw new Error('Unable to process message because PeerState is closed');
     if (hangup != null) {
       this.close(true);
       return;
     }
-    if (description != null) {
-      await this._pc.setRemoteDescription(description);
-      if (description.type === 'offer') {
-        await this._pc.setLocalDescription();
-        this._sendMessage({description: this._pc.localDescription});
+    if (ids != null) {
+      for (const idType of ['session', 'instance']) {
+        const newId = ids[idType];
+        if (newId != null) {
+          const oldId = this._remoteIds[idType];
+          if (oldId != null && newId !== oldId) {
+            // The remote peer reloaded the page or experienced an error. Destroy and recreate the
+            // local RTCPeerConnection to avoid browser quirks caused by state mismatches.
+            this._resetConnection();
+          }
+          this._remoteIds[idType] = newId;
+        }
       }
     }
-    if (candidate != null) {
-      await this._pc.addIceCandidate(candidate);
+    try {
+      if (description != null) {
+        await this._pc.setRemoteDescription(description);
+        if (description.type === 'offer') {
+          await this._pc.setLocalDescription();
+          this._sendMessage({description: this._pc.localDescription});
+        }
+      }
+      if (candidate != null) {
+        await this._pc.addIceCandidate(candidate);
+      }
+    } catch (err) {
+      console.error('Error processing message from peer:', err);
+      this._ids.instance++; // Let the peer know that it must reset its state.
+      this._resetConnection();
+      return;
     }
   }
 
@@ -600,7 +635,7 @@ exports.rtc = new class {
   // the WebRTC signaling messages. This is bad because WebRTC assumes reliable, in-order delivery
   // of signaling messages, so the discards will break future connection attempts.
   invitePeer(userId) {
-    this.sendMessage(userId, {invite: 'invite'});
+    this.sendMessage(userId, {ids: {session: sessionId}, invite: 'invite'});
   }
 
   getPeerConnection(userId) {
