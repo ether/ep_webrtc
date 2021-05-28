@@ -523,6 +523,11 @@ exports.rtc = new class {
         try {
           $('#rtcbox').css('display', 'flex');
           padcookie.setPref('rtcEnabled', true);
+          this.hangupAll();
+          this.invitePeer(null); // Broadcast an invite to everyone.
+          // Display the self-view interface while the user is being prompted for permission to
+          // access the microphone/camera.
+          this.addInterface(this.getUserId(), true);
           try {
             await this.updateLocalTracks();
           } catch (err) {
@@ -533,8 +538,6 @@ exports.rtc = new class {
             }
             return;
           }
-          this.hangupAll();
-          this.invitePeer(null); // Broadcast an invite to everyone.
           await this.setStream(this.getUserId(), this._localTracks.stream);
         } finally {
           $checkbox.prop('disabled', false);
@@ -703,7 +706,11 @@ exports.rtc = new class {
     $interface.append($('<span>')
         .addClass('interface-btn audio-btn buttonicon')
         .attr('title', audioHardDisabled ? 'Audio disallowed by admin' : 'Mute')
-        .toggleClass('muted', audioHardDisabled)
+        // For the self-view, show muted until the user grants access to the microphone. Remote
+        // views are never muted even if the peer is currently not sending any audio (the peer could
+        // start sending audio at any moment). Exception: If the browser blocks autoplay, we
+        // automatically mute the remote view by simulating a click on the mute button.
+        .toggleClass('muted', isLocal)
         .toggleClass('disallowed', audioHardDisabled)
         .on(audioHardDisabled ? {} : {
           click: (event) => {
@@ -730,7 +737,7 @@ exports.rtc = new class {
       $interface.append($('<span>')
           .addClass('interface-btn video-btn buttonicon')
           .attr('title', videoHardDisabled ? 'Video disallowed by admin' : 'Disable video')
-          .toggleClass('off', videoHardDisabled)
+          .addClass('off') // Muted until the user grants access to the camera.
           .toggleClass('disallowed', videoHardDisabled)
           .on(videoHardDisabled ? {} : {
             click: (event) => {
