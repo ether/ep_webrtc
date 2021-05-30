@@ -131,18 +131,17 @@ class PeerState extends EventTarget {
   }
 
   _setRemoteStream(stream) {
-    if (stream == null) {
-      if (this._remoteStream == null) return;
+    if (stream === this._remoteStream) return;
+    if (this._remoteStream != null) {
       const oldStream = this._remoteStream;
       oldStream.removeEventListener('removetrack', this._onremovetrack);
       this._remoteStream = null;
       this.dispatchEvent(new StreamEvent('streamgone', oldStream));
-    } else if (this._remoteStream == null) {
+    }
+    if (stream != null) {
       this._remoteStream = stream;
       stream.addEventListener('removetrack', this._onremovetrack);
       this.dispatchEvent(new StreamEvent('stream', stream));
-    } else if (stream !== this._remoteStream) {
-      throw new Error('New remote stream added before old stream was removed');
     }
   }
 
@@ -179,6 +178,15 @@ class PeerState extends EventTarget {
       this._debug(`connection state changed to ${pc.connectionState}`);
       switch (pc.connectionState) {
         case 'closed': this.close(true); break;
+        case 'connected':
+          if (this._remoteStream == null) this._setRemoteStream(this._disconnectedRemoteStream);
+          break;
+        case 'disconnected':
+          // Unfortunately, if the peer reconnects later there might not be a track event that can
+          // be used to re-add the stream. Stash the stream so that it can be reused on reconnect.
+          this._disconnectedRemoteStream = this._remoteStream;
+          this._setRemoteStream(null);
+          break;
         // From reading the spec it is not clear what the possible state transitions are, but it
         // seems that on at least Chrome 90 the 'failed' state is terminal (it can never go back to
         // working) so a new RTCPeerConnection must be made.
