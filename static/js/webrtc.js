@@ -18,6 +18,9 @@
 require('./adapter');
 const padcookie = require('ep_etherpad-lite/static/js/pad_cookie').padcookie;
 
+const enableDebugLogging = false;
+const debug = (...args) => { if (enableDebugLogging) console.debug('ep_webrtc:', ...args); };
+
 // Used to help remote peers detect when this user reloads the page.
 const sessionId = `${Date.now()}_${Math.floor(Math.random() * (1 << 16)).toString(16)}`;
 
@@ -39,12 +42,19 @@ class LocalTracks extends EventTarget {
       if (track.kind !== kind) continue;
       if (track === newTrack) return; // No change.
       oldTrack = track;
+      debug(`removing ${kind} track ${oldTrack.id} from local stream`);
       this.stream.removeTrack(oldTrack);
       break;
     }
-    if (newTrack != null) this.stream.addTrack(newTrack);
+    if (newTrack != null) {
+      debug(`adding ${kind} track ${newTrack.id} to local stream`);
+      this.stream.addTrack(newTrack);
+    }
     this.dispatchEvent(Object.assign(new CustomEvent('trackchanged'), {oldTrack, newTrack}));
-    if (oldTrack != null) oldTrack.stop();
+    if (oldTrack != null) {
+      debug(`stopping ${kind} track ${oldTrack.id}`);
+      oldTrack.stop();
+    }
   }
 }
 
@@ -74,12 +84,14 @@ class ClosedEvent extends CustomEvent {
 //   * 'closed' (see ClosedEvent): Emitted when the PeerState is closed, except when closed by a
 //     call to close(). The PeerState must not be used after it is closed.
 class PeerState extends EventTarget {
-  constructor(pcConfig, polite, sendMessage, localTracks) {
+  constructor(pcConfig, polite, sendMessage, localTracks, debug) {
     super();
     this._pcConfig = pcConfig;
     this._polite = polite;
     this._sendMessage = (msg) => sendMessage(Object.assign({ids: this._ids}, msg));
     this._localTracks = localTracks;
+    this._debug = debug;
+    this._debug(`I am the ${this._polite ? '' : 'im'}polite peer`);
     this._ids = {
       // Only changes when the user reloads the page.
       session: sessionId,
@@ -96,6 +108,9 @@ class PeerState extends EventTarget {
     this._resetConnection();
 
     this._ontrackchanged = async ({oldTrack, newTrack}) => {
+      this._debug(`replacing ${oldTrack ? oldTrack.kind : newTrack.kind} track ` +
+                  `${oldTrack ? oldTrack.id : '(null)'} with ` +
+                  `${newTrack ? newTrack.id : '(null)'}`);
       if (oldTrack != null) {
         for (const sender of this._pc.getSenders()) {
           if (sender.track !== oldTrack) continue;
@@ -103,7 +118,7 @@ class PeerState extends EventTarget {
             try {
               return await sender.replaceTrack(newTrack);
             } catch (err) {
-              // Renegotiation is required.
+              this._debug('renegotiation is required');
             }
           }
           this._pc.removeTrack(sender);
@@ -132,6 +147,7 @@ class PeerState extends EventTarget {
   }
 
   _resetConnection() {
+    this._debug('creating RTCPeerConnection');
     this._setRemoteStream(null);
     this._remoteIds = {session: null, instance: null};
     // This negotiation state is captured in closures (instead of doing something like
@@ -159,6 +175,7 @@ class PeerState extends EventTarget {
       }
     });
     pc.addEventListener('connectionstatechange', () => {
+      this._debug(`connection state changed to ${pc.connectionState}`);
       switch (pc.connectionState) {
         case 'closed': this.close(true); break;
         // From reading the spec it is not clear what the possible state transitions are, but it
@@ -171,6 +188,7 @@ class PeerState extends EventTarget {
       }
     });
     pc.addEventListener('iceconnectionstatechange', () => {
+      this._debug(`ICE connection state changed to ${pc.iceConnectionState}`);
       switch (pc.iceConnectionState) {
         case 'closed': this.close(true); break;
         case 'failed': pc.restartIce(); break;
@@ -206,7 +224,10 @@ class PeerState extends EventTarget {
     };
 
     const tracks = this._localTracks.stream.getTracks();
-    for (const track of tracks) pc.addTrack(track, this._localTracks.stream);
+    for (const track of tracks) {
+      this._debug(`start streaming ${track.kind} track ${track.id}`);
+      pc.addTrack(track, this._localTracks.stream);
+    }
     // Creating an RTCPeerConnection doesn't actually generate any control messages until
     // RTCPeerConnection.addTrack() is called. It is possible that the last invite sent to the peer
     // was sent before the peer was ready to accept invites. If that is the case and there are no
@@ -229,6 +250,8 @@ class PeerState extends EventTarget {
           if (oldId != null && newId !== oldId) {
             // The remote peer reloaded the page or experienced an error. Destroy and recreate the
             // local RTCPeerConnection to avoid browser quirks caused by state mismatches.
+            this._debug(`remote peer forced WebRTC renegotiation via new ${idType} ID ` +
+                        `(old ID ${oldId}, new ID ${newId})`);
             this._resetConnection();
           }
           this._remoteIds[idType] = newId;
@@ -360,16 +383,19 @@ exports.rtc = new class {
 
   userJoinOrUpdate(hookName, {userInfo}) {
     const {userId} = userInfo;
+    debug(`(peer ${userId}) join or update`);
     if (!this._isActive || !userId) return;
     if (userId !== this.getUserId()) this.invitePeer(userId);
     this.updatePeerNameAndColor(userInfo);
   }
 
   userLeave(hookName, {userInfo: {userId}}) {
+    debug(`(peer ${userId}) leave`);
     this.hangup(userId);
   }
 
   handleClientMessage_RTC_MESSAGE(hookName, {payload: {from, data}}) {
+    debug(`(peer ${from}) received message`, data);
     if (this._isActive && from !== this.getUserId() &&
         (this._peers.has(from) || data.hangup == null)) {
       this.getPeerConnection(from).receiveMessage(data);
@@ -445,6 +471,7 @@ exports.rtc = new class {
     const $checkbox = $('#options-enablertc');
     $checkbox.prop('checked', true);
     if (this._isActive) return;
+    debug('activating');
     $checkbox.prop('disabled', true);
     try {
       $('#rtcbox').css('display', 'flex');
@@ -493,6 +520,7 @@ exports.rtc = new class {
     const $checkbox = $('#options-enablertc');
     $checkbox.prop('checked', false);
     if (!this._isActive) return;
+    debug('deactivating');
     $checkbox.prop('disabled', true);
     try {
       $('#rtcbox').hide();
@@ -558,6 +586,7 @@ exports.rtc = new class {
   }
 
   addInterface(userId, isLocal) {
+    debug(isLocal ? 'adding self-view interface' : `(peer ${userId}) adding interface`);
     const videoId = getVideoId(userId);
     const size = `${this._settings.video.sizes.small}px`;
     const $video = $('<video>')
@@ -658,6 +687,7 @@ exports.rtc = new class {
   }
 
   sendMessage(to, data) {
+    debug(`(${to == null ? 'to everyone on the pad' : `peer ${to}`}) sending message`, data);
     this._pad.collabClient.sendMessage({
       type: 'RTC_MESSAGE',
       payload: {data, to},
@@ -677,6 +707,7 @@ exports.rtc = new class {
   }
 
   hangup(userId) {
+    debug(`(peer ${userId}) hangup`);
     this.setStream(userId, null);
     const peer = this._peers.get(userId);
     if (peer == null) return;
@@ -699,19 +730,25 @@ exports.rtc = new class {
   getPeerConnection(userId) {
     let peer = this._peers.get(userId);
     if (peer == null) {
+      const _debug = (...args) => debug(`(peer ${userId})`, ...args);
+      _debug('creating PeerState');
       peer = new PeerState(
           {iceServers: this._settings.iceServers},
           isPolite(this.getUserId(), userId),
           (msg) => this.sendMessage(userId, msg),
-          this._localTracks);
+          this._localTracks,
+          _debug);
       this._peers.set(userId, peer);
       peer.addEventListener('stream', ({stream}) => {
+        _debug(`remote stream ${stream.id} added`);
         this.setStream(userId, stream);
       });
       peer.addEventListener('streamgone', ({stream}) => {
+        _debug(`remote stream ${stream.id} removed`);
         this.setStream(userId, null);
       });
       peer.addEventListener('closed', () => {
+        _debug('PeerState closed');
         this.hangup(userId);
       });
     }
