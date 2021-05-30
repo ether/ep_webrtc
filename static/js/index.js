@@ -26,6 +26,18 @@ const sessionId = Date.now();
 // Incremented each time a new RTCPeerConnection is created.
 let nextInstanceId = 0;
 
+class Mutex {
+  async lock() {
+    while (this._locked != null) await this._locked;
+    this._locked = new Promise((resolve) => this._unlock = resolve);
+  }
+
+  unlock() {
+    this._unlock();
+    this._locked = null;
+  }
+}
+
 class LocalTracks extends EventTarget {
   constructor() {
     super();
@@ -328,6 +340,8 @@ exports.rtc = new class {
     this._localTracks = new LocalTracks();
     this._pad = null;
     this._peers = new Map();
+    // When grabbing both locks the audio lock must be grabbed first to avoid deadlock.
+    this._trackLocks = {audio: new Mutex(), video: new Mutex()};
   }
 
   // API HOOKS
@@ -489,42 +503,72 @@ exports.rtc = new class {
     });
   }
 
+  // Performs the following steps for the local audio and/or video tracks:
+  //   1. Read the state of the UI: Is the button in the enabled or disabled state?
+  //   2. Try to make the track match the state of the UI.
+  //   3. Update the state of the UI to reflect the actual state. For example, if the user set the
+  //      audio button to enabled but we failed to get permission to access the microphone, then the
+  //      button is changed back to disabled.
   async updateLocalTracks({updateAudio, updateVideo}) {
-    const $interface = $(`#interface_${getVideoId(this.getUserId())}`);
-    if ($interface.length === 0) throw new Error('self-view interface is missing');
-    const $audioBtn = $interface.find('.audio-btn');
-    const $videoBtn = $interface.find('.video-btn');
-    const addAudioTrack = updateAudio && this._localTracks.stream.getAudioTracks().length === 0;
-    const addVideoTrack = updateVideo && this._localTracks.stream.getVideoTracks().length === 0;
-    if (addAudioTrack || addVideoTrack) {
-      debug(`requesting permission to access ${
-        addAudioTrack && addVideoTrack ? 'camera and microphone'
-        : addAudioTrack ? 'microphone'
-        : 'camera'}`);
-      const stream = await window.navigator.mediaDevices.getUserMedia({
-        audio: addAudioTrack,
-        video: addVideoTrack && {width: {max: 320}, height: {max: 240}},
-      });
-      debug('successfully accessed device(s)');
-      for (const track of stream.getTracks()) this._localTracks.setTrack(track.kind, track);
-    }
-    if (updateAudio) {
-      for (const track of this._localTracks.stream.getAudioTracks()) {
-        track.enabled = !$audioBtn.hasClass('muted');
+    // Prevent overlapping requests to access the microphone/camera. (If getUserMedia() is called
+    // concurrently the browser might return different track objects from each call.)
+    if (updateAudio) await this._trackLocks.audio.lock();
+    if (updateVideo) await this._trackLocks.video.lock();
+    try {
+      const $interface = $(`#interface_${getVideoId(this.getUserId())}`);
+      if ($interface.length === 0) throw new Error('self-view interface is missing');
+      const $audioBtn = $interface.find('.audio-btn');
+      const $videoBtn = $interface.find('.video-btn');
+      const addAudioTrack = updateAudio && !$audioBtn.hasClass('muted') &&
+          this._localTracks.stream.getAudioTracks().length === 0;
+      const addVideoTrack = updateVideo && !$videoBtn.hasClass('off') &&
+          this._localTracks.stream.getVideoTracks().length === 0;
+      if (addAudioTrack || addVideoTrack) {
+        debug(`requesting permission to access ${
+          addAudioTrack && addVideoTrack ? 'camera and microphone'
+          : addAudioTrack ? 'microphone'
+          : 'camera'}`);
+        let stream;
+        try {
+          stream = await window.navigator.mediaDevices.getUserMedia({
+            audio: addAudioTrack,
+            video: addVideoTrack && {width: {max: 320}, height: {max: 240}},
+          });
+          debug('successfully accessed device(s)');
+        } catch (err) {
+          // Display but otherwise ignore the error. The button(s) will be toggled back to
+          // disabled below if we failed to access the microphone/camera. The user can re-click
+          // the button to try again.
+          (async () => this.showUserMediaError(err))();
+          stream = new MediaStream();
+        }
+        for (const track of stream.getTracks()) this._localTracks.setTrack(track.kind, track);
       }
-      const hasAudio = this._localTracks.stream.getAudioTracks().some((t) => t.enabled);
-      $audioBtn
-          .attr('title', hasAudio ? 'Mute' : 'Unmute')
-          .toggleClass('muted', !hasAudio);
-    }
-    if (updateVideo) {
-      for (const track of this._localTracks.stream.getVideoTracks()) {
-        track.enabled = !$videoBtn.hasClass('off');
+      if (updateAudio) {
+        for (const track of this._localTracks.stream.getAudioTracks()) {
+          // Re-check the state of the button because the user might have clicked it while
+          // getUserMedia() was running.
+          track.enabled = !$audioBtn.hasClass('muted');
+        }
+        const hasAudio = this._localTracks.stream.getAudioTracks().some((t) => t.enabled);
+        $audioBtn
+            .attr('title', hasAudio ? 'Mute' : 'Unmute')
+            .toggleClass('muted', !hasAudio);
       }
-      const hasVideo = this._localTracks.stream.getVideoTracks().some((t) => t.enabled);
-      $videoBtn
-          .attr('title', hasVideo ? 'Disable video' : 'Enable video')
-          .toggleClass('off', !hasVideo);
+      if (updateVideo) {
+        for (const track of this._localTracks.stream.getVideoTracks()) {
+          // Re-check the state of the button because the user might have clicked it while
+          // getUserMedia() was running.
+          track.enabled = !$videoBtn.hasClass('off');
+        }
+        const hasVideo = this._localTracks.stream.getVideoTracks().some((t) => t.enabled);
+        $videoBtn
+            .attr('title', hasVideo ? 'Disable video' : 'Enable video')
+            .toggleClass('off', !hasVideo);
+      }
+    } finally {
+      if (updateVideo) this._trackLocks.video.unlock();
+      if (updateAudio) this._trackLocks.audio.unlock();
     }
     await this.playVideo($(`#${getVideoId(this.getUserId())}`));
   }
@@ -542,19 +586,10 @@ exports.rtc = new class {
           this.hangupAll();
           this.invitePeer(null); // Broadcast an invite to everyone.
           await this.setStream(this.getUserId(), this._localTracks.stream);
-          try {
-            await this.updateLocalTracks({
-              updateAudio: this._settings.audio.disabled !== 'hard',
-              updateVideo: this._settings.video.disabled !== 'hard',
-            });
-          } catch (err) {
-            try {
-              this.showUserMediaError(err);
-            } finally {
-              await this.deactivate(false);
-            }
-            return;
-          }
+          await this.updateLocalTracks({
+            updateAudio: this._settings.audio.disabled !== 'hard',
+            updateVideo: this._settings.video.disabled !== 'hard',
+          });
         } finally {
           $checkbox.prop('disabled', false);
         }

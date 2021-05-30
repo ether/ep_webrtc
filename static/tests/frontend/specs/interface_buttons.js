@@ -142,7 +142,7 @@ describe('Test the behavior of the interface buttons: Mute, Video Disable, Enlar
 
       const chrome$ = helper.padChrome$;
 
-      expect(audioTrack.enabled).to.be(false);
+      expect(audioTrack).to.be(null);
       expect(chrome$('.audio-btn.muted').length).to.be(1);
       expect(chrome$('.audio-btn').attr('title')).to.be('Unmute');
 
@@ -150,7 +150,9 @@ describe('Test the behavior of the interface buttons: Mute, Video Disable, Enlar
       $audioBtn.click();
 
       await helper.waitForPromise(
-          () => chrome$('.audio-btn.muted').length === 0 && audioTrack.enabled === true, 3000);
+          () => (chrome$('.audio-btn.muted').length === 0 &&
+                 audioTrack != null && audioTrack.enabled),
+          3000);
       expect(chrome$('.audio-btn').attr('title')).to.be('Mute');
       $audioBtn.click();
       await helper.waitForPromise(
@@ -163,9 +165,7 @@ describe('Test the behavior of the interface buttons: Mute, Video Disable, Enlar
 
       const chrome$ = helper.padChrome$;
 
-      await helper.waitForPromise(
-          () => chrome$('.video-btn').length === 1 && videoTrack != null, 3000);
-      expect(videoTrack.enabled).to.be(false);
+      expect(videoTrack).to.be(null);
       expect(chrome$('.video-btn.off').length).to.be(1);
       expect(chrome$('.video-btn').attr('title')).to.contain('Enable');
 
@@ -173,7 +173,9 @@ describe('Test the behavior of the interface buttons: Mute, Video Disable, Enlar
       $videoBtn.click();
 
       await helper.waitForPromise(
-          () => chrome$('.video-btn.off').length === 0 && videoTrack.enabled === true, 3000);
+          () => (chrome$('.video-btn.off').length === 0 &&
+                 videoTrack != null && videoTrack.enabled),
+          3000);
       expect(chrome$('.video-btn').attr('title')).to.contain('Disable');
       $videoBtn.click();
       await helper.waitForPromise(
