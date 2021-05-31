@@ -338,6 +338,15 @@ exports.rtc = new class {
     this._activated = null;
     this._settings = null;
     this._localTracks = new LocalTracks();
+    this._disabledSilence = (() => {
+      const ctx = new AudioContext();
+      const gain = ctx.createGain();
+      const dst = gain.connect(ctx.createMediaStreamDestination());
+      const track = dst.stream.getAudioTracks()[0];
+      track.enabled = false;
+      return track;
+    })();
+    this._localTracks.setTrack(this._disabledSilence.kind, this._disabledSilence);
     this._pad = null;
     this._peers = new Map();
     // When grabbing both locks the audio lock must be grabbed first to avoid deadlock.
@@ -520,7 +529,7 @@ exports.rtc = new class {
       const $audioBtn = $interface.find('.audio-btn');
       const $videoBtn = $interface.find('.video-btn');
       const addAudioTrack = updateAudio && !$audioBtn.hasClass('muted') &&
-          this._localTracks.stream.getAudioTracks().length === 0;
+          !this._localTracks.stream.getAudioTracks().some((t) => t !== this._disabledSilence);
       const addVideoTrack = updateVideo && !$videoBtn.hasClass('off') &&
           this._localTracks.stream.getVideoTracks().length === 0;
       if (addAudioTrack || addVideoTrack) {
@@ -548,7 +557,7 @@ exports.rtc = new class {
         for (const track of this._localTracks.stream.getAudioTracks()) {
           // Re-check the state of the button because the user might have clicked it while
           // getUserMedia() was running.
-          track.enabled = !$audioBtn.hasClass('muted');
+          track.enabled = track !== this._disabledSilence && !$audioBtn.hasClass('muted');
         }
         const hasAudio = this._localTracks.stream.getAudioTracks().some((t) => t.enabled);
         $audioBtn
