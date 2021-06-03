@@ -686,6 +686,27 @@ exports.rtc = new class {
         .append($interface));
     this.updatePeerNameAndColor(this.getUserFromId(userId));
 
+    // For tests it is important to know when an asynchronous event handler has finishing handling
+    // an event. This function wraps async event handler functions so that tests can wait for all
+    // executions of an event handler to finish by calling `await $element.data('idle')(eventName)`.
+    const addAsyncEventHandlers = ($element, asyncHandlers) => {
+      const busy = {};
+      const handlers = {};
+      for (const [event, handler] of Object.entries(asyncHandlers)) {
+        handlers[event] = (...args) => {
+          const p = Promise.resolve(handler(...args));
+          const busyp = busy[event] = p
+              .catch(() => {}) // Exceptions should not interrupt the Promise chain.
+              .then(Promise.resolve(busy[event]))
+              .then(() => { if (busy[event] === busyp) delete busy[event]; });
+          // Add a no-op .then() function to force an unhandled promise rejection if p rejects.
+          p.then(() => {});
+        };
+      }
+      $element.on(handlers);
+      $element.data('idle', async (event) => { while (busy[event] != null) await busy[event]; });
+    };
+
     // /////
     // Mute button
     // /////
@@ -696,30 +717,30 @@ exports.rtc = new class {
     // automatically mute the remote view by simulating a click on the mute button.
     const audioEnabled =
         !isLocal || (!audioHardDisabled && $('#options-audioenabledonstart').prop('checked'));
-    $interface.append($('<span>')
+    const $audioBtn = $('<span>')
         .addClass('interface-btn audio-btn buttonicon')
         .attr('title',
             audioHardDisabled ? 'Audio disallowed by admin'
             : audioEnabled ? 'Mute'
             : 'Unmute')
         .toggleClass('muted', !audioEnabled)
-        .toggleClass('disallowed', audioHardDisabled)
-        .on(audioHardDisabled ? {} : {
-          click: async (event) => {
-            $video.removeData('automuted');
-            const $audioBtn = $(event.currentTarget);
-            const muted =
-                isLocal ? !$audioBtn.hasClass('muted') : ($video[0].muted = !$video[0].muted);
-            _debug(`audio button clicked to ${muted ? 'dis' : 'en'}able audio`);
-            $audioBtn.attr('title', muted ? 'Unmute' : 'Mute').toggleClass('muted', muted);
-            if (isLocal) await this.updateLocalTracks({updateAudio: true});
-            // Do not use `await` when calling unmuteAutoMuted() because unmuting is best-effort
-            // (success of this handler does not depend on the ability to unmute). Call
-            // unmuteAutoMuted() late so that it can call $video[0].play() after $video[0].muted is
-            // set to its new value, and so that it can auto-mute if necessary.
-            this.unmuteAutoMuted();
-          },
-        }));
+        .toggleClass('disallowed', audioHardDisabled);
+    addAsyncEventHandlers($audioBtn, audioHardDisabled ? {} : {
+      click: async () => {
+        $video.removeData('automuted');
+        const muted = isLocal ? !$audioBtn.hasClass('muted') : ($video[0].muted = !$video[0].muted);
+        _debug(`audio button clicked to ${muted ? 'dis' : 'en'}able audio`);
+        $audioBtn.attr('title', muted ? 'Unmute' : 'Mute').toggleClass('muted', muted);
+        if (isLocal) await this.updateLocalTracks({updateAudio: true});
+        // Do not use `await` when calling unmuteAutoMuted() because unmuting is best-effort
+        // (success of this handler does not depend on the ability to unmute, and this handler's
+        // idle/busy status should not be affected by unmuteAutoMuted()). Call unmuteAutoMuted()
+        // late so that it can call $video[0].play() after $video[0].muted is set to its new value,
+        // and so that it can auto-mute if necessary.
+        this.unmuteAutoMuted();
+      },
+    });
+    $interface.append($audioBtn);
 
     // /////
     // Disable Video button
@@ -728,27 +749,27 @@ exports.rtc = new class {
     if (isLocal) {
       const videoHardDisabled = this._settings.video.disabled === 'hard';
       const videoEnabled = !videoHardDisabled && $('#options-videoenabledonstart').prop('checked');
-      $interface.append($('<span>')
+      const $videoBtn = $('<span>')
           .addClass('interface-btn video-btn buttonicon')
           .attr('title',
               videoHardDisabled ? 'Video disallowed by admin'
               : videoEnabled ? 'Disable video'
               : 'Enable video')
           .toggleClass('off', !videoEnabled)
-          .toggleClass('disallowed', videoHardDisabled)
-          .on(videoHardDisabled ? {} : {
-            click: async (event) => {
-              const $videoBtn = $(event.currentTarget);
-              const videoEnabled = $videoBtn.hasClass('off');
-              _debug(`video button clicked to ${videoEnabled ? 'en' : 'dis'}able video`);
-              $videoBtn
-                  .attr('title', videoEnabled ? 'Disable video' : 'Enable video')
-                  .toggleClass('off', !videoEnabled);
-              await this.updateLocalTracks({updateVideo: true});
-              // Don't use `await` here -- see the comment for the audio button click handler above.
-              this.unmuteAutoMuted();
-            },
-          }));
+          .toggleClass('disallowed', videoHardDisabled);
+      addAsyncEventHandlers($videoBtn, videoHardDisabled ? {} : {
+        click: async () => {
+          const videoEnabled = $videoBtn.hasClass('off');
+          _debug(`video button clicked to ${videoEnabled ? 'en' : 'dis'}able video`);
+          $videoBtn
+              .attr('title', videoEnabled ? 'Disable video' : 'Enable video')
+              .toggleClass('off', !videoEnabled);
+          await this.updateLocalTracks({updateVideo: true});
+          // Don't use `await` here -- see the comment for the audio button click handler above.
+          this.unmuteAutoMuted();
+        },
+      });
+      $interface.append($videoBtn);
     }
 
     // /////
