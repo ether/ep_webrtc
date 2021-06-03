@@ -499,6 +499,8 @@ exports.rtc = new class {
           return;
         }
       }
+      this.hangupAll();
+      this.invitePeer(null); // Broadcast an invite to everyone.
       for (const track of stream.getAudioTracks()) {
         track.enabled = !!$('#options-audioenabledonstart').prop('checked');
       }
@@ -508,9 +510,7 @@ exports.rtc = new class {
       for (const track of stream.getTracks()) {
         this._localTracks.setTrack(track.kind, track);
       }
-      this.setStream(this.getUserId(), this._localTracks.stream);
-      this.hangupAll();
-      this.invitePeer(null); // Broadcast an invite to everyone.
+      await this.setStream(this.getUserId(), this._localTracks.stream);
     } finally {
       $checkbox.prop('disabled', false);
     }
@@ -555,7 +555,7 @@ exports.rtc = new class {
     return user;
   }
 
-  setStream(userId, stream) {
+  async setStream(userId, stream) {
     let $video = $(`#${getVideoId(userId)}`);
     if (!stream) {
       $video.parent().remove();
@@ -585,6 +585,22 @@ exports.rtc = new class {
     }
     // Avoid flicker by checking if .srcObject already equals stream.
     if ($video[0].srcObject !== stream) $video[0].srcObject = stream;
+    await this.playVideo($video);
+  }
+
+  async playVideo($video) {
+    if (!$video[0].paused) return;
+    // play() will block indefinitely if there are no enabled tracks.
+    if (!$video[0].srcObject.getTracks().some((t) => t.enabled)) return;
+    try {
+      return await $video[0].play();
+    } catch (err) {
+      // AbortError can happen if there is a hangup (e.g., the user disables WebRTC) while playback
+      // is starting. The video element will be deleted shortly (if it hasn't already been deleted)
+      // so it's OK to ignore the error.
+      if (err.name === 'AbortError') return;
+      throw err;
+    }
   }
 
   addInterface(userId, isLocal) {
@@ -592,12 +608,7 @@ exports.rtc = new class {
     const videoId = getVideoId(userId);
     const size = `${this._settings.video.sizes.small}px`;
     const $video = $('<video>')
-        .attr({
-          id: videoId,
-          playsinline: '',
-          autoplay: '',
-          muted: isLocal ? '' : null,
-        })
+        .attr({id: videoId, muted: isLocal ? '' : null})
         .prop('muted', isLocal) // Setting the 'muted' attribute isn't sufficient for some reason.
         .css({'width': size, 'max-height': size});
     const $interface = $('<div>')
@@ -741,13 +752,13 @@ exports.rtc = new class {
           this._localTracks,
           _debug);
       this._peers.set(userId, peer);
-      peer.addEventListener('stream', ({stream}) => {
+      peer.addEventListener('stream', async ({stream}) => {
         _debug(`remote stream ${stream.id} added`);
-        this.setStream(userId, stream);
+        await this.setStream(userId, stream);
       });
-      peer.addEventListener('streamgone', ({stream}) => {
+      peer.addEventListener('streamgone', async ({stream}) => {
         _debug(`remote stream ${stream.id} removed`);
-        this.setStream(userId, null);
+        await this.setStream(userId, null);
       });
       peer.addEventListener('closed', () => {
         _debug('PeerState closed');

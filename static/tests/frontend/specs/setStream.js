@@ -61,7 +61,7 @@ describe('setStream()', function () {
           ownUserId = chrome$.window.ep_webrtc.getUserId();
           ownVideoId = `video_${ownUserId.replace(/\./g, '_')}`;
           ownInterfaceId = `interface_${ownVideoId}`;
-          chrome$.window.ep_webrtc.setStream(
+          await chrome$.window.ep_webrtc.setStream(
               otherUserId, fakeStream(chrome$.window.document, tc.peer));
         });
 
@@ -122,7 +122,7 @@ describe('setStream()', function () {
       ownUserId = chrome$.window.ep_webrtc.getUserId();
       ownVideoId = `video_${ownUserId.replace(/\./g, '_')}`;
       ownInterfaceId = `interface_${ownVideoId}`;
-      chrome$.window.ep_webrtc.setStream(
+      await chrome$.window.ep_webrtc.setStream(
           otherUserId, fakeStream(chrome$.window.document, {audio: false, video: false}));
     });
 
