@@ -308,15 +308,6 @@ class PeerState extends EventTarget {
   }
 }
 
-// Toggles the enabled state of the first track, then updates the other tracks to match. Returns
-// true iff the result is no enabled tracks (either there are no tracks or all tracks are muted).
-const toggleTracks = (tracks) => {
-  const [{enabled: enabledBefore = true} = {}] = tracks;
-  const enabledAfter = !enabledBefore;
-  for (const track of tracks) track.enabled = enabledAfter;
-  return !enabledAfter; // Return true iff disabled (muted).
-};
-
 const isPolite = (myId, otherId) => {
   // Compare user IDs to determine which of the two users is the "polite" user.
   const polite = myId.localeCompare(otherId) < 0;
@@ -498,9 +489,13 @@ exports.rtc = new class {
     });
   }
 
-  async updateLocalTracks() {
-    const addAudioTrack = this._settings.audio.disabled !== 'hard';
-    const addVideoTrack = this._settings.video.disabled !== 'hard';
+  async updateLocalTracks({updateAudio, updateVideo}) {
+    const $interface = $(`#interface_${getVideoId(this.getUserId())}`);
+    if ($interface.length === 0) throw new Error('self-view interface is missing');
+    const $audioBtn = $interface.find('.audio-btn');
+    const $videoBtn = $interface.find('.video-btn');
+    const addAudioTrack = updateAudio && this._localTracks.stream.getAudioTracks().length === 0;
+    const addVideoTrack = updateVideo && this._localTracks.stream.getVideoTracks().length === 0;
     if (addAudioTrack || addVideoTrack) {
       debug(`requesting permission to access ${
         addAudioTrack && addVideoTrack ? 'camera and microphone'
@@ -513,12 +508,25 @@ exports.rtc = new class {
       debug('successfully accessed device(s)');
       for (const track of stream.getTracks()) this._localTracks.setTrack(track.kind, track);
     }
-    for (const track of this._localTracks.stream.getAudioTracks()) {
-      track.enabled = !!$('#options-audioenabledonstart').prop('checked');
+    if (updateAudio) {
+      for (const track of this._localTracks.stream.getAudioTracks()) {
+        track.enabled = !$audioBtn.hasClass('muted');
+      }
+      const hasAudio = this._localTracks.stream.getAudioTracks().some((t) => t.enabled);
+      $audioBtn
+          .attr('title', hasAudio ? 'Mute' : 'Unmute')
+          .toggleClass('muted', !hasAudio);
     }
-    for (const track of this._localTracks.stream.getVideoTracks()) {
-      track.enabled = !!$('#options-videoenabledonstart').prop('checked');
+    if (updateVideo) {
+      for (const track of this._localTracks.stream.getVideoTracks()) {
+        track.enabled = !$videoBtn.hasClass('off');
+      }
+      const hasVideo = this._localTracks.stream.getVideoTracks().some((t) => t.enabled);
+      $videoBtn
+          .attr('title', hasVideo ? 'Disable video' : 'Enable video')
+          .toggleClass('off', !hasVideo);
     }
+    await this.playVideo($(`#${getVideoId(this.getUserId())}`));
   }
 
   async activate() {
@@ -533,11 +541,12 @@ exports.rtc = new class {
           padcookie.setPref('rtcEnabled', true);
           this.hangupAll();
           this.invitePeer(null); // Broadcast an invite to everyone.
-          // Display the self-view interface while the user is being prompted for permission to
-          // access the microphone/camera.
-          this.addInterface(this.getUserId(), true);
+          await this.setStream(this.getUserId(), this._localTracks.stream);
           try {
-            await this.updateLocalTracks();
+            await this.updateLocalTracks({
+              updateAudio: this._settings.audio.disabled !== 'hard',
+              updateVideo: this._settings.video.disabled !== 'hard',
+            });
           } catch (err) {
             try {
               this.showUserMediaError(err);
@@ -546,7 +555,6 @@ exports.rtc = new class {
             }
             return;
           }
-          await this.setStream(this.getUserId(), this._localTracks.stream);
         } finally {
           $checkbox.prop('disabled', false);
         }
@@ -582,14 +590,6 @@ exports.rtc = new class {
     debug('deactivated');
   }
 
-  toggleMuted() {
-    return toggleTracks(this._localTracks.stream.getAudioTracks());
-  }
-
-  toggleVideo() {
-    return toggleTracks(this._localTracks.stream.getVideoTracks());
-  }
-
   getUserFromId(userId) {
     if (!this._pad || !this._pad.collabClient) return null;
     const result = this._pad.collabClient
@@ -607,26 +607,6 @@ exports.rtc = new class {
     }
     const isLocal = userId === this.getUserId();
     if ($video.length === 0) $video = this.addInterface(userId, isLocal);
-    if (isLocal) {
-      // Sync the interface for the self view with the state of the outgoing stream.
-      const $interface = $(`#interface_${getVideoId(userId)}`);
-      const hasAudio = stream.getAudioTracks().some((t) => t.enabled);
-      if (this._settings.audio.disabled !== 'hard') {
-        $interface.children('.audio-btn')
-            .attr('title', hasAudio ? 'Mute' : 'Unmute')
-            .toggleClass('muted', !hasAudio);
-      } else if (hasAudio) {
-        throw new Error('audio is hard disabled but local stream has audio');
-      }
-      const hasVideo = stream.getVideoTracks().some((t) => t.enabled);
-      if (this._settings.video.disabled !== 'hard') {
-        $interface.children('.video-btn')
-            .attr('title', hasVideo ? 'Disable video' : 'Enable video')
-            .toggleClass('off', !hasVideo);
-      } else if (hasVideo) {
-        throw new Error('video is hard disabled but local stream has video');
-      }
-    }
     // Avoid flicker by checking if .srcObject already equals stream.
     if ($video[0].srcObject !== stream) $video[0].srcObject = stream;
     await this.playVideo($video);
@@ -711,23 +691,28 @@ exports.rtc = new class {
     // /////
 
     const audioHardDisabled = isLocal && this._settings.audio.disabled === 'hard';
+    // Remote views are never muted even if the peer is currently not sending any audio (the peer
+    // could start sending audio at any moment). Exception: If the browser blocks autoplay, we
+    // automatically mute the remote view by simulating a click on the mute button.
+    const audioEnabled =
+        !isLocal || (!audioHardDisabled && $('#options-audioenabledonstart').prop('checked'));
     $interface.append($('<span>')
         .addClass('interface-btn audio-btn buttonicon')
-        .attr('title', audioHardDisabled ? 'Audio disallowed by admin' : 'Mute')
-        // For the self-view, show muted until the user grants access to the microphone. Remote
-        // views are never muted even if the peer is currently not sending any audio (the peer could
-        // start sending audio at any moment). Exception: If the browser blocks autoplay, we
-        // automatically mute the remote view by simulating a click on the mute button.
-        .toggleClass('muted', isLocal)
+        .attr('title',
+            audioHardDisabled ? 'Audio disallowed by admin'
+            : audioEnabled ? 'Mute'
+            : 'Unmute')
+        .toggleClass('muted', !audioEnabled)
         .toggleClass('disallowed', audioHardDisabled)
         .on(audioHardDisabled ? {} : {
-          click: (event) => {
+          click: async (event) => {
             $video.removeData('automuted');
-            const muted = isLocal ? this.toggleMuted() : ($video[0].muted = !$video[0].muted);
+            const $audioBtn = $(event.currentTarget);
+            const muted =
+                isLocal ? !$audioBtn.hasClass('muted') : ($video[0].muted = !$video[0].muted);
             _debug(`audio button clicked to ${muted ? 'dis' : 'en'}able audio`);
-            $(event.currentTarget)
-                .attr('title', muted ? 'Unmute' : 'Mute')
-                .toggleClass('muted', muted);
+            $audioBtn.attr('title', muted ? 'Unmute' : 'Mute').toggleClass('muted', muted);
+            if (isLocal) await this.updateLocalTracks({updateAudio: true});
             // Do not use `await` when calling unmuteAutoMuted() because unmuting is best-effort
             // (success of this handler does not depend on the ability to unmute). Call
             // unmuteAutoMuted() late so that it can call $video[0].play() after $video[0].muted is
@@ -742,18 +727,24 @@ exports.rtc = new class {
 
     if (isLocal) {
       const videoHardDisabled = this._settings.video.disabled === 'hard';
+      const videoEnabled = !videoHardDisabled && $('#options-videoenabledonstart').prop('checked');
       $interface.append($('<span>')
           .addClass('interface-btn video-btn buttonicon')
-          .attr('title', videoHardDisabled ? 'Video disallowed by admin' : 'Disable video')
-          .addClass('off') // Muted until the user grants access to the camera.
+          .attr('title',
+              videoHardDisabled ? 'Video disallowed by admin'
+              : videoEnabled ? 'Disable video'
+              : 'Enable video')
+          .toggleClass('off', !videoEnabled)
           .toggleClass('disallowed', videoHardDisabled)
           .on(videoHardDisabled ? {} : {
-            click: (event) => {
-              const videoEnabled = !this.toggleVideo();
+            click: async (event) => {
+              const $videoBtn = $(event.currentTarget);
+              const videoEnabled = $videoBtn.hasClass('off');
               _debug(`video button clicked to ${videoEnabled ? 'en' : 'dis'}able video`);
-              $(event.currentTarget)
+              $videoBtn
                   .attr('title', videoEnabled ? 'Disable video' : 'Enable video')
                   .toggleClass('off', !videoEnabled);
+              await this.updateLocalTracks({updateVideo: true});
               // Don't use `await` here -- see the comment for the audio button click handler above.
               this.unmuteAutoMuted();
             },
