@@ -25,10 +25,7 @@ describe('settingToCheckbox', function () {
   before(async function () {
     this.timeout(60000);
     await helper.aNewPad({
-      padPrefs: Object.assign({
-        rtcEnabled: true,
-        fakeWebrtcFirefox: true,
-      }, ...testCases
+      padPrefs: Object.assign({rtcEnabled: true}, ...testCases
           .filter(({cookieVal}) => cookieVal != null)
           .map(({cookieVal, i}) => ({[`cookie${i}`]: cookieVal}))),
       params: Object.assign({}, ...testCases

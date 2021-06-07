@@ -25,7 +25,6 @@ describe('Test the behavior of the interface buttons: Mute, Video Disable, Enlar
       await helper.aNewPad({
         padPrefs: {
           rtcEnabled: false,
-          fakeWebrtcFirefox: true,
           audioEnabledOnStart: true,
           videoEnabledOnStart: true,
         },
@@ -135,7 +134,6 @@ describe('Test the behavior of the interface buttons: Mute, Video Disable, Enlar
       await helper.aNewPad({
         padPrefs: {
           rtcEnabled: false,
-          fakeWebrtcFirefox: true,
           audioEnabledOnStart: false,
           videoEnabledOnStart: false,
         },
@@ -208,14 +206,9 @@ describe('Test the behavior of the interface buttons: Mute, Video Disable, Enlar
       this.timeout(60000);
       audioTrack = null;
       videoTrack = null;
-      // Make sure webrtc starts disabled so we have time to wrap getUserMedia
-      await helper.aNewPad({
-        padPrefs: {
-          fakeWebrtcFirefox: true,
-        },
-        // Disable WebRTC so we can change clientVars before activation.
-        params: {av: false},
-      });
+      // Make sure webrtc starts disabled so we have time to wrap getUserMedia and change clientVars
+      // before activation.
+      await helper.aNewPad({params: {av: false}});
       const chrome$ = helper.padChrome$;
       chrome$.window.clientVars.webrtc.audio.disabled = 'hard';
       chrome$.window.clientVars.webrtc.video.disabled = 'hard';

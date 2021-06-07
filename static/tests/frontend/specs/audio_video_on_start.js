@@ -14,7 +14,6 @@ describe('audio/video on/off according to query parameters/cookies', function ()
       await helper.aNewPad({
         padPrefs: Object.assign({
           rtcEnabled: true,
-          fakeWebrtcFirefox: true,
         }, cookieVal == null ? {} : {[`${avType}EnabledOnStart`]: cookieVal}),
         params: queryVal == null ? {} : {[`webrtc${avType}enabled`]: queryVal},
       });

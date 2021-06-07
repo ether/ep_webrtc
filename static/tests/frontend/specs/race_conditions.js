@@ -200,7 +200,6 @@ describe('Race conditions that leave audio/video track enabled', function () {
       await helper.aNewPad({
         padPrefs: {
           rtcEnabled: false,
-          fakeWebrtcFirefox: true,
           audioEnabledOnStart: true,
           videoEnabledOnStart: true,
         },
@@ -269,7 +268,6 @@ describe('Race conditions that leave audio/video track enabled', function () {
       await helper.aNewPad({
         padPrefs: {
           rtcEnabled: false,
-          fakeWebrtcFirefox: true,
           audioEnabledOnStart: false,
           videoEnabledOnStart: false,
         },

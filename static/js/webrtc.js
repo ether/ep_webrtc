@@ -475,16 +475,10 @@ exports.rtc = new class {
         addAudioTrack && addVideoTrack ? 'camera and microphone'
         : addAudioTrack ? 'microphone'
         : 'camera'}`);
-      const constraints = {
+      const stream = await window.navigator.mediaDevices.getUserMedia({
         audio: addAudioTrack,
         video: addVideoTrack && {width: {max: 320}, height: {max: 240}},
-      };
-      if (padcookie.getPref('fakeWebrtcFirefox')) {
-        // The equivalent is done for chromium with cli option:
-        // --use-fake-device-for-media-stream
-        constraints.fake = true;
-      }
-      const stream = await window.navigator.mediaDevices.getUserMedia(constraints);
+      });
       debug('successfully accessed device(s)');
       for (const track of stream.getTracks()) this._localTracks.setTrack(track.kind, track);
     }

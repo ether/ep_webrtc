@@ -17,9 +17,7 @@ describe('enable/disable', function () {
       before(async function () {
         this.timeout(60000);
         await helper.aNewPad({
-          padPrefs: Object.assign({
-            fakeWebrtcFirefox: true,
-          }, cookieVal == null ? {} : {rtcEnabled: cookieVal}),
+          padPrefs: cookieVal == null ? {} : {rtcEnabled: cookieVal},
           params: queryVal == null ? {} : {av: queryVal},
         });
         chrome$ = helper.padChrome$;
