@@ -10,7 +10,6 @@
 	"pad.ep_webrtc.error.notFound": "Litujeme, ve vašem zařízení jsme nenašli vhodnou kameru. Pokud máte kameru, ujistěte se, že je správně nastavena a obnovte tento web a zkuste to znovu.",
 	"pad.ep_webrtc.error.notReadable": "Je nám líto, došlo k hardwarové chybě, která znemožnila přístup k vaší kameře nebo mikrofonu:",
 	"pad.ep_webrtc.error.otherCantAccess": "Je nám líto, ale prohlížeč nemá přístup k vaší kameře nebo mikrofonu. Zkontrolujte oprávnění v nastavení prohlížeče. Nejpravděpodobněji nejde o hardwarovou chybu:",
-	"pad.ep_webrtc.error.other": "Litujeme, došlo k neznámé chybě:",
 	"pad.settings.audioenabledonstart": "Zvuk zapnut při spuštění",
 	"pad.settings.videoenabledonstart": "Obraz zapnut při spuštění"
 }

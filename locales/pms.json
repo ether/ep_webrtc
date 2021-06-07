@@ -10,7 +10,6 @@
 	"pad.ep_webrtc.error.notFound": "An dëspias, i l'oma nen trovà na telecàmera adata su sò angign. S'a l'ha pro na telecàmera, ch'a contròla ch'a sia configurà për da bin e ch'a rinfrësca ës sit a linia për prové torna.",
 	"pad.ep_webrtc.error.notReadable": "An dëspias, a-i é staje n'eror material che a l'ha ampedì l'acess a sò telecàmera o micròfon:",
 	"pad.ep_webrtc.error.otherCantAccess": "An dëspias, ël navigador a l'ha nen acess a sò telecàmera o micròfon. Për piasì, ch'a contròla j'autorisassion ant ij paràmeter ëd sò navigador. Probabilman a l'é nen n'eror material:",
-	"pad.ep_webrtc.error.other": "An dëspias, a l'é rivaje n'eror nen conossù:",
 	"pad.settings.audioenabledonstart": "Sonor ativà a la partensa",
 	"pad.settings.videoenabledonstart": "Visualisassion ativà a la partensa"
 }

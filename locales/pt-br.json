@@ -11,7 +11,6 @@
 	"pad.ep_webrtc.error.notFound": "Não foi possível encontrar uma câmera adequada em seu dispositivo. Se você tiver uma câmera, certifique-se de configurá-la corretamente e atualize este site para tentar novamente.",
 	"pad.ep_webrtc.error.notReadable": "Lamentamos, mas ocorreu um erro de hardware que impediu o acesso à sua câmara e/ou microfone:",
 	"pad.ep_webrtc.error.otherCantAccess": "Desculpe, o navegador não tem acesso à sua câmera e/ou microfone. Verifique as permissões nas configurações do seu navegador. Provavelmente não é um erro de hardware:",
-	"pad.ep_webrtc.error.other": "Sorry, there was an unknown error:",
 	"pad.settings.audioenabledonstart": "Ligar áudio no início",
 	"pad.settings.videoenabledonstart": "Ligar vídeo no início"
 }

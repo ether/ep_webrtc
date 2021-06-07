@@ -10,7 +10,6 @@
 	"pad.ep_webrtc.error.notFound": "Desculpa, non atopamos unha cámara dispoñible no teu dispositivo. Se tes unha, asegúrate de que está correctamente configurada e actualiza esta web para reintentalo.",
 	"pad.ep_webrtc.error.notReadable": "Desculpa, houbo un fallo de hardware que impideu o acceso á túa cámara e/ou micrófono:",
 	"pad.ep_webrtc.error.otherCantAccess": "Desculpa, o navegador non ten acceso á cámara e/ou micrófono. Comproba os permisos nos axustes do navegador. Normalmente esto non se debe a un fallo no hardware:",
-	"pad.ep_webrtc.error.other": "Desculpa, houbo un fallo descoñecido:",
 	"pad.settings.audioenabledonstart": "Audio ON ao Inicio",
 	"pad.settings.videoenabledonstart": "Video ON ao Inicio"
 }

@@ -1,16 +1,16 @@
 {
 	"@metadata": {
 		"authors": [
+			"An13sa",
 			"Izendegi"
 		]
 	},
 	"pad.settings.enablertc": "Gaitu Audio/Bideo Txata",
-	"pad.ep_webrtc.error.ssl": "Sentitzen dugu, WebRTC erabili ahal izateko zure Etherpad instantzian SSL ziurtagiriak instalatu behar dituzu.",
-	"pad.ep_webrtc.error.permission": "Sentitzen dugu, zure kamera eta mikrofonoa erabili ahal izateko baimena eman behar diguzu.",
-	"pad.ep_webrtc.error.notFound": "Sentitzen dugu, baina ez dugu aurkitu kamera egokirik zure gailuan. Kamera bat baduzu, ziurtatu ezazu ondo konfiguratuta dagoela eta webgune hau freskatu ezazu berriz saiatzeko.",
+	"pad.ep_webrtc.error.ssl": "TLS (https) beharrezkoa da WebRTC erabiltzeko.",
+	"pad.ep_webrtc.error.permission": "Zure kamera eta mikrofonoa erabili ahal izateko baimena lortzeko errorea gertatu da.",
+	"pad.ep_webrtc.error.notFound": "Ez dugu aurkitu kamera edota mikrofonorik topatu. Freskatu ezazu berriz saiatzeko.",
 	"pad.ep_webrtc.error.notReadable": "Sentitzen dugu, zure kamera edo mikrofonorako sarbidea ukatzen duen hardware errore bat gertatu da:",
 	"pad.ep_webrtc.error.otherCantAccess": "Sentitzen dugu, nabigatzaileak ez dauka zure kamera edo mikrofonorako sarbiderik. Egiaztatu itzazu zure zure nabigatzailearen ezarpenak. Ziuraski hau ez da hardware errore bat izango:",
-	"pad.ep_webrtc.error.other": "Sentitzen dugu, errore ezezaguna gertatu da:",
 	"pad.settings.audioenabledonstart": "Audioa GAITU abiaraztean",
 	"pad.settings.videoenabledonstart": "Bideoa GAITU habiaraztean"
 }

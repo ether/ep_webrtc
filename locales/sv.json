@@ -11,7 +11,6 @@
 	"pad.ep_webrtc.error.notFound": "Tyvärr, vi kunde inte hitta någon lämplig kamera. Om du har en kamera, se till att den är ordentligt installerad och uppdatera denna webbplats för att försöka igen.",
 	"pad.ep_webrtc.error.notReadable": "Tyvärr, ett hårdvarufel uppstod som förhindrade åtkomst till din kamera och /eller mikrofon:",
 	"pad.ep_webrtc.error.otherCantAccess": "Tyvärr, webbläsaren har inte åtkomst till din kamera och/eller mikrofon. Kontrollera behörigheterna i din webbläsares inställningar. Detta är mest troligt inte ett hårdvarufel:",
-	"pad.ep_webrtc.error.other": "Tyvärr, ett okänt fel uppstod:",
 	"pad.settings.audioenabledonstart": "Ljud PÅ vid start",
 	"pad.settings.videoenabledonstart": "Video PÅ vid start"
 }

@@ -1,16 +1,16 @@
 {
 	"@metadata": {
 		"authors": [
+			"Gomoko",
 			"Verdy p"
 		]
 	},
 	"pad.settings.enablertc": "Activer la conversation audio/vidéo",
-	"pad.ep_webrtc.error.ssl": "Désolé, vous devez installer des certificats SSL pour votre instance Etherpad afin d’utiliser WebRTC.",
-	"pad.ep_webrtc.error.permission": "Désolé, vous devez nous autoriser à utiliser votre caméra et votre micro.",
-	"pad.ep_webrtc.error.notFound": "Désolé, nous n’avons trouvé aucune caméra adaptée sur votre appareil. Si vous avez une caméra, assurez-vous qu’elle est correctement configurée et actualisez ce site Web pour réessayer.",
+	"pad.ep_webrtc.error.ssl": "TLS (https) est obligatoire afin d’utiliser WebRTC.",
+	"pad.ep_webrtc.error.permission": "Échec de récupérer le droit d’utiliser votre caméra ou votre micro.",
+	"pad.ep_webrtc.error.notFound": "Échec pour trouver une caméra ou un microphone. Recharger la page pour réessayer.",
 	"pad.ep_webrtc.error.notReadable": "Désolé, une erreur matérielle s’est produite qui a empêché l’accès à votre caméra ou votre micro :",
 	"pad.ep_webrtc.error.otherCantAccess": "Désolé, le navigateur n’a pas accès à votre caméra ou votre micro. Veuillez vérifier les autorisations dans les paramètres de votre navigateur. Ce n’est probablement pas une erreur matérielle :",
-	"pad.ep_webrtc.error.other": "Désolé, une erreur inconnue s’est produite :",
 	"pad.settings.audioenabledonstart": "Audio activé au démarrage",
 	"pad.settings.videoenabledonstart": "Vidéo activée au démarrage"
 }

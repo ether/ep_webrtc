@@ -1,16 +1,16 @@
 {
 	"@metadata": {
 		"authors": [
-			"MuratTheTurkish"
+			"MuratTheTurkish",
+			"SaldırganSincap"
 		]
 	},
 	"pad.settings.enablertc": "Sesli/Görüntülü Sohbeti Etkinleştir",
-	"pad.ep_webrtc.error.ssl": "Üzgünüz, Etherpad örneğinizin WebRTC'yi kullanması için SSL sertifikaları yüklemeniz gerekiyor.",
-	"pad.ep_webrtc.error.permission": "Üzgünüz, kameranızı ve mikrofonunuzu kullanmamız için bize izin vermeniz gerekiyor.",
-	"pad.ep_webrtc.error.notFound": "Üzgünüz, cihazınızda uygun bir kamera bulamadık. Bir kameranız varsa, doğru şekilde kurulduğundan emin olun ve yeniden denemek için bu web sitesini yenileyin.",
+	"pad.ep_webrtc.error.ssl": "WebRTC'yi kullanmak için TLS (https) gereklidir.",
+	"pad.ep_webrtc.error.permission": "Kameranıza veya mikrofonunuza erişim izni alınamadı.",
+	"pad.ep_webrtc.error.notFound": "Bir kamera ve/veya mikrofon bulunamadı. Yeniden denemek için sayfayı yeniden yükleyin.",
 	"pad.ep_webrtc.error.notReadable": "Üzgünüz, kameranıza ve/veya mikrofonunuza erişimi engelleyen bir donanım hatası oluştu:",
 	"pad.ep_webrtc.error.otherCantAccess": "Üzgünüz, tarayıcının kameranıza ve/veya mikrofonunuza erişimi yok. Lütfen tarayıcınızın ayarlarındaki izinleri kontrol edin. Bu büyük olasılıkla bir donanım hatası değildir:",
-	"pad.ep_webrtc.error.other": "Üzgünüz, bilinmeyen bir hata oluştu:",
 	"pad.settings.audioenabledonstart": "Başlangıçta Ses AÇIK",
 	"pad.settings.videoenabledonstart": "Başlangıçta Video AÇIK"
 }

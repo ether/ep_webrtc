@@ -10,7 +10,6 @@
 	"pad.ep_webrtc.error.notFound": "Na ndjeni, s’gjetëm dot një kamera të përshtatshme në pajisjen tuaj. Nëse keni një kamera, sigurohuni ta ujdisni si duhet dhe rifreskoni këtë sajt, që të riprovohet.",
 	"pad.ep_webrtc.error.notReadable": "Na ndjeni, u has një gabim hardware-i që e pengoi hyrjen te kamera dhe/ose mikrofoni juaj:",
 	"pad.ep_webrtc.error.otherCantAccess": "Na ndjeni, shfletuesi, s’ka leje të përdorë kamerën dhe/ose mikrofonin tuaj. Ju lutemi, kontrolloni lejet te rregullimet e shfletuesit tuaj. Kjo ka shumë gjasa të vijë nga një gaibm hardware-i:",
-	"pad.ep_webrtc.error.other": "Na ndjeni, pati një gabim të panjohur:",
 	"pad.settings.audioenabledonstart": "Audio ON që në Nisje",
 	"pad.settings.videoenabledonstart": "Video ON që në Nisje"
 }

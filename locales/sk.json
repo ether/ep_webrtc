@@ -5,12 +5,11 @@
 		]
 	},
 	"pad.settings.enablertc": "Zapnúť Audio/Video rozhovor",
-	"pad.ep_webrtc.error.ssl": "Prepáčte, pre používanie WebRTC musíte do Vášho Etherpadu nainštalovať certifikáty SSL.",
-	"pad.ep_webrtc.error.permission": "Prepáčte, musíte povoliť používanie kamery a mikrofónu.",
-	"pad.ep_webrtc.error.notFound": "Prepáčte, na Vašom zariadení sme nenašli vhodnú kameru. Ak máte kameru, uistite sa, že je správne nastavená a obnovte stránku.",
+	"pad.ep_webrtc.error.ssl": "Pre použitie WebRTC je vytžadované TLS(https).",
+	"pad.ep_webrtc.error.permission": "Nepodarilo sa získať povolenie pre použitie Vašej kamery a mikrofónu.",
+	"pad.ep_webrtc.error.notFound": "Nepodarilo sa nájsť kameru a/alebo mikrofón. Skúste znovu načítať stránku.",
 	"pad.ep_webrtc.error.notReadable": "Prepáčte, došlo k hardvérovej chybe, ktorá znemožňuje prístup k Vašej kamere a/alebo mikrofónu:",
 	"pad.ep_webrtc.error.otherCantAccess": "Prepáčte, prehliadač nemá prístup k Vašej kamere a/alebo mikrofónu. Prosím skontrolujte nastavenia vo Vašom prehliadači.",
-	"pad.ep_webrtc.error.other": "Prepáčte, došlo k neznámej chybe:",
 	"pad.settings.audioenabledonstart": "Pri spustení zapnúť zvuk",
 	"pad.settings.videoenabledonstart": "Pri spustení zapnúť obraz"
 }

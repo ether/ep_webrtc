@@ -10,7 +10,6 @@
 	"pad.ep_webrtc.error.notFound": "Ho sento, no hem pogut trobar una càmera adequada al teu dispositiu.  Si teniu una càmera, assegureu-vos que es configuri correctament i refresqueu aquest lloc web per tornar-ho a provar.",
 	"pad.ep_webrtc.error.notReadable": "Ho sento, s'ha produït un error de maquinari que ha impedit l'accés a la càmera i/o al micròfon:",
 	"pad.ep_webrtc.error.otherCantAccess": "Ho sento, el navegador no té accés a la teva càmera ni al micròfon.  Comproveu els permisos a la configuració del vostre navegador.  Això probablement no és un error de maquinari:",
-	"pad.ep_webrtc.error.other": "Ho sento, hi ha hagut un error desconegut:",
 	"pad.settings.audioenabledonstart": "Àudio activat al començament",
 	"pad.settings.videoenabledonstart": "Vídeo activat a l'inici"
 }

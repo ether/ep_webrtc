@@ -10,7 +10,6 @@
 	"pad.ep_webrtc.error.notFound": "Valitettavasti laitteestasi ei löytynyt sopivaa kameraa. Jos sinulla on kamera, varmista että se on asetettu oikein ja päivitä tämä sivusto yrittääksesi uudelleen.",
 	"pad.ep_webrtc.error.notReadable": "Valitettavasti tapahtui laitteistovirhe, joka esti kameran ja/tai mikrofonin käytön.",
 	"pad.ep_webrtc.error.otherCantAccess": "Valitettavasti selaimella ei ole pääsyä kamerallesi ja/tai mikrofonillesi. Tarkista käyttöoikeudet selaimesi asetuksista. Tämä ei todennäköisesti ole laitteistovirhe.",
-	"pad.ep_webrtc.error.other": "Anteeksi, tapahtui tuntematon virhe.",
 	"pad.settings.audioenabledonstart": "Ääni PÄÄLLÄ aloitusvaiheessa",
 	"pad.settings.videoenabledonstart": "Video PÄÄLLÄ aloitusvaiheessa"
 }

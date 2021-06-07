@@ -10,7 +10,6 @@
 	"pad.ep_webrtc.error.notFound": "很抱歉，我們在您的設備上找不到合適的攝影機。若您有攝影機，請確定有設定正確，然後重新整理此網站來重試。",
 	"pad.ep_webrtc.error.notReadable": "很抱歉，發生硬體錯誤導致無法存取您的攝影機以及/或是麥克風。",
 	"pad.ep_webrtc.error.otherCantAccess": "很抱歉，瀏覽器無法存取您的攝影機以及/或是麥克風。請檢查在您瀏覽器設定裡的權限。這可能不是硬體錯誤：",
-	"pad.ep_webrtc.error.other": "很抱歉，發生不明錯誤：",
 	"pad.settings.audioenabledonstart": "在開始時啟用音訊",
 	"pad.settings.videoenabledonstart": "在開始時啟用視訊"
 }
