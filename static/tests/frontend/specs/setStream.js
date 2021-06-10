@@ -27,10 +27,17 @@ describe('setStream()', function () {
     return canvas.captureStream().getVideoTracks()[0];
   };
 
-  const fakeStream = ({audio = true, video = true} = {}) => new MediaStream([
-    ...(audio ? [makeSilentAudioTrack()] : []),
-    ...(video ? [makeVideoTrack()] : []),
-  ]);
+  // Creates dummy audio and/or video tracks. Limitations:
+  //   - `audio` and `video` are treated as Booleans (video size requirements are ignored).
+  //   - Most browsers prohibit audio until there has been some user interaction with the page or
+  //     the real getUserMedia() has been called.
+  const fakeGetUserMedia = async ({audio, video}) => {
+    if (!audio && !video) throw new DOMException('either audio or video is required', 'TypeError');
+    return new MediaStream([
+      ...(audio ? [makeSilentAudioTrack()] : []),
+      ...(video ? [makeVideoTrack()] : []),
+    ]);
+  };
 
   describe('Audio and video enabled', function () {
     const testCases = [...cartesian(...Array(4).fill([false, true]))].map(
@@ -48,13 +55,15 @@ describe('setStream()', function () {
             params: Object.assign({av: false}, tc.params),
           });
           chrome$ = helper.padChrome$;
-          chrome$.window.navigator.mediaDevices.getUserMedia = fakeStream;
+          chrome$.window.navigator.mediaDevices.getUserMedia = fakeGetUserMedia;
           chrome$('#options-enablertc').click();
           await helper.waitForPromise(() => chrome$('#rtcbox').data('initialized'));
           ownUserId = chrome$.window.ep_webrtc.getUserId();
           ownVideoId = `video_${ownUserId.replace(/\./g, '_')}`;
           ownInterfaceId = `interface_${ownVideoId}`;
-          await chrome$.window.ep_webrtc.setStream(otherUserId, fakeStream(tc.peer));
+          const peerStream =
+              tc.peer.audio || tc.peer.video ? await fakeGetUserMedia(tc.peer) : new MediaStream();
+          await chrome$.window.ep_webrtc.setStream(otherUserId, peerStream);
         });
 
         it('self and peer elements exist', async function () {
@@ -108,7 +117,7 @@ describe('setStream()', function () {
         },
       });
       chrome$ = helper.padChrome$;
-      chrome$.window.navigator.mediaDevices.getUserMedia = fakeStream;
+      chrome$.window.navigator.mediaDevices.getUserMedia = fakeGetUserMedia;
       chrome$.window.clientVars.webrtc.audio.disabled = 'hard';
       chrome$.window.clientVars.webrtc.video.disabled = 'hard';
       chrome$('#options-enablertc').click();
@@ -116,8 +125,7 @@ describe('setStream()', function () {
       ownUserId = chrome$.window.ep_webrtc.getUserId();
       ownVideoId = `video_${ownUserId.replace(/\./g, '_')}`;
       ownInterfaceId = `interface_${ownVideoId}`;
-      await chrome$.window.ep_webrtc.setStream(
-          otherUserId, fakeStream({audio: false, video: false}));
+      await chrome$.window.ep_webrtc.setStream(otherUserId, new MediaStream());
     });
 
     it('self and peer elements exist', async function () {
