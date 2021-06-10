@@ -202,7 +202,10 @@ class PeerState extends EventTarget {
           (pc.signalingState === 'stable' || negotiationState.isSettingRemoteAnswerPending);
       const offerCollision = description.type === 'offer' && !readyForOffer;
       negotiationState.ignoreOffer = !this._polite && offerCollision;
-      if (negotiationState.ignoreOffer) return;
+      if (negotiationState.ignoreOffer) {
+        this._debug('ignoring offer due to offer collision');
+        return;
+      }
       negotiationState.isSettingRemoteAnswerPending = description.type === 'answer';
       await pc.setRemoteDescription(description);
       // The "Perfect Negotiation Example" doesn't put this next line inside a `finally` block. It
@@ -516,6 +519,7 @@ exports.rtc = new class {
     } finally {
       $checkbox.prop('disabled', false);
     }
+    debug('activated');
   }
 
   deactivate() {
@@ -538,6 +542,7 @@ exports.rtc = new class {
     } finally {
       $checkbox.prop('disabled', false);
     }
+    debug('deactivated');
   }
 
   toggleMuted() {
@@ -594,9 +599,11 @@ exports.rtc = new class {
     if (!$video[0].paused) return;
     // play() will block indefinitely if there are no enabled tracks.
     if (!$video[0].srcObject.getTracks().some((t) => t.enabled)) return;
+    debug('playing video', $video[0]);
     try {
       return await $video[0].play();
     } catch (err) {
+      debug('failed to play video', $video[0], err);
       // AbortError can happen if there is a hangup (e.g., the user disables WebRTC) while playback
       // is starting. The video element will be deleted shortly (if it hasn't already been deleted)
       // so it's OK to ignore the error.
@@ -605,6 +612,7 @@ exports.rtc = new class {
       // page or the page is already capturing audio or video. If playback is not permitted, mute
       // the video and try again.
       if (err.name === 'NotAllowedError' && !$video[0].muted) {
+        debug('auto-muting video', $video[0]);
         // The self view is always muted, so this click() only applies to videos of remote peers.
         $(`#interface_${$video.attr('id')} .audio-btn`).click();
         $video.data('automuted', true);
@@ -627,7 +635,9 @@ exports.rtc = new class {
   }
 
   addInterface(userId, isLocal) {
-    debug(isLocal ? 'adding self-view interface' : `(peer ${userId}) adding interface`);
+    const _debug =
+        (...args) => debug(`(${isLocal ? 'self-view' : `peer ${userId}`} interface)`, ...args);
+    _debug('adding interface');
     const videoId = getVideoId(userId);
     const size = `${this._settings.video.sizes.small}px`;
     const $video = $('<video>')
@@ -672,6 +682,7 @@ exports.rtc = new class {
             // parallel with the rest of this handler.
             this.unmuteAutoMuted();
             const muted = isLocal ? this.toggleMuted() : ($video[0].muted = !$video[0].muted);
+            _debug(`audio button clicked to ${muted ? 'dis' : 'en'}able audio`);
             $(event.currentTarget)
                 .attr('title', muted ? 'Unmute' : 'Mute')
                 .toggleClass('muted', muted);
@@ -694,6 +705,7 @@ exports.rtc = new class {
               // Don't use `await` here -- see the comment for the audio button click handler above.
               this.unmuteAutoMuted();
               const videoEnabled = !this.toggleVideo();
+              _debug(`video button clicked to ${videoEnabled ? 'en' : 'dis'}able video`);
               $(event.currentTarget)
                   .attr('title', videoEnabled ? 'Disable video' : 'Enable video')
                   .toggleClass('off', !videoEnabled);
