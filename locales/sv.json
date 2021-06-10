@@ -6,9 +6,9 @@
 		]
 	},
 	"pad.settings.enablertc": "Aktivera ljud-/videochatt",
-	"pad.ep_webrtc.error.ssl": "Tyvärr, du behöver installera SSL-certifikat för din Etherpad-instans för att använda WebRTC.",
-	"pad.ep_webrtc.error.permission": "Tyvärr, du behöver ge oss behörighet att använda din kamera och mikrofon.",
-	"pad.ep_webrtc.error.notFound": "Tyvärr, vi kunde inte hitta någon lämplig kamera. Om du har en kamera, se till att den är ordentligt installerad och uppdatera denna webbplats för att försöka igen.",
+	"pad.ep_webrtc.error.ssl": "TLS (https) krävs för att använda WebRTC.",
+	"pad.ep_webrtc.error.permission": "Misslyckades att få behörighet till att använda din kamera eller mikrofon.",
+	"pad.ep_webrtc.error.notFound": "Misslyckades att hitta en kamera och/eller mikrofon. Uppdatera sidan för att försöka igen.",
 	"pad.ep_webrtc.error.notReadable": "Tyvärr, ett hårdvarufel uppstod som förhindrade åtkomst till din kamera och /eller mikrofon:",
 	"pad.ep_webrtc.error.otherCantAccess": "Tyvärr, webbläsaren har inte åtkomst till din kamera och/eller mikrofon. Kontrollera behörigheterna i din webbläsares inställningar. Detta är mest troligt inte ett hårdvarufel:",
 	"pad.settings.audioenabledonstart": "Ljud PÅ vid start",
