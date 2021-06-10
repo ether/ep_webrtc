@@ -22,10 +22,10 @@ describe('settingToCheckbox', function () {
   before(async function () {
     this.timeout(60000);
     await helper.aNewPad({
-      padPrefs: Object.assign({rtcEnabled: true}, ...testCases
+      padPrefs: Object.assign({}, ...testCases
           .filter(({cookieVal}) => cookieVal != null)
           .map(({cookieVal, i}) => ({[`cookie${i}`]: cookieVal}))),
-      params: Object.assign({}, ...testCases
+      params: Object.assign({av: false}, ...testCases
           .filter(({queryVal}) => queryVal != null)
           .map(({queryVal, i}) => ({[`urlVar${i}`]: queryVal}))),
     });

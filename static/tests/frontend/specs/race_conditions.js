@@ -1,5 +1,7 @@
 'use strict';
 
+const {fakeGetUserMedia} = require('ep_webrtc/static/tests/frontend/utils');
+
 describe('Race conditions that leave audio/video track enabled', function () {
   // The idea here is to place high value on making sure that the "mute" and "video-off" buttons in
   // the video interfaces match with the audioTrack.enabled/videoTrack.enabled, so that users don't
@@ -15,11 +17,10 @@ describe('Race conditions that leave audio/video track enabled', function () {
 
   // wrap getUserMedia such that it grabs a copy of audio and video tracks for inspection after it's
   // done
-  const wrapGetUserMedia = () => {
+  const installFakeGetUserMedia = () => {
     const chrome$ = helper.padChrome$;
-    const oldGetUserMedia = chrome$.window.navigator.mediaDevices.getUserMedia;
     chrome$.window.navigator.mediaDevices.getUserMedia = async (constraints) => {
-      const stream = await oldGetUserMedia.call(chrome$.window.navigator.mediaDevices, constraints);
+      const stream = await fakeGetUserMedia(constraints);
       audioTrack = stream.getAudioTracks()[0];
       videoTrack = stream.getVideoTracks()[0];
       return stream;
@@ -205,7 +206,7 @@ describe('Race conditions that leave audio/video track enabled', function () {
         },
       });
       const chrome$ = helper.padChrome$;
-      wrapGetUserMedia();
+      installFakeGetUserMedia();
       // Clicking $('#options-enablertc') also activates, but calling activate() directly blocks
       // until activation is complete.
       await chrome$.window.ep_webrtc.activate();
@@ -256,7 +257,7 @@ describe('Race conditions that leave audio/video track enabled', function () {
         },
       });
       const chrome$ = helper.padChrome$;
-      wrapGetUserMedia();
+      installFakeGetUserMedia();
       // Clicking $('#options-enablertc') also activates, but calling activate() directly blocks
       // until activation is complete.
       await chrome$.window.ep_webrtc.activate();

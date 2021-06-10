@@ -1,6 +1,6 @@
 'use strict';
 
-const {cartesian} = require('ep_webrtc/static/tests/frontend/utils');
+const {cartesian, fakeGetUserMedia} = require('ep_webrtc/static/tests/frontend/utils');
 
 describe('audio/video on/off according to query parameters/cookies', function () {
   const testCases = cartesian(['audio', 'video'], [null, false, true], [null, false, true]);
@@ -9,13 +9,18 @@ describe('audio/video on/off according to query parameters/cookies', function ()
     it(`${avType} cookie=${cookieVal} query=${queryVal}`, async function () {
       this.timeout(60000);
       await helper.aNewPad({
-        padPrefs: Object.assign({
-          rtcEnabled: true,
-        }, cookieVal == null ? {} : {[`${avType}EnabledOnStart`]: cookieVal}),
-        params: queryVal == null ? {} : {[`webrtc${avType}enabled`]: queryVal},
+        padPrefs: cookieVal == null ? {} : {[`${avType}EnabledOnStart`]: cookieVal},
+        params: Object.assign({
+          // Disable WebRTC so we can install a fake getUserMedia() before WebRTC stuff is
+          // initialized.
+          av: false,
+        }, queryVal == null ? {} : {[`webrtc${avType}enabled`]: queryVal}),
       });
       const chrome$ = helper.padChrome$;
-      await helper.waitForPromise(() => chrome$('#rtcbox').data('initialized'), 5000);
+      chrome$.window.navigator.mediaDevices.getUserMedia = fakeGetUserMedia;
+      // Clicking $(#options-enablertc) also activates, but calling activate() directly blocks until
+      // activation is complete.
+      await chrome$.window.ep_webrtc.activate();
       const {disabled} = chrome$.window.clientVars.webrtc[avType];
       const checkbox = chrome$(`#options-${avType}enabledonstart`);
       if (disabled === 'hard') {

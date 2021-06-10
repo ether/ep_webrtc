@@ -1,14 +1,15 @@
 'use strict';
 
+const {fakeGetUserMedia} = require('ep_webrtc/static/tests/frontend/utils');
+
 describe('Test the behavior of the interface buttons: Mute, Video Disable, Enlarge', function () {
   let audioTrack;
   let videoTrack;
 
-  const wrapGetUserMedia = () => {
+  const installFakeGetUserMedia = () => {
     const chrome$ = helper.padChrome$;
-    const oldGetUserMedia = chrome$.window.navigator.mediaDevices.getUserMedia;
     chrome$.window.navigator.mediaDevices.getUserMedia = async (constraints) => {
-      const stream = await oldGetUserMedia.call(chrome$.window.navigator.mediaDevices, constraints);
+      const stream = await fakeGetUserMedia(constraints);
       audioTrack = stream.getAudioTracks()[0];
       videoTrack = stream.getVideoTracks()[0];
       return stream;
@@ -30,7 +31,7 @@ describe('Test the behavior of the interface buttons: Mute, Video Disable, Enlar
         },
       });
       const chrome$ = helper.padChrome$;
-      wrapGetUserMedia();
+      installFakeGetUserMedia();
       // Clicking $('#options-enablertc') also activates, but calling activate() directly blocks
       // until activation is complete.
       await chrome$.window.ep_webrtc.activate();
@@ -127,7 +128,7 @@ describe('Test the behavior of the interface buttons: Mute, Video Disable, Enlar
         },
       });
       const chrome$ = helper.padChrome$;
-      wrapGetUserMedia();
+      installFakeGetUserMedia();
       // Clicking $('#options-enablertc') also activates, but calling activate() directly blocks
       // until activation is complete.
       await chrome$.window.ep_webrtc.activate();
@@ -189,7 +190,7 @@ describe('Test the behavior of the interface buttons: Mute, Video Disable, Enlar
       const chrome$ = helper.padChrome$;
       chrome$.window.clientVars.webrtc.audio.disabled = 'hard';
       chrome$.window.clientVars.webrtc.video.disabled = 'hard';
-      wrapGetUserMedia();
+      installFakeGetUserMedia();
       // Clicking $(#options-enablertc) also activates, but calling activate() directly blocks until
       // activation is complete.
       await chrome$.window.ep_webrtc.activate();
