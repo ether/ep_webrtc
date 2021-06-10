@@ -15,7 +15,7 @@ describe('audio/video on/off according to query parameters/cookies', function ()
         params: queryVal == null ? {} : {[`webrtc${avType}enabled`]: queryVal},
       });
       const chrome$ = helper.padChrome$;
-      await helper.waitForPromise(() => chrome$('#rtcbox').data('initialized'));
+      await helper.waitForPromise(() => chrome$('#rtcbox').data('initialized'), 5000);
       const {disabled} = chrome$.window.clientVars.webrtc[avType];
       const checkbox = chrome$(`#options-${avType}enabledonstart`);
       if (disabled === 'hard') {

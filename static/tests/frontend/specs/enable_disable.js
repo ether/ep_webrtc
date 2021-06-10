@@ -28,7 +28,7 @@ describe('enable/disable', function () {
         wantChecked = (queryNorm || (queryNorm == null && cookieVal) ||
                        (queryNorm == null && cookieVal == null && defaultChecked));
         checkbox = chrome$('#options-enablertc');
-        await helper.waitForPromise(() => chrome$('#rtcbox').data('initialized'));
+        await helper.waitForPromise(() => chrome$('#rtcbox').data('initialized'), 5000);
       });
 
       it('checkbox is checked/unchecked', async function () {
