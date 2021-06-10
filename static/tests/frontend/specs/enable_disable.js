@@ -1,11 +1,8 @@
 'use strict';
 
-describe('enable/disable', function () {
-  const cartesian = function* (head, ...tail) {
-    const remainder = tail.length > 0 ? cartesian(...tail) : [[]];
-    for (const r of remainder) for (const h of head) yield [h, ...r];
-  };
+const {cartesian} = require('ep_webrtc/static/tests/frontend/utils');
 
+describe('enable/disable', function () {
   const testCases = cartesian([null, false, true], [null, false, true, 'NO', 'YES', 'ignored']);
 
   for (const [cookieVal, queryVal] of testCases) {

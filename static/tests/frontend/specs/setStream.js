@@ -1,5 +1,7 @@
 'use strict';
 
+const {cartesian} = require('ep_webrtc/static/tests/frontend/utils');
+
 describe('setStream()', function () {
   let chrome$;
   const otherUserId = 'other_user_id';
@@ -32,11 +34,6 @@ describe('setStream()', function () {
     ...(audio ? [makeSilentAudioTrack()] : []),
     ...(video ? [makeVideoTrack(document)] : []),
   ]);
-
-  const cartesian = function* (head, ...tail) {
-    const remainder = tail.length > 0 ? cartesian(...tail) : [[]];
-    for (const r of remainder) for (const h of head) yield [h, ...r];
-  };
 
   describe('Audio and video enabled', function () {
     const testCases = [...cartesian(...Array(4).fill([false, true]))].map(

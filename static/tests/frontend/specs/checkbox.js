@@ -1,11 +1,8 @@
 'use strict';
 
-describe('settingToCheckbox', function () {
-  const cartesian = function* (head, ...tail) {
-    const remainder = tail.length > 0 ? cartesian(...tail) : [[]];
-    for (const r of remainder) for (const h of head) yield [h, ...r];
-  };
+const {cartesian} = require('ep_webrtc/static/tests/frontend/utils');
 
+describe('settingToCheckbox', function () {
   const testCases = [
     ...cartesian([false, true], [null, false, true], [null, false, true]),
   ].map(([defaultVal, cookieVal, queryVal], i) => ({

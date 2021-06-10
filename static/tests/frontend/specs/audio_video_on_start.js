@@ -1,11 +1,8 @@
 'use strict';
 
-describe('audio/video on/off according to query parameters/cookies', function () {
-  const cartesian = function* (head, ...tail) {
-    const remainder = tail.length > 0 ? cartesian(...tail) : [[]];
-    for (const r of remainder) for (const h of head) yield [h, ...r];
-  };
+const {cartesian} = require('ep_webrtc/static/tests/frontend/utils');
 
+describe('audio/video on/off according to query parameters/cookies', function () {
   const testCases = cartesian(['audio', 'video'], [null, false, true], [null, false, true]);
 
   for (const [avType, cookieVal, queryVal] of testCases) {
