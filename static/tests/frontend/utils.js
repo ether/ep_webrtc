@@ -23,8 +23,12 @@ const makeVideoTrack = (constraints) => {
   canvas.width = widthIdeal || widthMax;
   canvas.height = heightIdeal || heightMax;
   const ctx = canvas.getContext('2d');
-  ctx.fillStyle = `#${Math.floor(Math.random() * 2 ** 24).toString(16).padStart(6, '0')}`;
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  // With Safari, HTMLVideoElement.play() hangs until the canvas is updated. Add some animation to
+  // work around it.
+  setInterval(() => {
+    ctx.fillStyle = `#${Math.floor(Math.random() * 2 ** 24).toString(16).padStart(6, '0')}`;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+  }, 500);
   return canvas.captureStream().getVideoTracks()[0];
 };
 
