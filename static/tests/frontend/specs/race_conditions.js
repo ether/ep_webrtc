@@ -43,7 +43,7 @@ describe('Race conditions that leave audio/video track enabled', function () {
       expect(originalVideoTrack).to.equal(videoTrack);
       expect(chrome$('.video-btn').hasClass('off')).to.equal(!videoTrack.enabled);
 
-      chrome$.window.ep_webrtc.deactivate();
+      await chrome$.window.ep_webrtc.deactivate();
       chrome$('.audio-btn').click();
       chrome$('.video-btn').click();
       await chrome$.window.ep_webrtc.activate();
@@ -79,7 +79,7 @@ describe('Race conditions that leave audio/video track enabled', function () {
 
       chrome$('.audio-btn').click();
       chrome$('.video-btn').click();
-      chrome$.window.ep_webrtc.deactivate();
+      await chrome$.window.ep_webrtc.deactivate();
       await chrome$.window.ep_webrtc.activate();
 
       // getUserMedia should give us new audio and video Tracks and disable the old one
@@ -112,7 +112,7 @@ describe('Race conditions that leave audio/video track enabled', function () {
       expect(originalVideoTrack).to.equal(videoTrack);
       expect(chrome$('.video-btn').hasClass('off')).to.equal(!videoTrack.enabled);
 
-      chrome$.window.ep_webrtc.deactivate();
+      await chrome$.window.ep_webrtc.deactivate();
       const p = chrome$.window.ep_webrtc.activate();
       await helper.waitForPromise(
           () => chrome$ && chrome$('.interface-container').length === 1, 2000);
@@ -152,7 +152,7 @@ describe('Race conditions that leave audio/video track enabled', function () {
       expect(originalVideoTrack).to.equal(videoTrack);
       expect(chrome$('.video-btn').hasClass('off')).to.equal(!videoTrack.enabled);
 
-      chrome$.window.ep_webrtc.deactivate();
+      await chrome$.window.ep_webrtc.deactivate();
       const p = chrome$.window.ep_webrtc.activate();
       chrome$('.audio-btn').click();
       chrome$('.video-btn').click();

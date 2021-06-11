@@ -307,8 +307,8 @@ const getVideoId = (userId) => `video_${userId.replace(/\./g, '_')}`;
 
 exports.rtc = new class {
   constructor() {
+    this._activated = null;
     this._settings = null;
-    this._isActive = false;
     this._localTracks = new LocalTracks();
     this._pad = null;
     this._peers = new Map();
@@ -370,7 +370,7 @@ exports.rtc = new class {
       if (event.currentTarget.checked) {
         await this.activate();
       } else {
-        this.deactivate();
+        await this.deactivate();
       }
     });
     $(window).on('beforeunload', () => { this.hangupAll(); });
@@ -378,7 +378,7 @@ exports.rtc = new class {
     if ($('#options-enablertc').prop('checked')) {
       await this.activate();
     } else {
-      this.deactivate();
+      await this.deactivate();
     }
     $('#rtcbox').data('initialized', true); // Help tests determine when initialization is done.
   }
@@ -386,7 +386,7 @@ exports.rtc = new class {
   userJoinOrUpdate(hookName, {userInfo}) {
     const {userId} = userInfo;
     debug(`(peer ${userId}) join or update`);
-    if (!this._isActive || !userId) return;
+    if (!this._activated || !userId) return;
     if (userId !== this.getUserId()) this.invitePeer(userId);
     this.updatePeerNameAndColor(userInfo);
   }
@@ -398,7 +398,7 @@ exports.rtc = new class {
 
   handleClientMessage_RTC_MESSAGE(hookName, {payload: {from, data}}) {
     debug(`(peer ${from}) received message`, data);
-    if (this._isActive && from !== this.getUserId() &&
+    if (this._activated && from !== this.getUserId() &&
         (this._peers.has(from) || data.hangup == null)) {
       this.getPeerConnection(from).receiveMessage(data);
     }
@@ -493,41 +493,48 @@ exports.rtc = new class {
   }
 
   async activate() {
-    const $checkbox = $('#options-enablertc');
-    $checkbox.prop('checked', true);
-    if (this._isActive) return;
-    debug('activating');
-    $checkbox.prop('disabled', true);
-    try {
-      $('#rtcbox').css('display', 'flex');
-      padcookie.setPref('rtcEnabled', true);
-      this._isActive = true;
-      try {
-        await this.updateLocalTracks();
-      } catch (err) {
+    if (!this._activated) {
+      this._activated = (async () => {
+        const $checkbox = $('#options-enablertc');
+        $checkbox.prop('checked', true);
+        debug('activating');
+        $checkbox.prop('disabled', true);
         try {
-          this.showUserMediaError(err);
+          $('#rtcbox').css('display', 'flex');
+          padcookie.setPref('rtcEnabled', true);
+          try {
+            await this.updateLocalTracks();
+          } catch (err) {
+            try {
+              this.showUserMediaError(err);
+            } finally {
+              await this.deactivate(false);
+            }
+            return;
+          }
+          this.hangupAll();
+          this.invitePeer(null); // Broadcast an invite to everyone.
+          await this.setStream(this.getUserId(), this._localTracks.stream);
         } finally {
-          this.deactivate();
+          $checkbox.prop('disabled', false);
         }
-        return;
-      }
-      this.hangupAll();
-      this.invitePeer(null); // Broadcast an invite to everyone.
-      await this.setStream(this.getUserId(), this._localTracks.stream);
-    } finally {
-      $checkbox.prop('disabled', false);
+        debug('activated');
+      })();
     }
-    debug('activated');
+    await this._activated;
   }
 
-  deactivate() {
+  async deactivate(awaitActivated = true) {
     const $checkbox = $('#options-enablertc');
     $checkbox.prop('checked', false);
-    if (!this._isActive) return;
+    if (awaitActivated) await this._activated;
+    // Check this._activated after awaiting in case deactivate() is called multiple times while
+    // activate() is running. (It's OK to await a null value.)
+    if (!this._activated) return;
     debug('deactivating');
     $checkbox.prop('disabled', true);
     try {
+      this._activated = null;
       padcookie.setPref('rtcEnabled', false);
       this.hangupAll();
       this.setStream(this.getUserId(), null);
@@ -537,7 +544,6 @@ exports.rtc = new class {
       for (const track of this._localTracks.stream.getTracks()) {
         this._localTracks.setTrack(track.kind, null);
       }
-      this._isActive = false;
     } finally {
       $checkbox.prop('disabled', false);
     }
