@@ -212,35 +212,30 @@ describe('Race conditions that leave audio/video track enabled', function () {
     });
 
     it('click, deactivate, activate', async function () {
-      this.timeout(5000);
       expect(audioTrack.enabled).to.equal(true);
       expect(videoTrack.enabled).to.equal(true);
       await testClickDeactivateActivate();
     });
 
     it('deactivate, click, activate', async function () {
-      this.timeout(5000);
       expect(audioTrack.enabled).to.equal(true);
       expect(videoTrack.enabled).to.equal(true);
       await testDeactivateClickActivate();
     });
 
     it('deactivate, activate, click', async function () {
-      this.timeout(5000);
       expect(audioTrack.enabled).to.equal(true);
       expect(videoTrack.enabled).to.equal(true);
       await testDeactivateActivateClick();
     });
 
     it('click while reactivate', async function () {
-      this.timeout(5000);
       expect(audioTrack.enabled).to.equal(true);
       expect(videoTrack.enabled).to.equal(true);
       await testClickWhileReactivate();
     });
 
     it('many clicks', async function () {
-      this.timeout(5000);
       expect(audioTrack.enabled).to.equal(true);
       expect(videoTrack.enabled).to.equal(true);
       await testManyClicks();
