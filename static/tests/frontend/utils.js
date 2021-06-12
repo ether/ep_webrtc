@@ -14,10 +14,14 @@ const makeSilentAudioTrack = () => {
   return dst.stream.getAudioTracks()[0];
 };
 
-const makeVideoTrack = () => {
+const makeVideoTrack = (constraints) => {
   const canvas = helper.padChrome$.window.document.createElement('canvas');
-  canvas.width = 160;
-  canvas.height = 120;
+  const {
+    width: {max: widthMax = 160, ideal: widthIdeal} = {},
+    height: {max: heightMax = 120, ideal: heightIdeal} = {},
+  } = constraints;
+  canvas.width = widthIdeal || widthMax;
+  canvas.height = heightIdeal || heightMax;
   const ctx = canvas.getContext('2d');
   ctx.fillStyle = `#${Math.floor(Math.random() * 2 ** 24).toString(16).padStart(6, '0')}`;
   ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -25,13 +29,12 @@ const makeVideoTrack = () => {
 };
 
 // Creates dummy audio and/or video tracks. Limitations:
-//   - `audio` and `video` are treated as Booleans (video size requirements are ignored).
 //   - Most browsers prohibit audio until there has been some user interaction with the page or
 //     the real getUserMedia() has been called.
 exports.fakeGetUserMedia = async ({audio, video}) => {
   if (!audio && !video) throw new DOMException('either audio or video is required', 'TypeError');
   return new MediaStream([
     ...(audio ? [makeSilentAudioTrack()] : []),
-    ...(video ? [makeVideoTrack()] : []),
+    ...(video ? [makeVideoTrack(video)] : []),
   ]);
 };
