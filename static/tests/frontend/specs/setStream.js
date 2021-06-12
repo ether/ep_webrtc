@@ -56,8 +56,9 @@ describe('setStream()', function () {
           });
           chrome$ = helper.padChrome$;
           chrome$.window.navigator.mediaDevices.getUserMedia = fakeGetUserMedia;
-          chrome$('#options-enablertc').click();
-          await helper.waitForPromise(() => chrome$('#rtcbox').data('initialized'));
+          // Clicking $(#options-enablertc) also activates, but calling activate() directly blocks
+          // until activation is complete.
+          await chrome$.window.ep_webrtc.activate();
           ownUserId = chrome$.window.ep_webrtc.getUserId();
           ownVideoId = `video_${ownUserId.replace(/\./g, '_')}`;
           ownInterfaceId = `interface_${ownVideoId}`;
@@ -120,8 +121,9 @@ describe('setStream()', function () {
       chrome$.window.navigator.mediaDevices.getUserMedia = fakeGetUserMedia;
       chrome$.window.clientVars.webrtc.audio.disabled = 'hard';
       chrome$.window.clientVars.webrtc.video.disabled = 'hard';
-      chrome$('#options-enablertc').click();
-      await helper.waitForPromise(() => chrome$('#rtcbox').data('initialized'));
+      // Clicking $(#options-enablertc) also activates, but calling activate() directly blocks until
+      // activation is complete.
+      await chrome$.window.ep_webrtc.activate();
       ownUserId = chrome$.window.ep_webrtc.getUserId();
       ownVideoId = `video_${ownUserId.replace(/\./g, '_')}`;
       ownInterfaceId = `interface_${ownVideoId}`;

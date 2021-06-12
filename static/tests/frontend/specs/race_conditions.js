@@ -205,22 +205,10 @@ describe('Race conditions that leave audio/video track enabled', function () {
         },
       });
       const chrome$ = helper.padChrome$;
-
-      await helper.waitForPromise(
-          () => chrome$ && chrome$('#options-enablertc').length === 1, 2000);
       wrapGetUserMedia();
-
-      const $enableRtc = chrome$('#options-enablertc');
-      $enableRtc.click(); // Turn it on late so that wrapGetUserMedia works
-
-      await helper.waitForPromise(
-          () => (chrome$('.audio-btn').length === 1 && chrome$('.video-btn').length === 1 &&
-                 audioTrack != null && videoTrack != null),
-          1000);
-      // Video interface buttons are added twice, and there's no good way besides a timeout to tell
-      // when it's done being called the second time. We want it to be finished so our test is
-      // stable.
-      await new Promise((resolve) => setTimeout(resolve, 200));
+      // Clicking $('#options-enablertc') also activates, but calling activate() directly blocks
+      // until activation is complete.
+      await chrome$.window.ep_webrtc.activate();
     });
 
     it('click, deactivate, activate', async function () {
@@ -273,22 +261,10 @@ describe('Race conditions that leave audio/video track enabled', function () {
         },
       });
       const chrome$ = helper.padChrome$;
-
-      await helper.waitForPromise(
-          () => chrome$ && chrome$('#options-enablertc').length === 1, 2000);
       wrapGetUserMedia();
-
-      const $enableRtc = chrome$('#options-enablertc');
-      $enableRtc.click(); // Turn it on late so that wrapGetUserMedia works
-
-      await helper.waitForPromise(
-          () => (chrome$('.audio-btn').length === 1 && chrome$('.video-btn').length === 1 &&
-                 audioTrack != null && videoTrack != null),
-          1000);
-      // Video interface buttons are added twice, and there's no good way besides a timeout to tell
-      // when it's done being called the second time. We want it to be finished so our test is
-      // stable.
-      await new Promise((resolve) => setTimeout(resolve, 200));
+      // Clicking $('#options-enablertc') also activates, but calling activate() directly blocks
+      // until activation is complete.
+      await chrome$.window.ep_webrtc.activate();
     });
 
     it('click, deactivate, activate', async function () {
