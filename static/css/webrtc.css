@@ -25,7 +25,7 @@
 }
 #rtcbox video {
   border-left: 5px solid;
-  box-sizing: border-box;
+  box-sizing: content-box;
   background-color: black;
 }
 #rtcbox .video-container, #rtcbox video {

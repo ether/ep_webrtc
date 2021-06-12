@@ -52,7 +52,7 @@ describe('Test the behavior of the interface buttons: Mute, Video Disable, Enlar
       // I.e. it has come back a quarter pixel off before.
       const $video = chrome$('video');
       expect(numFromCssSize($video.css('width'))).to.be.within(159, 161);
-      expect(numFromCssSize($video.css('height'))).to.be.within(115, 117);
+      expect(numFromCssSize($video.css('height'))).to.be.within(119, 121);
 
       const $enlargeBtn = chrome$('.enlarge-btn');
       $enlargeBtn.click();
@@ -60,13 +60,13 @@ describe('Test the behavior of the interface buttons: Mute, Video Disable, Enlar
       // Expect it to grow to 260, 190
       await helper.waitForPromise(
           () => (numFromCssSize($video.css('width')) > 259 &&
-                 numFromCssSize($video.css('height')) > 190),
+                 numFromCssSize($video.css('height')) > 194),
           1000);
       $enlargeBtn.click();
       // Expect it to shrink to 160, 116
       await helper.waitForPromise(
           () => (numFromCssSize($video.css('width')) < 161 &&
-                 numFromCssSize($video.css('height')) < 117),
+                 numFromCssSize($video.css('height')) < 121),
           1000);
     });
 
