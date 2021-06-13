@@ -26,7 +26,6 @@
   background-color: black;
 }
 #rtcbox .video-container, #rtcbox video {
-  border-radius: 0 3px 3px 0;
   transition: max-width .3s, max-height .3s, width .3s, height .3s;
 }
 
