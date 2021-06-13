@@ -16,6 +16,7 @@
 #rtcbox .video-container {
   align-items: center;
   background-color: black;
+  border: 1px solid black;
   border-left: 5px solid;
   box-sizing: content-box;
   display: flex;
