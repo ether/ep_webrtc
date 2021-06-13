@@ -13,10 +13,6 @@
   padding: 20px 0;
 }
 
-#rtcbox .error-msg {
-  padding: 10px;
-  max-width: 120px;
-}
 #rtcbox .video-container {
   position: relative;
 }
