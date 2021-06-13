@@ -14,8 +14,13 @@
 }
 
 #rtcbox .video-container {
+  align-items: center;
+  background-color: black;
   border-left: 5px solid;
   box-sizing: content-box;
+  display: flex;
+  justify-content: center;
+  min-height: 80px;
   position: relative;
 }
 #rtcbox .video-container:not(:first-child) {
