@@ -14,13 +14,14 @@
 }
 
 #rtcbox .video-container {
+  border-left: 5px solid;
+  box-sizing: content-box;
   position: relative;
 }
 #rtcbox .video-container:not(:first-child) {
   margin-top: 5px;
 }
 #rtcbox video {
-  border-left: 5px solid;
   box-sizing: content-box;
   background-color: black;
 }

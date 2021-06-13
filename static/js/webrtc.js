@@ -409,9 +409,9 @@ exports.rtc = new class {
     if (!userInfo) return;
     const {userId, name = html10n.get('pad.userlist.unnamed'), colorId = 0} = userInfo;
     const color = typeof colorId === 'number' ? clientVars.colorPalette[colorId] : colorId;
-    $(`#${getVideoId(userId)}`)
-        .css({'border-color': color})
-        .siblings('.user-name').text(name);
+    const $video = $(`#${getVideoId(userId)}`);
+    $video.parent().css({'border-left-color': color});
+    $video.siblings('.user-name').text(name);
   }
 
   showUserMediaError(err) { // show an error returned from getUserMedia
