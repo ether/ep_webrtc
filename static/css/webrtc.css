@@ -106,7 +106,6 @@
   #rtcbox {
     flex-direction: row;
     order: 2;
-    justify-content: start;
     align-items: baseline;
   }
   #rtcbox .video-container:not(:first-child) {
