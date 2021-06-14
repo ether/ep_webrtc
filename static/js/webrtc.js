@@ -637,15 +637,13 @@ exports.rtc = new class {
     const $interface = $('<div>')
         .addClass('interface-container')
         .attr('id', `interface_${videoId}`);
-    const $videoContainer = $('<div>')
+    $('#rtcbox').append($('<div>')
         .addClass('video-container')
         .toggleClass('local-user', isLocal)
         .css({'width': size, 'max-height': size})
         .append($('<div>').addClass('user-name'))
         .append($video)
-        .append($interface);
-    if (isLocal) $('#rtcbox').prepend($videoContainer);
-    else $('#rtcbox').append($videoContainer);
+        .append($interface));
     this.updatePeerNameAndColor(this.getUserFromId(userId));
 
     // /////
