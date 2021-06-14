@@ -639,7 +639,7 @@ exports.rtc = new class {
     $('#rtcbox').append($('<div>')
         .addClass('video-container')
         .toggleClass('local-user', isLocal)
-        .css({'width': size, 'max-height': size})
+        .css({width: size})
         .append($('<div>').addClass('user-name'))
         .append($video)
         .append($interface));
@@ -710,8 +710,7 @@ exports.rtc = new class {
                 .attr('title', videoEnlarged ? 'Make video smaller' : 'Make video larger')
                 .toggleClass('large', videoEnlarged);
             const videoSize = `${this._settings.video.sizes[videoEnlarged ? 'large' : 'small']}px`;
-            $video.parent().css({'width': videoSize, 'max-height': videoSize});
-            $video.css({'width': videoSize, 'max-height': videoSize});
+            $video.parent().css({width: videoSize});
           },
         }));
 

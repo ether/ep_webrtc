@@ -19,9 +19,12 @@
   border-left: 5px solid;
   box-sizing: content-box;
   display: flex;
+  height: auto;
   justify-content: center;
   min-height: 80px;
+  overflow: hidden;
   position: relative;
+  resize: horizontal;
 }
 #rtcbox .video-container:not(:first-child) {
   margin-top: 5px;
@@ -30,6 +33,7 @@
   box-sizing: content-box;
   background-color: black;
   height: 100%;
+  object-fit: contain;
   width: 100%;
 }
 #rtcbox .video-container, #rtcbox video {
