@@ -35,9 +35,9 @@ class LocalTracks extends EventTarget {
     newTrack = newTrack || null; // Convert undefined to null.
     let oldTrack = null;
     const tracks =
-          kind === 'audio' ? this.stream.getAudioTracks()
-          : kind === 'video' ? this.stream.getVideoTracks()
-          : this.stream.getTracks();
+        kind === 'audio' ? this.stream.getAudioTracks()
+        : kind === 'video' ? this.stream.getVideoTracks()
+        : this.stream.getTracks();
     for (const track of tracks) {
       if (track.kind !== kind) continue;
       if (track === newTrack) return; // No change.
