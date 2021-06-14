@@ -8,9 +8,8 @@ exports.cartesian = function* (head, ...tail) {
 
 const makeSilentAudioTrack = () => {
   const ctx = new AudioContext();
-  const oscillator = ctx.createOscillator();
-  const dst = oscillator.connect(ctx.createMediaStreamDestination());
-  oscillator.start();
+  const gain = ctx.createGain();
+  const dst = gain.connect(ctx.createMediaStreamDestination());
   return dst.stream.getAudioTracks()[0];
 };
 
