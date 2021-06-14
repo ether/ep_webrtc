@@ -29,7 +29,7 @@ const makeVideoTrack = (constraints) => {
   helper.padChrome$.window.setInterval(() => {
     ctx.fillStyle = `#${Math.floor(Math.random() * 2 ** 24).toString(16).padStart(6, '0')}`;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
-  }, 500);
+  }, 100); // Use a relatively high frame rate to speed up tests.
   return canvas.captureStream().getVideoTracks()[0];
 };
 
