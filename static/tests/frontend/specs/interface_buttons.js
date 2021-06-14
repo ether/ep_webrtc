@@ -184,12 +184,13 @@ describe('Test the behavior of the interface buttons: Mute, Video Disable, Enlar
       this.timeout(60000);
       audioTrack = null;
       videoTrack = null;
-      // Make sure webrtc starts disabled so we have time to wrap getUserMedia and change clientVars
+      // Make sure webrtc starts disabled so we have time to wrap getUserMedia and change settings
       // before activation.
       await helper.aNewPad({params: {av: false}});
       const chrome$ = helper.padChrome$;
-      chrome$.window.clientVars.webrtc.audio.disabled = 'hard';
-      chrome$.window.clientVars.webrtc.video.disabled = 'hard';
+      await helper.waitForPromise(() => chrome$('#rtcbox').data('initialized'));
+      chrome$.window.ep_webrtc._settings.audio.disabled = 'hard';
+      chrome$.window.ep_webrtc._settings.video.disabled = 'hard';
       installFakeGetUserMedia();
       // Clicking $(#options-enablertc) also activates, but calling activate() directly blocks until
       // activation is complete.

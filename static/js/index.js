@@ -316,7 +316,7 @@ exports.rtc = new class {
 
   async postAceInit(hookName, {pad}) {
     this._pad = pad;
-    this._settings = clientVars.webrtc;
+    this._settings = clientVars.ep_webrtc;
     if (this._settings == null || this._settings.configError) {
       $.gritter.add({
         title: 'Error',

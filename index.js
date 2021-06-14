@@ -100,7 +100,7 @@ const handleErrorStatMessage = (statName) => {
   }
 };
 
-exports.clientVars = async (hookName, context) => ({webrtc: settings});
+exports.clientVars = async (hookName, context) => ({ep_webrtc: settings});
 
 exports.handleMessage = async (hookName, {message, socket}) => {
   if (message.type === 'COLLABROOM' && message.data.type === 'RTC_MESSAGE') {

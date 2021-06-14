@@ -24,11 +24,11 @@ describe('enable/disable', function () {
             : queryVal === 'NO' ? false
             : queryVal === 'YES' ? true
             : null;
-        const defaultChecked = !!chrome$.window.clientVars.webrtc.enabled;
+        await helper.waitForPromise(() => chrome$('#rtcbox').data('initialized'), 5000);
+        const defaultChecked = !!chrome$.window.ep_webrtc._settings.enabled;
         wantChecked = (queryNorm || (queryNorm == null && cookieVal) ||
                        (queryNorm == null && cookieVal == null && defaultChecked));
         checkbox = chrome$('#options-enablertc');
-        await helper.waitForPromise(() => chrome$('#rtcbox').data('initialized'), 5000);
       });
 
       it('checkbox is checked/unchecked', async function () {

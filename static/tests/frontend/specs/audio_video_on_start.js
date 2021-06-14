@@ -21,7 +21,7 @@ describe('audio/video on/off according to query parameters/cookies', function ()
       // Clicking $(#options-enablertc) also activates, but calling activate() directly blocks until
       // activation is complete.
       await chrome$.window.ep_webrtc.activate();
-      const {disabled} = chrome$.window.clientVars.webrtc[avType];
+      const {disabled} = chrome$.window.ep_webrtc._settings[avType];
       const checkbox = chrome$(`#options-${avType}enabledonstart`);
       if (disabled === 'hard') {
         expect(checkbox.length).to.equal(0); // There shouldn't even be a checkbox.

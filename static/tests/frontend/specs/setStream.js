@@ -80,7 +80,7 @@ describe('setStream()', function () {
       this.timeout(60000);
       await helper.aNewPad({
         params: {
-          // Disable WebRTC so we can modify clientVars and install a mock getUserMedia() before
+          // Disable WebRTC so we can modify settings and install a fake getUserMedia() before
           // WebRTC stuff is initialized.
           av: false,
           webrtcaudioenabled: true,
@@ -89,8 +89,9 @@ describe('setStream()', function () {
       });
       chrome$ = helper.padChrome$;
       chrome$.window.navigator.mediaDevices.getUserMedia = fakeGetUserMedia;
-      chrome$.window.clientVars.webrtc.audio.disabled = 'hard';
-      chrome$.window.clientVars.webrtc.video.disabled = 'hard';
+      await helper.waitForPromise(() => chrome$('#rtcbox').data('initialized'));
+      chrome$.window.ep_webrtc._settings.audio.disabled = 'hard';
+      chrome$.window.ep_webrtc._settings.video.disabled = 'hard';
       // Clicking $(#options-enablertc) also activates, but calling activate() directly blocks until
       // activation is complete.
       await chrome$.window.ep_webrtc.activate();
