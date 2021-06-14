@@ -9,9 +9,6 @@
   height: auto;
   overflow: auto;
 }
-@media (min-width: 1000px) {
-  padding: 20px 0;
-}
 
 #rtcbox .video-container {
   align-items: center;
