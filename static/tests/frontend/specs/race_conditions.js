@@ -10,292 +10,197 @@ describe('Race conditions that leave audio/video track enabled', function () {
   // These tests are various ideas for trying to do things in quick succession
   // or "at the same time". We can add more if we think of them.
 
-  let audioTrack;
-  let videoTrack;
-  let originalAudioTrack;
-  let originalVideoTrack;
+  for (const enabledOnStart of [false, true]) {
+    describe(`audio and video ${enabledOnStart ? 'en' : 'dis'}abled on start`, function () {
+      let chrome$;
 
-  // wrap getUserMedia such that it grabs a copy of audio and video tracks for inspection after it's
-  // done
-  const installFakeGetUserMedia = () => {
-    const chrome$ = helper.padChrome$;
-    chrome$.window.navigator.mediaDevices.getUserMedia = async (constraints) => {
-      const stream = await fakeGetUserMedia(constraints);
-      audioTrack = stream.getAudioTracks()[0];
-      videoTrack = stream.getVideoTracks()[0];
-      return stream;
-    };
-  };
+      const getVideo = () => chrome$('video')[0];
+      const getStream = () => getVideo().srcObject;
+      const assertTracks = (enabled = enabledOnStart) => {
+        if (enabled) {
+          expect(getStream().getTracks().length).to.equal(2);
+          expect(getStream().getTracks().every((t) => t.enabled)).to.be(true);
+        } else {
+          expect(getStream().getTracks().some((t) => t.enabled)).to.be(false);
+        }
+        const [audio] = getStream().getAudioTracks();
+        const [video] = getStream().getVideoTracks();
+        expect(chrome$('.audio-btn').hasClass('muted')).to.equal(audio == null || !audio.enabled);
+        expect(chrome$('.video-btn').hasClass('off')).to.equal(video == null || !video.enabled);
+      };
 
-  // See if we can trip up the state by "deactivating" webrtc, clicking mute/video-off, and
-  // "activating" webrtc in quick succession. As of this writing, "deactivating" will make the
-  // buttons disappear pretty quickly, making the "click" ineffectual, regardless, but in case we
-  // ever change things around, perhaps this test will catch something.
-  const testDeactivateClickActivate = async () => {
-    const chrome$ = helper.padChrome$;
-
-    for (let i = 0; i < 10; ++i) {
-      originalAudioTrack = audioTrack;
-      expect(originalAudioTrack).to.equal(audioTrack);
-      expect(chrome$('.audio-btn').hasClass('muted')).to.equal(!audioTrack.enabled);
-
-      originalVideoTrack = videoTrack;
-      expect(originalVideoTrack).to.equal(videoTrack);
-      expect(chrome$('.video-btn').hasClass('off')).to.equal(!videoTrack.enabled);
-
-      await chrome$.window.ep_webrtc.deactivate();
-      chrome$('.audio-btn').click();
-      chrome$('.video-btn').click();
-      await chrome$.window.ep_webrtc.activate();
-
-      // getUserMedia should give us new audio and video Tracks and disable the old one
-      expect(originalAudioTrack).to.not.equal(audioTrack);
-      expect(originalAudioTrack.readyState).to.equal('ended');
-      expect(audioTrack.readyState).to.equal('live');
-
-      expect(originalVideoTrack).to.not.equal(videoTrack);
-      expect(originalVideoTrack.readyState).to.equal('ended');
-      expect(videoTrack.readyState).to.equal('live');
-
-      // The mute state should be consistent with icon, wherever they land
-      expect(chrome$('.audio-btn').hasClass('muted')).to.equal(!audioTrack.enabled);
-      expect(chrome$('.video-btn').hasClass('off')).to.equal(!videoTrack.enabled);
-    }
-  };
-
-  // See if we can trip up the state by clicking mute/video-off,
-  // "deactivating" webrtc, and "activating" webrtc in quick succession
-  const testClickDeactivateActivate = async () => {
-    const chrome$ = helper.padChrome$;
-
-    for (let i = 0; i < 10; ++i) {
-      originalAudioTrack = audioTrack;
-      expect(originalAudioTrack).to.equal(audioTrack);
-      expect(chrome$('.audio-btn').hasClass('muted')).to.equal(!audioTrack.enabled);
-
-      originalVideoTrack = videoTrack;
-      expect(originalVideoTrack).to.equal(videoTrack);
-      expect(chrome$('.video-btn').hasClass('off')).to.equal(!videoTrack.enabled);
-
-      chrome$('.audio-btn').click();
-      chrome$('.video-btn').click();
-      await chrome$.window.ep_webrtc.deactivate();
-      await chrome$.window.ep_webrtc.activate();
-
-      // getUserMedia should give us new audio and video Tracks and disable the old one
-      expect(originalAudioTrack).to.not.equal(audioTrack);
-      expect(originalAudioTrack.readyState).to.equal('ended');
-      expect(audioTrack.readyState).to.equal('live');
-
-      expect(originalVideoTrack).to.not.equal(videoTrack);
-      expect(originalVideoTrack.readyState).to.equal('ended');
-      expect(videoTrack.readyState).to.equal('live');
-
-      // The mute state should be consistent with icon, wherever they land
-      expect(chrome$('.audio-btn').hasClass('muted')).to.equal(!audioTrack.enabled);
-      expect(chrome$('.video-btn').hasClass('off')).to.equal(!videoTrack.enabled);
-    }
-  };
-
-  // See if we can trip up the state by "deactivating" webrtc, "activating" webrtc, and then
-  // clicking mute/video-off right after the interface returns. As of this writing, addInterface is
-  // called twice. we'll try to catch it on the first call.
-  const testDeactivateActivateClick = async () => {
-    const chrome$ = helper.padChrome$;
-
-    for (let i = 0; i < 10; ++i) {
-      originalAudioTrack = audioTrack;
-      expect(originalAudioTrack).to.equal(audioTrack);
-      expect(chrome$('.audio-btn').hasClass('muted')).to.equal(!audioTrack.enabled);
-
-      originalVideoTrack = videoTrack;
-      expect(originalVideoTrack).to.equal(videoTrack);
-      expect(chrome$('.video-btn').hasClass('off')).to.equal(!videoTrack.enabled);
-
-      await chrome$.window.ep_webrtc.deactivate();
-      const p = chrome$.window.ep_webrtc.activate();
-      await helper.waitForPromise(
-          () => chrome$ && chrome$('.interface-container').length === 1, 2000);
-      chrome$('.audio-btn').click();
-      chrome$('.video-btn').click();
-
-      // Give it a moment to settle.
-      await new Promise((resolve) => setTimeout(resolve, 200));
-      await p;
-
-      // getUserMedia should give us new audio and video Tracks and disable the old one
-      expect(originalAudioTrack).to.not.equal(audioTrack);
-      expect(originalAudioTrack.readyState).to.equal('ended');
-      expect(audioTrack.readyState).to.equal('live');
-
-      expect(originalVideoTrack).to.not.equal(videoTrack);
-      expect(originalVideoTrack.readyState).to.equal('ended');
-      expect(videoTrack.readyState).to.equal('live');
-
-      // The mute state should be consistent with icon, wherever they land
-      expect(chrome$('.audio-btn').hasClass('muted')).to.equal(!audioTrack.enabled);
-      expect(chrome$('.video-btn').hasClass('off')).to.equal(!videoTrack.enabled);
-    }
-  };
-
-  // See if we can trip up the state by clicking mute/video-off, "deactivating"/"activating" webrtc,
-  // as close to at the same time as we can
-  const testClickWhileReactivate = async () => {
-    const chrome$ = helper.padChrome$;
-
-    for (let i = 0; i < 10; i++) {
-      originalAudioTrack = audioTrack;
-      expect(originalAudioTrack).to.equal(audioTrack);
-      expect(chrome$('.audio-btn').hasClass('muted')).to.equal(!audioTrack.enabled);
-
-      originalVideoTrack = videoTrack;
-      expect(originalVideoTrack).to.equal(videoTrack);
-      expect(chrome$('.video-btn').hasClass('off')).to.equal(!videoTrack.enabled);
-
-      await chrome$.window.ep_webrtc.deactivate();
-      const p = chrome$.window.ep_webrtc.activate();
-      chrome$('.audio-btn').click();
-      chrome$('.video-btn').click();
-      await p;
-
-      // getUserMedia should give us new audio and video Tracks and disable the old one
-      expect(originalAudioTrack).to.not.equal(audioTrack);
-      expect(originalAudioTrack.readyState).to.equal('ended');
-      expect(audioTrack.readyState).to.equal('live');
-
-      expect(originalVideoTrack).to.not.equal(videoTrack);
-      expect(originalVideoTrack.readyState).to.equal('ended');
-      expect(videoTrack.readyState).to.equal('live');
-
-      // The mute state should be consistent with icon, wherever they land
-      expect(chrome$('.audio-btn').hasClass('muted')).to.equal(!audioTrack.enabled);
-      expect(chrome$('.video-btn').hasClass('off')).to.equal(!videoTrack.enabled);
-    }
-  };
-
-  // See if we can trip up the state by clicking mute/video-off many times at once.
-  // We click mute an odd number of times and video-off an even number of times.
-  const testManyClicks = async (done) => {
-    const chrome$ = helper.padChrome$;
-
-    for (let i = 0; i < 10; ++i) {
-      expect(chrome$('.audio-btn').hasClass('muted')).to.equal(!audioTrack.enabled);
-      expect(chrome$('.video-btn').hasClass('off')).to.equal(!videoTrack.enabled);
-      chrome$('.audio-btn').click();
-      chrome$('.audio-btn').click();
-      chrome$('.audio-btn').click();
-      chrome$('.video-btn').click();
-      chrome$('.video-btn').click();
-      await new Promise((resolve) => setTimeout(resolve, 100)); // wait to make sure it's settled
-      expect(chrome$('.audio-btn').hasClass('muted')).to.equal(!audioTrack.enabled);
-      expect(chrome$('.video-btn').hasClass('off')).to.equal(!videoTrack.enabled);
-    }
-  };
-
-  describe('audio and video enabled on start', function () {
-    beforeEach(async function () {
-      this.timeout(60000);
-      audioTrack = null;
-      videoTrack = null;
-
-      await helper.aNewPad({
-        padPrefs: {
-          rtcEnabled: false,
-          audioEnabledOnStart: true,
-          videoEnabledOnStart: true,
-        },
+      beforeEach(async function () {
+        this.timeout(60000);
+        await helper.aNewPad({
+          padPrefs: {
+            audioEnabledOnStart: enabledOnStart,
+            videoEnabledOnStart: enabledOnStart,
+          },
+          // Disable WebRTC so we can install a fake getUserMedia() before it is called.
+          params: {av: false},
+        });
+        chrome$ = helper.padChrome$;
+        chrome$.window.navigator.mediaDevices.getUserMedia = fakeGetUserMedia;
+        chrome$('#options-enablertc').click();
+        await helper.waitForPromise(() => chrome$('#rtcbox').data('initialized'));
+        const ownVideoId = `video_${chrome$.window.ep_webrtc.getUserId().replace(/\./g, '_')}`;
+        await helper.waitForPromise(() => getVideo() != null);
+        const $interface = chrome$(`#interface_${ownVideoId}`);
+        expect($interface.length).to.equal(1);
+        expect(chrome$('.audio-btn').length).to.equal(1);
+        expect(chrome$('.video-btn').length).to.equal(1);
+        await helper.waitForPromise(
+            () => getStream() != null && (!enabledOnStart || getStream().getTracks().length === 2));
+        assertTracks();
       });
-      const chrome$ = helper.padChrome$;
-      installFakeGetUserMedia();
-      // Clicking $('#options-enablertc') also activates, but calling activate() directly blocks
-      // until activation is complete.
-      await chrome$.window.ep_webrtc.activate();
-    });
 
-    it('click, deactivate, activate', async function () {
-      expect(audioTrack.enabled).to.equal(true);
-      expect(videoTrack.enabled).to.equal(true);
-      await testClickDeactivateActivate();
-    });
+      // See if we can trip up the state by "deactivating" webrtc, clicking mute/video-off, and
+      // "activating" webrtc in quick succession. As of this writing, "deactivating" will make the
+      // buttons disappear pretty quickly, making the "click" ineffectual, regardless, but in case
+      // we ever change things around, perhaps this test will catch something.
+      it('deactivate, click, activate', async function () {
+        for (let i = 0; i < 10; ++i) {
+          const [oldAudioTrack] = getStream().getAudioTracks();
+          const [oldVideoTrack] = getStream().getVideoTracks();
 
-    it('deactivate, click, activate', async function () {
-      expect(audioTrack.enabled).to.equal(true);
-      expect(videoTrack.enabled).to.equal(true);
-      await testDeactivateClickActivate();
-    });
+          await chrome$.window.ep_webrtc.deactivate();
+          chrome$('.audio-btn').click();
+          chrome$('.video-btn').click();
+          await chrome$.window.ep_webrtc.activate();
 
-    it('deactivate, activate, click', async function () {
-      expect(audioTrack.enabled).to.equal(true);
-      expect(videoTrack.enabled).to.equal(true);
-      await testDeactivateActivateClick();
-    });
+          assertTracks();
 
-    it('click while reactivate', async function () {
-      expect(audioTrack.enabled).to.equal(true);
-      expect(videoTrack.enabled).to.equal(true);
-      await testClickWhileReactivate();
-    });
+          const [newAudioTrack] = getStream().getAudioTracks();
+          const [newVideoTrack] = getStream().getVideoTracks();
 
-    it('many clicks', async function () {
-      expect(audioTrack.enabled).to.equal(true);
-      expect(videoTrack.enabled).to.equal(true);
-      await testManyClicks();
-    });
-  });
+          if (enabledOnStart) {
+            expect(newAudioTrack).to.not.equal(oldAudioTrack);
+            expect(oldAudioTrack.readyState).to.equal('ended');
+            expect(newAudioTrack.readyState).to.equal('live');
 
-  describe('audio and video disabled on start', function () {
-    beforeEach(async function () {
-      this.timeout(60000);
-      audioTrack = null;
-      videoTrack = null;
-
-      await helper.aNewPad({
-        padPrefs: {
-          rtcEnabled: false,
-          audioEnabledOnStart: false,
-          videoEnabledOnStart: false,
-        },
+            expect(newVideoTrack).to.not.equal(oldVideoTrack);
+            expect(oldVideoTrack.readyState).to.equal('ended');
+            expect(newVideoTrack.readyState).to.equal('live');
+          }
+        }
       });
-      const chrome$ = helper.padChrome$;
-      installFakeGetUserMedia();
-      // Clicking $('#options-enablertc') also activates, but calling activate() directly blocks
-      // until activation is complete.
-      await chrome$.window.ep_webrtc.activate();
-    });
 
-    it('click, deactivate, activate', async function () {
-      this.timeout(5000);
-      expect(audioTrack.enabled).to.equal(false);
-      expect(videoTrack.enabled).to.equal(false);
-      await testClickDeactivateActivate();
-    });
+      // See if we can trip up the state by clicking mute/video-off, "deactivating" webrtc, and
+      // "activating" webrtc in quick succession
+      it('click, deactivate, activate', async function () {
+        for (let i = 0; i < 10; ++i) {
+          const [oldAudioTrack] = getStream().getAudioTracks();
+          const [oldVideoTrack] = getStream().getVideoTracks();
 
-    it('deactivate, click, activate', async function () {
-      this.timeout(5000);
-      expect(audioTrack.enabled).to.equal(false);
-      expect(videoTrack.enabled).to.equal(false);
-      await testDeactivateClickActivate();
-    });
+          chrome$('.audio-btn').click();
+          chrome$('.video-btn').click();
+          await chrome$.window.ep_webrtc.deactivate();
+          await chrome$.window.ep_webrtc.activate();
 
-    it('deactivate, activate, click', async function () {
-      this.timeout(5000);
-      expect(audioTrack.enabled).to.equal(false);
-      expect(videoTrack.enabled).to.equal(false);
-      await testDeactivateActivateClick();
-    });
+          assertTracks();
 
-    it('click while reactivate', async function () {
-      this.timeout(5000);
-      expect(audioTrack.enabled).to.equal(false);
-      expect(videoTrack.enabled).to.equal(false);
-      await testClickWhileReactivate();
-    });
+          const [newAudioTrack] = getStream().getAudioTracks();
+          const [newVideoTrack] = getStream().getVideoTracks();
 
-    it('many clicks', async function () {
-      this.timeout(5000);
-      expect(audioTrack.enabled).to.equal(false);
-      expect(videoTrack.enabled).to.equal(false);
-      await testManyClicks();
+          if (enabledOnStart) {
+            expect(newAudioTrack).to.not.equal(oldAudioTrack);
+            expect(oldAudioTrack.readyState).to.equal('ended');
+            expect(newAudioTrack.readyState).to.equal('live');
+
+            expect(newVideoTrack).to.not.equal(oldVideoTrack);
+            expect(oldVideoTrack.readyState).to.equal('ended');
+            expect(newVideoTrack.readyState).to.equal('live');
+          }
+        }
+      });
+
+      // See if we can trip up the state by "deactivating" webrtc, "activating" webrtc, and then
+      // clicking mute/video-off right after the interface returns.
+      it('deactivate, activate, click', async function () {
+        for (let i = 0; i < 10; ++i) {
+          const [oldAudioTrack] = getStream().getAudioTracks();
+          const [oldVideoTrack] = getStream().getVideoTracks();
+
+          await chrome$.window.ep_webrtc.deactivate();
+          const p = chrome$.window.ep_webrtc.activate();
+          await helper.waitForPromise(
+              () => chrome$ && chrome$('.interface-container').length === 1, 2000);
+          chrome$('.audio-btn').click();
+          chrome$('.video-btn').click();
+          await Promise.all([
+            p,
+            chrome$('.audio-btn').data('idle')('click'),
+            chrome$('.video-btn').data('idle')('click'),
+          ]);
+
+          assertTracks(!enabledOnStart);
+
+          const [newAudioTrack] = getStream().getAudioTracks();
+          const [newVideoTrack] = getStream().getVideoTracks();
+
+          expect(newAudioTrack).to.not.equal(oldAudioTrack);
+          if (oldAudioTrack != null) expect(oldAudioTrack.readyState).to.equal('ended');
+          if (newAudioTrack != null) expect(newAudioTrack.readyState).to.equal('live');
+
+          expect(newVideoTrack).to.not.equal(oldVideoTrack);
+          if (oldVideoTrack != null) expect(oldVideoTrack.readyState).to.equal('ended');
+          if (newVideoTrack != null) expect(newVideoTrack.readyState).to.equal('live');
+        }
+      });
+
+      // See if we can trip up the state by clicking mute/video-off, "deactivating"/"activating"
+      // webrtc, as close to at the same time as we can
+      it('click while reactivate', async function () {
+        for (let i = 0; i < 10; i++) {
+          const [oldAudioTrack] = getStream().getAudioTracks();
+          const [oldVideoTrack] = getStream().getVideoTracks();
+
+          await chrome$.window.ep_webrtc.deactivate();
+          const p = chrome$.window.ep_webrtc.activate();
+          chrome$('.audio-btn').click();
+          chrome$('.video-btn').click();
+          await Promise.all([
+            p,
+            chrome$('.audio-btn').data('idle')(),
+            chrome$('.video-btn').data('idle')(),
+          ]);
+
+          assertTracks(!enabledOnStart);
+
+          const [newAudioTrack] = getStream().getAudioTracks();
+          const [newVideoTrack] = getStream().getVideoTracks();
+
+          if (!enabledOnStart) {
+            expect(newAudioTrack).to.not.equal(oldAudioTrack);
+            if (oldAudioTrack != null) expect(oldAudioTrack.readyState).to.equal('ended');
+            if (newAudioTrack != null) expect(newAudioTrack.readyState).to.equal('live');
+
+            expect(newVideoTrack).to.not.equal(oldVideoTrack);
+            if (oldVideoTrack != null) expect(oldVideoTrack.readyState).to.equal('ended');
+            if (newVideoTrack != null) expect(newVideoTrack.readyState).to.equal('live');
+          }
+        }
+      });
+
+      // See if we can trip up the state by clicking mute/video-off many times at once. We click
+      // mute an odd number of times and video-off an even number of times.
+      it('many clicks', async function () {
+        for (let i = 0; i < 10; ++i) {
+          chrome$('.audio-btn').click();
+          chrome$('.audio-btn').click();
+          chrome$('.audio-btn').click();
+          chrome$('.video-btn').click();
+          chrome$('.video-btn').click();
+          await Promise.all([
+            chrome$('.audio-btn').data('idle')(),
+            chrome$('.video-btn').data('idle')(),
+          ]);
+          expect(chrome$('.audio-btn').hasClass('muted'))
+              .to.equal(((i + 1) * 3 + (enabledOnStart ? 1 : 0)) % 2 === 0);
+          expect(chrome$('.video-btn').hasClass('off'))
+              .to.equal(((i + 1) * 2 + (enabledOnStart ? 1 : 0)) % 2 === 0);
+        }
+      });
     });
-  });
+  }
 });
