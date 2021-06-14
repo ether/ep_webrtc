@@ -632,8 +632,7 @@ exports.rtc = new class {
     const size = `${this._settings.video.sizes.small}px`;
     const $video = $('<video>')
         .attr({id: videoId, muted: isLocal ? '' : null})
-        .prop('muted', isLocal) // Setting the 'muted' attribute isn't sufficient for some reason.
-        .css({'width': size, 'max-height': size});
+        .prop('muted', isLocal); // Setting the 'muted' attribute isn't sufficient for some reason.
     const $interface = $('<div>')
         .addClass('interface-container')
         .attr('id', `interface_${videoId}`);

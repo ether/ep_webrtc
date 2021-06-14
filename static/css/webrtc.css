@@ -29,6 +29,8 @@
 #rtcbox video {
   box-sizing: content-box;
   background-color: black;
+  height: 100%;
+  width: 100%;
 }
 #rtcbox .video-container, #rtcbox video {
   transition: max-width .3s, max-height .3s, width .3s, height .3s;
