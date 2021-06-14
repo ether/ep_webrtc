@@ -23,9 +23,10 @@ const makeVideoTrack = (constraints) => {
   canvas.width = widthIdeal || widthMax;
   canvas.height = heightIdeal || heightMax;
   const ctx = canvas.getContext('2d');
-  // With Safari, HTMLVideoElement.play() hangs until the canvas is updated. Add some animation to
-  // work around it.
-  setInterval(() => {
+  // Some animation is needed because in some browsers HTMLVideoElement.play() will hang until the
+  // canvas is updated. The pad's window.setInterval is called in the hopes that the interval will
+  // be automatically stopped once the pad is unloaded.
+  helper.padChrome$.window.setInterval(() => {
     ctx.fillStyle = `#${Math.floor(Math.random() * 2 ** 24).toString(16).padStart(6, '0')}`;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
   }, 500);
