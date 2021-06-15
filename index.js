@@ -123,7 +123,7 @@ exports.eejsBlock_mySettings = (hookName, context) => {
 };
 
 exports.eejsBlock_editorContainerBox = (hookName, context) => {
-  context.content += eejs.require('./templates/webrtc.ejs', {}, module);
+  context.content += eejs.require('./templates/editorContainerBox.ejs', {}, module);
 };
 
 exports.eejsBlock_styles = (hookName, context) => {
