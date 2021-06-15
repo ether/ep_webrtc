@@ -23,8 +23,15 @@
   justify-content: center;
   min-height: 80px;
   overflow: hidden;
-  position: relative;
   resize: horizontal;
+  /*
+   * This serves two purposes:
+   *   - It creates a stacking context so that the `z-index: -1;` rule on the
+   *     video element doesn't send the video behind the background.
+   *   - It causes the `position: absolute;` rule on the .interface-container
+   *     div to position relative to the .video-container div.
+   */
+  transform: translateZ(0);
 }
 #rtcbox .video-container:not(:first-child) {
   margin-top: 5px;
@@ -35,6 +42,12 @@
   height: 100%;
   object-fit: contain;
   width: 100%;
+  /*
+   * Without this, Safari puts the lower right resize handle for the
+   * containing div (.video-container) behind the video. Chrome and Firefox
+   * do not have the same defect.
+   */
+  z-index: -1;
 }
 #rtcbox .video-container, #rtcbox video {
   transition: max-width .3s, max-height .3s, width .3s, height .3s;
@@ -43,7 +56,6 @@
 .interface-container {
   display: flex;
   position: absolute;
-  z-index: 2;
   bottom: 8px;
   left: 8px;
 }
