@@ -631,7 +631,15 @@ exports.rtc = new class {
     const videoId = getVideoId(userId);
     const size = `${this._settings.video.sizes.small}px`;
     const $video = $('<video>')
-        .attr({id: videoId, muted: isLocal ? '' : null})
+        .attr({
+          id: videoId,
+          // `playsinline` seems to be required on iOS (both Chrome and Safari), but not on any
+          // other platform. `autoplay` might also be needed on iOS, or maybe it's superfluous (it
+          // doesn't hurt to add it).
+          playsinline: '',
+          autoplay: '',
+          muted: isLocal ? '' : null,
+        })
         .prop('muted', isLocal); // Setting the 'muted' attribute isn't sufficient for some reason.
     const $interface = $('<div>')
         .addClass('interface-container')
