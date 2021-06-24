@@ -28,7 +28,6 @@ class LocalTracks extends EventTarget {
   constructor() {
     super();
     Object.defineProperty(this, 'stream', {value: new MediaStream(), writeable: false});
-    this._tracks = new Map();
   }
 
   setTrack(kind, newTrack) {
