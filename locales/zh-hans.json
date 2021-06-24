@@ -1,0 +1,10 @@
+{
+	"@metadata": {
+		"authors": [
+			"Zhang8569"
+		]
+	},
+	"pad.ep_webrtc.error.ssl": "TLS（https）要求使用WebRTC。",
+	"pad.ep_webrtc.error.permission": "获取你的摄像头或麦克风的准许失败了。",
+	"pad.ep_webrtc.error.notFound": "寻找摄像头和/或麦克风失败。请重新加载页面来重试。"
+}
