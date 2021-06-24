@@ -22,7 +22,9 @@ const enableDebugLogging = false;
 const debug = (...args) => { if (enableDebugLogging) console.debug('ep_webrtc:', ...args); };
 
 // Used to help remote peers detect when this user reloads the page.
-const sessionId = `${Date.now()}_${Math.floor(Math.random() * (1 << 16)).toString(16)}`;
+const sessionId = Date.now();
+// Incremented each time a new RTCPeerConnection is created.
+let nextInstanceId = 0;
 
 class LocalTracks extends EventTarget {
   constructor() {
@@ -92,21 +94,20 @@ class PeerState extends EventTarget {
     this._debug = debug;
     this._debug(`I am the ${this._polite ? '' : 'im'}polite peer`);
     this._ids = {
-      // Only changes when the user reloads the page.
-      session: sessionId,
-      // Counter that is increased when WebRTC renegotiation is necessary due to an error.
-      instance: 0,
+      from: {
+        // Only changes when the user reloads the page.
+        session: sessionId,
+        // Increased when WebRTC renegotiation is necessary due to an error.
+        instance: 0,
+      },
     };
-    this._remoteIds = null;
     this._closed = false;
     this._pc = null;
     this._remoteStream = null;
     this._onremovetrack =
         () => { if (this._remoteStream.getTracks().length === 0) this._setRemoteStream(null); };
-
-    this._resetConnection();
-
     this._ontrackchanged = async ({oldTrack, newTrack}) => {
+      if (this._pc == null) return;
       this._debug(`replacing ${oldTrack ? oldTrack.kind : newTrack.kind} track ` +
                   `${oldTrack ? oldTrack.id : '(null)'} with ` +
                   `${newTrack ? newTrack.id : '(null)'}`);
@@ -145,10 +146,11 @@ class PeerState extends EventTarget {
     }
   }
 
-  _resetConnection() {
+  _resetConnection(peerIds = null) {
     this._debug('creating RTCPeerConnection');
     this._setRemoteStream(null);
-    this._remoteIds = {session: null, instance: null};
+    this._ids.from.instance = ++nextInstanceId;
+    this._ids.to = peerIds;
     // This negotiation state is captured in closures (instead of doing something like
     // this._negotiationState) because this._resetConnection() needs to be sure that all of the
     // event handlers for the old RTCPeerConnection do not mutate the negotiation state for the new
@@ -181,7 +183,6 @@ class PeerState extends EventTarget {
         // seems that on at least Chrome 90 the 'failed' state is terminal (it can never go back to
         // working) so a new RTCPeerConnection must be made.
         case 'failed':
-          this._ids.instance++; // Let the peer know that it must reset its state.
           this._resetConnection();
           break;
       }
@@ -253,27 +254,35 @@ class PeerState extends EventTarget {
       return;
     }
     if (ids != null) {
-      for (const idType of ['session', 'instance']) {
-        const newId = ids[idType];
-        if (newId != null) {
-          const oldId = this._remoteIds[idType];
-          if (oldId != null && newId !== oldId) {
-            // The remote peer reloaded the page or experienced an error. Destroy and recreate the
-            // local RTCPeerConnection to avoid browser quirks caused by state mismatches.
-            this._debug(`remote peer forced WebRTC renegotiation via new ${idType} ID ` +
-                        `(old ID ${oldId}, new ID ${newId})`);
-            this._resetConnection();
-          }
-          this._remoteIds[idType] = newId;
-        }
+      const {
+        session: wantSession = this._ids.from.session,
+        instance: wantInstance = this._ids.from.instance,
+      } = ids.to || {};
+      if (wantSession !== this._ids.from.session || wantInstance !== this._ids.from.instance) {
+        this._debug('dropping message intended for a different instance');
+        this._debug('current IDs:', this._ids.from);
+        return;
       }
+      for (const idType of ['session', 'instance']) {
+        const newId = ids.from[idType];
+        const currentId = (this._ids.to || {})[idType];
+        if (currentId == null || newId === currentId) continue;
+        if (newId == null || newId < currentId) return;
+        // The remote peer reloaded the page or experienced an error. Destroy and recreate the local
+        // RTCPeerConnection to avoid browser quirks caused by state mismatches.
+        this._debug(`remote peer forced WebRTC renegotiation via new ${idType} ID ` +
+                    `(old ID ${currentId}, new ID ${newId})`);
+        this._resetConnection(ids.from);
+        break;
+      }
+      this._ids.to = ids.from;
     }
+    if (this._pc == null) this._resetConnection(this._ids.to);
     try {
       if (description != null) await this._setRemoteDescription(description);
       if (candidate != null) await this._addIceCandidate(candidate);
     } catch (err) {
       console.error('Error processing message from peer:', err);
-      this._ids.instance++; // Let the peer know that it must reset its state.
       this._resetConnection();
       return;
     }
@@ -283,7 +292,7 @@ class PeerState extends EventTarget {
     if (this._closed) return;
     this._closed = true;
     this._localTracks.removeEventListener('trackchanged', this._ontrackchanged);
-    this._pc.close();
+    if (this._pc != null) this._pc.close();
     this._pc = null;
     this._setRemoteStream(null);
     this._sendMessage({hangup: 'hangup'});
@@ -809,7 +818,7 @@ exports.rtc = new class {
   // the WebRTC signaling messages. This is bad because WebRTC assumes reliable, in-order delivery
   // of signaling messages, so the discards will break future connection attempts.
   invitePeer(userId) {
-    this.sendMessage(userId, {ids: {session: sessionId}, invite: 'invite'});
+    this.sendMessage(userId, {ids: {from: {session: sessionId}}, invite: 'invite'});
   }
 
   getPeerConnection(userId) {
