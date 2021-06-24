@@ -529,9 +529,10 @@ exports.rtc = new class {
       const $audioBtn = $interface.find('.audio-btn');
       const $videoBtn = $interface.find('.video-btn');
       const addAudioTrack = updateAudio && !$audioBtn.hasClass('muted') &&
-          !this._localTracks.stream.getAudioTracks().some((t) => t !== this._disabledSilence);
+          !this._localTracks.stream.getAudioTracks().some(
+              (t) => t !== this._disabledSilence && t.readyState === 'live');
       const addVideoTrack = updateVideo && !$videoBtn.hasClass('off') &&
-          this._localTracks.stream.getVideoTracks().length === 0;
+          !this._localTracks.stream.getVideoTracks().some((t) => t.readyState === 'live');
       if (addAudioTrack || addVideoTrack) {
         debug(`requesting permission to access ${
           addAudioTrack && addVideoTrack ? 'camera and microphone'
@@ -559,7 +560,8 @@ exports.rtc = new class {
           // getUserMedia() was running.
           track.enabled = track !== this._disabledSilence && !$audioBtn.hasClass('muted');
         }
-        const hasAudio = this._localTracks.stream.getAudioTracks().some((t) => t.enabled);
+        const hasAudio = this._localTracks.stream.getAudioTracks().some(
+            (t) => t.enabled && t.readyState === 'live');
         $audioBtn
             .attr('title', hasAudio ? 'Mute' : 'Unmute')
             .toggleClass('muted', !hasAudio);
@@ -570,7 +572,8 @@ exports.rtc = new class {
           // getUserMedia() was running.
           track.enabled = !$videoBtn.hasClass('off');
         }
-        const hasVideo = this._localTracks.stream.getVideoTracks().some((t) => t.enabled);
+        const hasVideo = this._localTracks.stream.getVideoTracks().some(
+            (t) => t.enabled && t.readyState === 'live');
         $videoBtn
             .attr('title', hasVideo ? 'Disable video' : 'Enable video')
             .toggleClass('off', !hasVideo);
