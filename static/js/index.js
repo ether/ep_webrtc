@@ -345,7 +345,6 @@ exports.rtc = new class {
   constructor() {
     this._activated = null;
     this._settings = null;
-    this._localTracks = new LocalTracks();
     this._disabledSilence = (() => {
       const ctx = new AudioContext();
       const gain = ctx.createGain();
@@ -354,6 +353,18 @@ exports.rtc = new class {
       track.enabled = false;
       return track;
     })();
+    this._localTracks = new LocalTracks();
+    this._localTracks.addEventListener('trackchanged', ({oldTrack, newTrack}) => {
+      if (newTrack != null) return;
+      // Normally the self-view UI only needs to be updated if the user clicks on something, but it
+      // also needs to be updated if the browser decides to end the local stream for whatever
+      // reason. (Safari v14.1 on macOS v11.3.1 (Big Sur) seems to have a bug that causes it to
+      // unexpectedly end local streams.)
+      switch (oldTrack.kind) {
+        case 'audio': this._selfViewButtons.audio.enabled = false; break;
+        case 'video': this._selfViewButtons.video.enabled = false; break;
+      }
+    });
     this._localTracks.setTrack(this._disabledSilence.kind, this._disabledSilence);
     this._pad = null;
     this._peers = new Map();
