@@ -9,7 +9,7 @@ describe('error handling', function () {
     // Hard to test the version of NotAllowedError that is the SSL error
     // because it requires changing window.location
     ['NotAllowedError', 'Failed to get permission to access'],
-    ['NotFoundError', 'Failed to find a camera'],
+    ['NotFoundError', 'Failed to access'],
     ['NotReadableError', 'hardware error occurred'],
     ['AbortError', 'not a hardware error'],
   ];

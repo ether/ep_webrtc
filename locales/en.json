@@ -3,7 +3,7 @@
 
     "ep_webrtc_error_ssl": "TLS (https) is required to use WebRTC.",
     "ep_webrtc_error_permission": "Failed to get permission to access your camera or microphone.",
-    "ep_webrtc_error_notFound": "Failed to find a camera and/or microphone. Reload the page to retry.",
+    "ep_webrtc_error_notFound": "Failed to access your camera or microphone.",
     "ep_webrtc_error_notReadable": "Sorry, a hardware error occurred that prevented access to your camera and/or microphone:",
     "ep_webrtc_error_otherCantAccess": "Sorry, the browser doesn't have access to your camera and/or microphone. Please check permissions in your browser's settings. This is most likely not a hardware error:",
 

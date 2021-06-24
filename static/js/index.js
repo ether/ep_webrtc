@@ -437,6 +437,10 @@ exports.rtc = new class {
           this.sendErrorStat('SecureConnection');
         }
         break;
+      case 'OverconstrainedError':
+        debug(err);
+        // Safari v14.1 on macOS v11.13.1 (Big Sur) on Sauce Labs emits OverconstrainedError when it
+        // can't find a camera. Fall through to the NotFoundError case:
       case 'NotFoundError':
         reason = html10n.get('ep_webrtc_error_notFound');
         this.sendErrorStat('NotFound');
