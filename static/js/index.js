@@ -193,6 +193,14 @@ class PeerState extends EventTarget {
         case 'failed': pc.restartIce(); break;
       }
     });
+    // RTCPeerConnection.peerIdentity is mentioned in https://www.w3.org/TR/webrtc-identity/ but as
+    // of 2021-06-24 only Firefox supports it.
+    if (pc.peerIdentity != null) {
+      // Silence "InvalidStateError: RTCPeerConnection is gone (did you enter Offline mode?)"
+      // unhandled Promise rejection errors in Firefox. This can happen if Firefox drops the
+      // connection because the pad is in an idle/background tab.
+      pc.peerIdentity.catch((err) => this._debug('Failed to assert peer identity:', err));
+    }
 
     if (this._pc != null) this._pc.close();
     this._pc = pc;
