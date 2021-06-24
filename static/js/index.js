@@ -44,13 +44,16 @@ class LocalTracks extends EventTarget {
     Object.defineProperty(this, 'stream', {value: new MediaStream(), writeable: false});
   }
 
+  _getTracks(kind) {
+    return kind === 'audio' ? this.stream.getAudioTracks()
+      : kind === 'video' ? this.stream.getVideoTracks()
+      : this.stream.getTracks();
+  }
+
   setTrack(kind, newTrack) {
     newTrack = newTrack || null; // Convert undefined to null.
     let oldTrack = null;
-    const tracks =
-        kind === 'audio' ? this.stream.getAudioTracks()
-        : kind === 'video' ? this.stream.getVideoTracks()
-        : this.stream.getTracks();
+    const tracks = this._getTracks(kind);
     for (const track of tracks) {
       if (track.kind !== kind) continue;
       if (track === newTrack) return; // No change.
@@ -61,6 +64,11 @@ class LocalTracks extends EventTarget {
     }
     if (newTrack != null) {
       debug(`adding ${kind} track ${newTrack.id} to local stream`);
+      newTrack.addEventListener('ended', () => {
+        debug(`local ${kind} track ${newTrack.id} ended`);
+        if (!this._getTracks(kind).includes(newTrack)) return;
+        this.setTrack(kind, null);
+      });
       this.stream.addTrack(newTrack);
     }
     this.dispatchEvent(Object.assign(new CustomEvent('trackchanged'), {oldTrack, newTrack}));
