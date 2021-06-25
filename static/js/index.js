@@ -692,6 +692,8 @@ exports.rtc = new class {
         debug('auto-muting video', $video[0]);
         // The self view is always muted, so this click() only applies to videos of remote peers.
         $(`#interface_${$video.attr('id')} .audio-btn`).click();
+        // Prevent infinite recursion if clicking the audio button didn't mute.
+        if (!$video[0].muted) throw new Error('assertion failed: video element should be muted');
         $video.data('automuted', true);
         return await this.playVideo($video);
       }
