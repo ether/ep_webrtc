@@ -635,12 +635,18 @@ exports.rtc = new class {
   // autoplay). If unmuting a video fails (perhaps the browser still thinks we're trying to
   // autoplay), the video is auto-muted again.
   async unmuteAutoMuted() {
-    await Promise.all($('#rtcbox video').map(async (i, video) => {
-      const $video = $(video);
-      if (!$video.data('automuted')) return;
-      $(`#interface_${$video.attr('id')} .audio-btn`).click();
-      await this.playVideo($video);
-    }).get());
+    if (this._unmuteAutoMutedInProgress) return; // Prevent infinite recursion if unmuting fails.
+    this._unmuteAutoMutedInProgress = true;
+    try {
+      await Promise.all($('#rtcbox video').map(async (i, video) => {
+        const $video = $(video);
+        if (!$video.data('automuted')) return;
+        $(`#interface_${$video.attr('id')} .audio-btn`).click();
+        await this.playVideo($video);
+      }).get());
+    } finally {
+      this._unmuteAutoMutedInProgress = false;
+    }
   }
 
   addInterface(userId, isLocal) {
