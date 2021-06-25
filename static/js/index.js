@@ -708,16 +708,16 @@ exports.rtc = new class {
         .on(audioHardDisabled ? {} : {
           click: (event) => {
             $video.removeData('automuted');
-            // Do not use `await` when calling unmuteAutoMuted() because unmuting is best-effort
-            // (success of this handler does not depend on the ability to unmute). Call
-            // unmuteAutoMuted() early so that the browser can work on unmuting the video in
-            // parallel with the rest of this handler.
-            this.unmuteAutoMuted();
             const muted = isLocal ? this.toggleMuted() : ($video[0].muted = !$video[0].muted);
             _debug(`audio button clicked to ${muted ? 'dis' : 'en'}able audio`);
             $(event.currentTarget)
                 .attr('title', muted ? 'Unmute' : 'Mute')
                 .toggleClass('muted', muted);
+            // Do not use `await` when calling unmuteAutoMuted() because unmuting is best-effort
+            // (success of this handler does not depend on the ability to unmute). Call
+            // unmuteAutoMuted() late so that it can call $video[0].play() after $video[0].muted is
+            // set to its new value, and so that it can auto-mute if necessary.
+            this.unmuteAutoMuted();
           },
         }));
 
@@ -734,13 +734,13 @@ exports.rtc = new class {
           .toggleClass('disallowed', videoHardDisabled)
           .on(videoHardDisabled ? {} : {
             click: (event) => {
-              // Don't use `await` here -- see the comment for the audio button click handler above.
-              this.unmuteAutoMuted();
               const videoEnabled = !this.toggleVideo();
               _debug(`video button clicked to ${videoEnabled ? 'en' : 'dis'}able video`);
               $(event.currentTarget)
                   .attr('title', videoEnabled ? 'Disable video' : 'Enable video')
                   .toggleClass('off', !videoEnabled);
+              // Don't use `await` here -- see the comment for the audio button click handler above.
+              this.unmuteAutoMuted();
             },
           }));
     }
@@ -755,14 +755,14 @@ exports.rtc = new class {
         .attr('title', 'Make video larger')
         .on({
           click: (event) => {
-            // Don't use `await` here -- see the comment for the audio button click handler above.
-            this.unmuteAutoMuted();
             videoEnlarged = !videoEnlarged;
             $(event.currentTarget)
                 .attr('title', videoEnlarged ? 'Make video smaller' : 'Make video larger')
                 .toggleClass('large', videoEnlarged);
             const videoSize = `${this._settings.video.sizes[videoEnlarged ? 'large' : 'small']}px`;
             $video.parent().css({width: videoSize});
+            // Don't use `await` here -- see the comment for the audio button click handler above.
+            this.unmuteAutoMuted();
           },
         }));
 
