@@ -681,10 +681,6 @@ exports.rtc = new class {
       return await $video[0].play();
     } catch (err) {
       debug('failed to play video', $video[0], err);
-      // AbortError can happen if there is a hangup (e.g., the user disables WebRTC) while playback
-      // is starting. The video element will be deleted shortly (if it hasn't already been deleted)
-      // so it's OK to ignore the error.
-      if (err.name === 'AbortError') return;
       // Browsers won't allow autoplayed video with sound until the user has interacted with the
       // page or the page is already capturing audio or video. If playback is not permitted, mute
       // the video and try again.
@@ -697,7 +693,13 @@ exports.rtc = new class {
         $video.data('automuted', true);
         return await this.playVideo($video);
       }
-      throw err;
+      // The error is most likely a browser autoplay restriction. It's not useful to display such
+      // errors -- or really any other play error for that matter -- in a gritter box, so ignore the
+      // error. The video won't be playing, but that's not a big deal: The user can click on one of
+      // the interface buttons to try playing again (via unmuteAndPlayAll()).
+      //
+      // TODO: Indicate the error in the video element (e.g., red circle with an exclamation point
+      // that displays the error message when clicked or hovered over).
     }
   }
 
