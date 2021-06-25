@@ -699,21 +699,21 @@ exports.rtc = new class {
     }
   }
 
-  // Tries to unmute and play any videos that were auto-muted (perhaps the browser prohibited
-  // autoplay). If unmuting a video fails (perhaps the browser still thinks we're trying to
-  // autoplay), the video is auto-muted again.
-  async unmuteAutoMuted() {
-    if (this._unmuteAutoMutedInProgress) return; // Prevent infinite recursion if unmuting fails.
-    this._unmuteAutoMutedInProgress = true;
+  // Tries to play any videos that aren't playing (including the self-view), or unmute videos that
+  // are playing but were auto-muted (perhaps the browser prohibited autoplay). If playing or
+  // unmuting a video fails (perhaps the browser still thinks we're trying to autoplay), the video
+  // is auto-muted again.
+  async unmuteAndPlayAll() {
+    if (this._unmuteAndPlayAllInProgress) return; // Prevent infinite recursion if unmuting fails.
+    this._unmuteAndPlayAllInProgress = true;
     try {
       await Promise.all($('#rtcbox video').map(async (i, video) => {
         const $video = $(video);
-        if (!$video.data('automuted')) return;
-        $(`#interface_${$video.attr('id')} .audio-btn`).click();
+        if ($video.data('automuted')) $(`#interface_${$video.attr('id')} .audio-btn`).click();
         await this.playVideo($video);
       }).get());
     } finally {
-      this._unmuteAutoMutedInProgress = false;
+      this._unmuteAndPlayAllInProgress = false;
     }
   }
 
@@ -799,12 +799,12 @@ exports.rtc = new class {
         audioInterface.enabled = !muted;
         if (isLocal) await this.updateLocalTracks({updateAudio: true});
         else $video[0].muted = muted;
-        // Do not use `await` when calling unmuteAutoMuted() because unmuting is best-effort
+        // Do not use `await` when calling unmuteAndPlayAll() because unmuting is best-effort
         // (success of this handler does not depend on the ability to unmute, and this handler's
-        // idle/busy status should not be affected by unmuteAutoMuted()). Call unmuteAutoMuted()
+        // idle/busy status should not be affected by unmuteAndPlayAll()). Call unmuteAndPlayAll()
         // late so that it can call $video[0].play() after $video[0].muted is set to its new value,
         // and so that it can auto-mute if necessary.
-        this.unmuteAutoMuted();
+        this.unmuteAndPlayAll();
       },
     });
 
@@ -836,7 +836,7 @@ exports.rtc = new class {
           this._selfViewButtons.video.enabled = videoEnabled;
           await this.updateLocalTracks({updateVideo: true});
           // Don't use `await` here -- see the comment for the audio button click handler above.
-          this.unmuteAutoMuted();
+          this.unmuteAndPlayAll();
         },
       });
     }
@@ -858,7 +858,7 @@ exports.rtc = new class {
             const videoSize = `${this._settings.video.sizes[videoEnlarged ? 'large' : 'small']}px`;
             $video.parent().css({width: videoSize});
             // Don't use `await` here -- see the comment for the audio button click handler above.
-            this.unmuteAutoMuted();
+            this.unmuteAndPlayAll();
           },
         }));
 
