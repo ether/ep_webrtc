@@ -53,68 +53,77 @@
   transition: max-width .3s, max-height .3s, width .3s, height .3s;
 }
 
+#rtcbox .video-container .interface-btn,
+#rtcbox .video-container .user-name {
+  --interface-text-color-rgb: 87, 98, 115; /* --dark-color */
+  --interface-background-color-rgb: 242, 243, 244; /* --light-color */
+  --interface-text-alpha: 0.6;
+  --interface-background-alpha: 0.2;
+  background-color: rgba(var(--interface-background-color-rgb),
+                         var(--interface-background-alpha));
+  color: rgba(var(--interface-text-color-rgb), var(--interface-text-alpha));
+  transition: background-color .2s, color .2s;
+}
+#rtcbox .video-container:hover .interface-btn,
+#rtcbox .video-container:hover .user-name {
+  --interface-text-alpha: 0.8;
+  --interface-background-alpha: 0.7;
+}
+#rtcbox .video-container:hover .interface-btn:hover,
+#rtcbox .video-container:hover .user-name:hover {
+  --interface-text-alpha: 1.0;
+  --interface-background-alpha: 1.0;
+}
+#rtcbox .video-container:hover .interface-btn:hover {
+  filter: drop-shadow(0 0 2px rgba(var(--interface-text-color-rgb),
+                                   var(--interface-text-alpha)));
+}
+#rtcbox .video-container .disallowed {
+  display: none;
+}
+
 #rtcbox .interface-container {
   display: flex;
   position: absolute;
-  bottom: 8px;
-  left: 8px;
+  bottom: 0px;
+  left: 0px;
+  padding: 5px;
 }
 #rtcbox .interface-btn {
-  background-color: rgba(255, 255, 255, 0.35);
+  flex: 0 0 auto;
   border-radius: 50%;
   padding: 5px;
-  margin-right: 6px;
+  margin: 3px;
   cursor: pointer;
-  transition: opacity .2s, background-color .2s;
-  color: rgba(51, 51, 51, 1);
   width: 28px;
   height: 28px;
 }
-#rtcbox .interface-btn:hover:not(.disallowed) {
-  opacity: 1;
-  background-color: white !important;
-}
+
 #rtcbox .interface-btn.audio-btn:before { content: '\e83d'; }
 #rtcbox .interface-btn.audio-btn.muted:before { content: '\e83e'; }
-#rtcbox .interface-btn.audio-btn.disallowed:before { color: rgba(51, 51, 51, .5); }
 
 #rtcbox .interface-btn.video-btn:before { content: '\e83b'; }
 #rtcbox .interface-btn.video-btn.off:before { content: '\e83c'; }
-#rtcbox .interface-btn.video-btn.disallowed:before { color: rgba(51, 51, 51, .5); }
 
 #rtcbox .interface-btn.enlarge-btn:before { content: '\e840'; }
 #rtcbox .interface-btn.enlarge-btn.large:before { content: '\e83f'; }
 
 #rtcbox .video-container .user-name {
-  transition: opacity .2s, background-color .2s;
   position: absolute;
   top: 0;
   left: 5px; /* border-width */
   right: 0;
-  opacity: 0;
-  background-color: rgba(255, 255, 255, 0.35);
   font-weight: bold;
   line-height: 20px;
   padding-left: 8px;
-  color: #111;
   z-index: 5;
   height: 20px;
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
-  background-color:
 }
 #rtcbox .video-container.local-user {
   order: -1; /* first position */
-}
-#rtcbox .video-container:hover .interface-btn,
-#rtcbox .video-container:hover .user-name,
-#rtcbox .video-container.local-user .interface-btn {
-  background-color: rgba(255, 255, 255, 0.65);
-  opacity: 1;
-}
-#rtcbox .video-container:hover .user-name {
-  opacity: 1;
 }
 
 @media (max-width: 800px) {
