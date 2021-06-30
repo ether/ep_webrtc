@@ -108,7 +108,7 @@
 #rtcbox .video-container .user-name {
   position: absolute;
   top: 0;
-  left: 5px; /* border-width */
+  left: 0;
   right: 0;
   font-weight: bold;
   line-height: 20px;
