@@ -49,9 +49,6 @@
    */
   z-index: -1;
 }
-#rtcbox .video-container, #rtcbox video {
-  transition: max-width .3s, max-height .3s, width .3s, height .3s;
-}
 
 #rtcbox .video-container .interface-btn,
 #rtcbox .video-container .user-name {

@@ -741,13 +741,14 @@ exports.rtc = new class {
     const $interface = $('<div>')
         .addClass('interface-container')
         .attr('id', `interface_${videoId}`);
-    $('#rtcbox').append($('<div>')
+    const $videoContainer = $('<div>')
         .addClass('video-container')
         .toggleClass('local-user', isLocal)
         .css({width: size})
         .append($('<div>').addClass('user-name'))
         .append($video)
-        .append($interface));
+        .append($interface)
+        .appendTo($('#rtcbox'));
     this.updatePeerNameAndColor(this.getUserFromId(userId));
 
     // For tests it is important to know when an asynchronous event handler has finishing handling
@@ -850,11 +851,18 @@ exports.rtc = new class {
     // /////
 
     let videoEnlarged = false;
+    const resizeElements = [$video, $videoContainer];
     $interface.append($('<span>')
         .addClass('interface-btn enlarge-btn buttonicon')
         .attr('title', 'Make video larger')
         .on({
           click: (event) => {
+            // Temporarily add a transition rule to smoothly animate the size change. The rule is
+            // removed after transition finishes so that dragging the resize handle is smooth.
+            for (const $element of resizeElements) {
+              $element.css('transition', 'max-width .3s, max-height .3s, width .3s, height .3s');
+            }
+
             videoEnlarged = !videoEnlarged;
             $(event.currentTarget)
                 .attr('title', videoEnlarged ? 'Make video smaller' : 'Make video larger')
@@ -865,6 +873,9 @@ exports.rtc = new class {
             this.unmuteAndPlayAll();
           },
         }));
+    for (const $element of resizeElements) {
+      $element.on('transitionend transitioncancel', (event) => $element.css('transition', ''));
+    }
 
     return $video;
   }
