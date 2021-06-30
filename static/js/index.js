@@ -859,9 +859,7 @@ exports.rtc = new class {
           click: (event) => {
             // Temporarily add a transition rule to smoothly animate the size change. The rule is
             // removed after transition finishes so that dragging the resize handle is smooth.
-            for (const $element of resizeElements) {
-              $element.css('transition', 'max-width .3s, max-height .3s, width .3s, height .3s');
-            }
+            for (const $elt of resizeElements) $elt.css('transition', 'width .3s, height .3s');
 
             videoEnlarged = !videoEnlarged;
             $(event.currentTarget)
