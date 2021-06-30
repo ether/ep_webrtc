@@ -1,3 +1,11 @@
+@font-face {
+  font-family: "fontawesome-ep_webrtc";
+  /* License: ../fonts/fontello/LICENSE.txt */
+  src: url("../fonts/fontello/font/fontawesome-custom.woff2") format("woff2");
+  font-weight: normal;
+  font-style: normal;
+}
+
 #rtcbox {
   align-items: start;
   display: none;

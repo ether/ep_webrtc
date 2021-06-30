@@ -1,0 +1,16 @@
+This work is licensed under CC BY 4.0. To view a copy of this license, visit
+https://creativecommons.org/licenses/by/4.0/
+
+Glyphs:
+  * U+E83F: Original creation by Richard Hansen <rhansen@rhansen.org>,
+    originally published at:
+    https://github.com/FortAwesome/Font-Awesome/issues/645#issuecomment-873326021
+    This work is marked with CC0 1.0. To view a copy of this license, visit
+    https://creativecommons.org/publicdomain/zero/1.0
+  * U+F071: https://fontawesome.com/v5.15/icons/exclamation-triangle?style=solid
+  * U+F108: https://fontawesome.com/v5.15/icons/desktop?style=solid
+  * U+F109: https://fontawesome.com/v5.15/icons/desktop?style=solid
+    with https://fontawesome.com/v5.15/icons/slash?style=solid
+
+For the license of the original Font Awesome source material, see:
+https://fontawesome.com/license/free
