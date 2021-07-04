@@ -477,7 +477,7 @@ exports.rtc = new class {
     const {userId, name = html10n.get('pad.userlist.unnamed'), colorId = 0} = userInfo;
     const $videoContainer = $(`#container_${getVideoId(userId)}`);
     if ($videoContainer.length === 0) return;
-    $videoContainer.find('.user-name').text(name);
+    $videoContainer.find('.user-name').attr('title', name).text(name);
     const color = typeof colorId === 'number' ? clientVars.colorPalette[colorId] : colorId;
     $videoContainer.css({borderLeftColor: color});
   }
