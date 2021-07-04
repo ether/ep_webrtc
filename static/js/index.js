@@ -470,10 +470,11 @@ exports.rtc = new class {
   updatePeerNameAndColor(userInfo) {
     if (!userInfo) return;
     const {userId, name = html10n.get('pad.userlist.unnamed'), colorId = 0} = userInfo;
+    const $videoContainer = $(`#container_${getVideoId(userId)}`);
+    if ($videoContainer.length === 0) return;
+    $videoContainer.find('.user-name').text(name);
     const color = typeof colorId === 'number' ? clientVars.colorPalette[colorId] : colorId;
-    const $video = $(`#${getVideoId(userId)}`);
-    $video.parent().css({'border-left-color': color});
-    $video.siblings('.user-name').text(name);
+    $videoContainer.css({borderLeftColor: color});
   }
 
   showUserMediaError(err) { // show an error returned from getUserMedia
@@ -662,7 +663,7 @@ exports.rtc = new class {
   async setStream(userId, stream) {
     let $video = $(`#${getVideoId(userId)}`);
     if (!stream) {
-      $video.parent().remove();
+      $(`#container_${getVideoId(userId)}`).remove();
       return;
     }
     const isLocal = userId === this.getUserId();
@@ -742,6 +743,7 @@ exports.rtc = new class {
         .addClass('interface-container')
         .attr('id', `interface_${videoId}`);
     const $videoContainer = $('<div>')
+        .attr('id', `container_${videoId}`)
         .addClass('video-container')
         .toggleClass('local-user', isLocal)
         .css({width: size})
@@ -866,7 +868,7 @@ exports.rtc = new class {
                 .attr('title', videoEnlarged ? 'Make video smaller' : 'Make video larger')
                 .toggleClass('large', videoEnlarged);
             const videoSize = `${this._settings.video.sizes[videoEnlarged ? 'large' : 'small']}px`;
-            $video.parent().css({width: videoSize});
+            $videoContainer.css({width: videoSize});
             // Don't use `await` here -- see the comment for the audio button click handler above.
             this.unmuteAndPlayAll();
           },
