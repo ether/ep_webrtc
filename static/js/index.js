@@ -859,8 +859,9 @@ exports.rtc = new class {
 
     let videoEnlarged = false;
     const resizeElements = [$video, $videoContainer];
-    $interface.append($('<span>')
+    const $enlargeBtn = $('<span>')
         .addClass('interface-btn enlarge-btn buttonicon')
+        .css({display: 'none'}) // Will become visible once a video is added.
         .attr('title', 'Make video larger')
         .on({
           click: (event) => {
@@ -877,10 +878,18 @@ exports.rtc = new class {
             // Don't use `await` here -- see the comment for the audio button click handler above.
             this.unmuteAndPlayAll();
           },
-        }));
+        })
+        .appendTo($interface);
     for (const $element of resizeElements) {
       $element.on('transitionend transitioncancel', (event) => $element.css('transition', ''));
     }
+
+    $video.on({
+      resize: (event) => {
+        const {videoWidth: vw, videoHeight: vh} = event.currentTarget;
+        $enlargeBtn.css({display: vw && vh ? '' : 'none'});
+      },
+    });
 
     return $video;
   }
