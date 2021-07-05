@@ -8,7 +8,6 @@
         "loadSettings": "",
         "socketio": ":setSocketIO",
         "eejsBlock_mySettings": "",
-        "eejsBlock_editorContainerBox": "",
         "eejsBlock_styles": ""
       },
       "client_hooks": {

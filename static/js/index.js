@@ -389,7 +389,8 @@ exports.rtc = new class {
       });
       return;
     }
-    if (!$('#editorcontainerbox').hasClass('flex-layout')) {
+    const $editorcontainerbox = $('#editorcontainerbox');
+    if (!$editorcontainerbox.hasClass('flex-layout')) {
       $.gritter.add({
         title: 'Error',
         text: 'Ep_webrtc: Please upgrade to etherpad 1.8.3 for this plugin to work correctly',
@@ -397,6 +398,10 @@ exports.rtc = new class {
         class_name: 'error',
       });
     }
+    const $rtcbox = $('<div>')
+        .attr('id', 'rtcbox')
+        .addClass('thin-scrollbar')
+        .appendTo($editorcontainerbox);
 
     this.settingToCheckbox({
       urlVar: 'av',
@@ -440,7 +445,7 @@ exports.rtc = new class {
     } else {
       await this.deactivate();
     }
-    $('#rtcbox').data('initialized', true); // Help tests determine when initialization is done.
+    $rtcbox.data('initialized', true); // Help tests determine when initialization is done.
   }
 
   userJoinOrUpdate(hookName, {userInfo}) {

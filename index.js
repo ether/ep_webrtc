@@ -122,10 +122,6 @@ exports.eejsBlock_mySettings = (hookName, context) => {
   }, module);
 };
 
-exports.eejsBlock_editorContainerBox = (hookName, context) => {
-  context.content += eejs.require('./templates/editorContainerBox.ejs', {}, module);
-};
-
 exports.eejsBlock_styles = (hookName, context) => {
   context.content += eejs.require('./templates/styles.html', {}, module);
 };
