@@ -347,6 +347,9 @@ const getContentSize = (elt) => {
   return {width: Number.parseFloat(width), height: Number.parseFloat(height)};
 };
 
+// Vector dot product.
+const dot = (a, b) => a.reduce((acc, n, i) => acc + (1.0 * n * b[i]), 0.0);
+
 exports.rtc = new class {
   constructor() {
     this._activated = null;
@@ -383,6 +386,9 @@ exports.rtc = new class {
   // API HOOKS
 
   async postAceInit(hookName, {pad}) {
+    const outerWin = document.querySelector('iframe[name="ace_outer"]').contentWindow;
+    const innerWin = outerWin.document.querySelector('iframe[name="ace_inner"]').contentWindow;
+    this._windows = [window, outerWin, innerWin];
     this._pad = pad;
     this._settings = clientVars.ep_webrtc;
     if (this._settings == null || this._settings.configError) {
@@ -781,15 +787,6 @@ exports.rtc = new class {
         })
         .appendTo($('#rtcbox'));
     this.updatePeerNameAndColor(this.getUserFromId(userId));
-    let updateMinSizePending = false;
-    new ResizeObserver(() => {
-      if (updateMinSizePending) return; // Avoid spamming the event loop (for smoother resizing).
-      updateMinSizePending = true;
-      setTimeout(() => {
-        ($videoContainer.data('updateMinSize') || (() => {}))();
-        updateMinSizePending = false;
-      }, 0);
-    }).observe($videoContainer[0]);
 
     // For tests it is important to know when an asynchronous event handler has finishing handling
     // an event. This function wraps async event handler functions so that tests can wait for all
@@ -931,13 +928,82 @@ exports.rtc = new class {
       });
     }
 
+    // /////
+    // Resize handle
+    // /////
+
+    // TODO: Add support for pinch zooming via touch events:
+    // https://developer.mozilla.org/en-US/docs/Web/API/Touch_events
+    $videoContainer.append($('<div>')
+        .addClass('resize-handle')
+        .attr('title', 'Drag to resize')
+        .appendTo($videoContainer)
+        .on({
+          // Pointer events (https://developer.mozilla.org/en-US/docs/Web/API/Pointer_events) are
+          // preferred over mouse events because the user might be on a touchscreen device (e.g.,
+          // smartphone).
+          pointerdown: ({originalEvent: pd}) => {
+            if (!pd.isPrimary) return;
+            pd.preventDefault();
+            pd.currentTarget.setPointerCapture(pd.pointerId);
+            const initialSize = getContentSize($videoContainer[0]);
+            const {x: initialX, y: initialY} = $videoContainer[0].getBoundingClientRect();
+            const onpointermove = (pm) => {
+              if (pm.pointerId !== pd.pointerId) return;
+              pm.preventDefault();
+              // Adjust the video container's size both by how much the pointer has moved and by how
+              // much the container itself has moved. The latter is included so that resizing
+              // behaves as users expect when the act of resizing itself causes an overflowing
+              // container to scroll into or out of view.
+              const {x, y} = $videoContainer[0].getBoundingClientRect();
+              const newSize = [
+                Math.max(0.0, initialSize.width + pm.screenX - pd.screenX + initialX - x),
+                Math.max(0.0, initialSize.height + pm.screenY - pd.screenY + initialY - y),
+              ];
+              if (aspectRatio) {
+                // Preserve the aspect ratio by projecting newSize onto the aspect ratio vector.
+                // Projection is preferred over other approaches because it provides a more natural
+                // user experience.
+                const arv = [aspectRatio, 1.0];
+                const m = dot(newSize, arv) / dot(arv, arv);
+                newSize[0] = m * arv[0];
+                newSize[1] = m * arv[1];
+              }
+              $videoContainer.css({
+                aspectRatio: '', // Browser resize behavior is weird if aspect-ratio is set.
+                width: `${newSize[0]}px`,
+                height: `${newSize[1]}px`,
+              });
+              ($videoContainer.data('updateMinSize') || (() => {}))();
+            };
+            const onpointerup = (pu) => {
+              if (pu.pointerId !== pd.pointerId) return;
+              pu.preventDefault();
+              pu.target.releasePointerCapture(pu.pointerId);
+              ($videoContainer.data('updateMinSize') || (() => {}))();
+              for (const win of this._windows) {
+                win.document.body.style.cursor = '';
+                win.document.body.style.touchAction = '';
+                win.removeEventListener('pointermove', onpointermove);
+                win.removeEventListener('pointerup', onpointerup);
+                win.removeEventListener('pointercancel', onpointerup);
+              }
+            };
+            for (const win of this._windows) {
+              win.document.body.style.cursor = 'nwse-resize';
+              win.document.body.style.touchAction = 'none';
+              win.addEventListener('pointermove', onpointermove);
+              win.addEventListener('pointerup', onpointerup);
+              win.addEventListener('pointercancel', onpointerup);
+            }
+          },
+        }));
+
     $video.on({
       resize: (event) => {
         const {videoWidth: vw, videoHeight: vh} = event.currentTarget;
         aspectRatio = vw && vh ? 1.0 * vw / vh : null;
         $enlargeBtn.css({display: aspectRatio != null ? '' : 'none'});
-        $videoContainer.css(
-            'resize', !vw || !vh ? '' : aspectRatio >= 1.0 ? 'horizontal' : 'vertical');
         setVideoSize();
       },
     });

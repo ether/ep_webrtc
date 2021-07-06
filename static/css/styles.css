@@ -17,7 +17,10 @@
   box-sizing: border-box;
   background-color: transparent;
   height: auto;
+  max-height: 100%;
+  max-width: 100%;
   overflow: auto;
+  width: auto;
 }
 
 #rtcbox .video-container {
@@ -27,20 +30,8 @@
   border: 1px solid black;
   border-left: 5px solid;
   box-sizing: content-box;
-  display: flex;
-  height: auto;
-  justify-content: center;
   overflow: hidden;
-  resize: both;
-  /*
-   * This serves two purposes:
-   *   - It creates a stacking context so that the `z-index: -1;` rule on the
-   *     video element doesn't send the video behind the background.
-   *   - It causes the `position: absolute;` rule on the .interface-container
-   *     div to position relative to the .video-container div.
-   */
-  transform: translateZ(0);
-  width: auto;
+  position: relative;
 }
 #rtcbox .video-container:not(:first-child) {
   margin-top: 5px;
@@ -51,16 +42,11 @@
   height: 100%;
   object-fit: contain;
   width: 100%;
-  /*
-   * Without this, Safari puts the lower right resize handle for the
-   * containing div (.video-container) behind the video. Chrome and Firefox
-   * do not have the same defect.
-   */
-  z-index: -1;
 }
 
 #rtcbox .video-container .interface-btn,
-#rtcbox .video-container .user-name {
+#rtcbox .video-container .user-name,
+#rtcbox .video-container .resize-handle {
   --interface-text-color-rgb: 87, 98, 115; /* --dark-color */
   --interface-background-color-rgb: 242, 243, 244; /* --light-color */
   --interface-text-alpha: 0.6;
@@ -71,12 +57,14 @@
   transition: background-color .2s, color .2s;
 }
 #rtcbox .video-container:hover .interface-btn,
-#rtcbox .video-container:hover .user-name {
+#rtcbox .video-container:hover .user-name,
+#rtcbox .video-container:hover .resize-handle {
   --interface-text-alpha: 0.8;
   --interface-background-alpha: 0.7;
 }
 #rtcbox .video-container:hover .interface-btn:hover,
-#rtcbox .video-container:hover .user-name:hover {
+#rtcbox .video-container:hover .user-name:hover,
+#rtcbox .video-container:hover .resize-handle:hover {
   --interface-text-alpha: 1.0;
   --interface-background-alpha: 1.0;
 }
@@ -95,6 +83,7 @@
   bottom: 0px;
   left: 0px;
   padding: 5px;
+  z-index: 2;
 }
 #rtcbox .interface-btn {
   flex: 0 0 auto;
@@ -115,18 +104,42 @@
 #rtcbox .interface-btn.enlarge-btn:before { content: '\e840'; }
 #rtcbox .interface-btn.enlarge-btn.large:before { content: '\e83f'; }
 
+#rtcbox .video-container .resize-handle {
+  --handle-size: 15px;
+  background-color: transparent;
+  bottom: 0;
+  cursor: nwse-resize;
+  font-family: "fontawesome-ep_webrtc";
+  font-size: var(--handle-size);
+  line-height: var(--handle-size);
+  position: absolute;
+  right: 0;
+  text-shadow: 1px 1px 0 rgba(var(--interface-background-color-rgb),
+                              var(--interface-background-alpha));
+  touch-action: none;
+  user-select: none;
+  z-index: 3;
+}
+#rtcbox .video-container .resize-handle:before {
+  content: "\e83f";
+}
+
 #rtcbox .video-container .user-name {
+  /*
+   * Use absolute positioning to remove the name from the normal document flow.
+   * This prevents a long name from making the .video-container div overly wide.
+   */
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
   font-weight: bold;
   height: min-content;
-  z-index: 5;
   overflow: hidden;
   padding: 0px 8px;
   white-space: nowrap;
   text-overflow: ellipsis;
+  z-index: 1;
 }
 #rtcbox .video-container.local-user {
   order: -1; /* first position */
