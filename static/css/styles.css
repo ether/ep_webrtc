@@ -111,11 +111,10 @@
   left: 0;
   right: 0;
   font-weight: bold;
-  line-height: 20px;
-  padding-left: 8px;
+  height: min-content;
   z-index: 5;
-  height: 20px;
   overflow: hidden;
+  padding: 0px 8px;
   white-space: nowrap;
   text-overflow: ellipsis;
 }
