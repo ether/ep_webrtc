@@ -1,4 +1,5 @@
 #rtcbox {
+  align-items: start;
   display: none;
   flex: 0 1 auto;
   flex-direction: column;
@@ -21,9 +22,8 @@
   display: flex;
   height: auto;
   justify-content: center;
-  min-height: 80px;
   overflow: hidden;
-  resize: horizontal;
+  resize: both;
   /*
    * This serves two purposes:
    *   - It creates a stacking context so that the `z-index: -1;` rule on the
@@ -32,6 +32,7 @@
    *     div to position relative to the .video-container div.
    */
   transform: translateZ(0);
+  width: auto;
 }
 #rtcbox .video-container:not(:first-child) {
   margin-top: 5px;
@@ -129,7 +130,6 @@
   #rtcbox {
     flex-direction: row;
     order: 2;
-    align-items: baseline;
   }
   #rtcbox .video-container:not(:first-child) {
     margin-top: 0;

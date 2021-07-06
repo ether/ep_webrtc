@@ -859,6 +859,15 @@ exports.rtc = new class {
 
     let videoEnlarged = false;
     const resizeElements = [$video, $videoContainer];
+    let aspectRatio = 4 / 3;
+    const setVideoSize = () => {
+      const wide = aspectRatio >= 1.0;
+      const size = `${this._settings.video.sizes[videoEnlarged ? 'large' : 'small']}px`;
+      $videoContainer.css({
+        height: wide ? '' : size,
+        width: wide ? size : '',
+      });
+    };
     const $enlargeBtn = $('<span>')
         .addClass('interface-btn enlarge-btn buttonicon')
         .css({display: 'none'}) // Will become visible once a video is added.
@@ -873,8 +882,7 @@ exports.rtc = new class {
             $(event.currentTarget)
                 .attr('title', videoEnlarged ? 'Make video smaller' : 'Make video larger')
                 .toggleClass('large', videoEnlarged);
-            const videoSize = `${this._settings.video.sizes[videoEnlarged ? 'large' : 'small']}px`;
-            $videoContainer.css({width: videoSize});
+            setVideoSize();
             // Don't use `await` here -- see the comment for the audio button click handler above.
             this.unmuteAndPlayAll();
           },
@@ -887,7 +895,11 @@ exports.rtc = new class {
     $video.on({
       resize: (event) => {
         const {videoWidth: vw, videoHeight: vh} = event.currentTarget;
+        aspectRatio = vw && vh ? 1.0 * vw / vh : 4 / 3;
         $enlargeBtn.css({display: vw && vh ? '' : 'none'});
+        $videoContainer.css(
+            'resize', !vw || !vh ? '' : aspectRatio >= 1.0 ? 'horizontal' : 'vertical');
+        setVideoSize();
       },
     });
 
