@@ -692,12 +692,15 @@ exports.rtc = new class {
   }
 
   async playVideo($video) {
-    if (!$video[0].paused) return;
     // play() will block indefinitely if there are no enabled tracks.
     if (!$video[0].srcObject.getTracks().some((t) => t.enabled)) return;
     debug('playing video', $video[0]);
+    const $videoContainer = $(`#container_${$video[0].id}`);
+    const $playErrorBtn = $videoContainer.find('.play-error-btn');
     try {
-      return await $video[0].play();
+      await $video[0].play();
+      debug('video is playing', $video[0]);
+      $playErrorBtn.css({display: 'none'});
     } catch (err) {
       debug('failed to play video', $video[0], err);
       // Browsers won't allow autoplayed video with sound until the user has interacted with the
@@ -712,14 +715,9 @@ exports.rtc = new class {
         $video.data('automuted', true);
         return await this.playVideo($video);
       }
-      // The error is most likely a browser autoplay restriction. It's not useful to display such
-      // errors -- or really any other play error for that matter -- in a gritter box, so ignore the
-      // error. The video won't be playing, but that's not a big deal: The user can click on one of
-      // the interface buttons to try playing again (via unmuteAndPlayAll()).
-      //
-      // TODO: Indicate the error in the video element (e.g., red circle with an exclamation point
-      // that displays the error message when clicked or hovered over).
+      $playErrorBtn.css({display: ''});
     }
+    ($videoContainer.data('updateMinSize') || (() => {}))();
   }
 
   // Tries to play any videos that aren't playing (including the self-view), or unmute videos that
@@ -926,6 +924,30 @@ exports.rtc = new class {
         $element.css('transition', '');
         ($videoContainer.data('updateMinSize') || (() => {}))();
       });
+    }
+
+    // /////
+    // Alerts
+    // /////
+
+    // Spacer to push the alerts to the right.
+    $interface.append($('<span>').css({flex: '1 0 0'}));
+
+    // TODO: These should be converted into accessible popovers/toggletips that work on touch-only
+    // devices. See: https://inclusive-components.design/tooltips-toggletips/
+    const errorBtns = [
+      {
+        cls: 'play-error-btn',
+        title: 'Playback failed. Click to retry.',
+        click: () => this.unmuteAndPlayAll(),
+      },
+    ];
+    for (const {cls, title, click} of errorBtns) {
+      $interface.append($('<span>')
+          .addClass(`interface-btn error-btn buttonicon ${cls}`)
+          .css({display: 'none'}) // Will become visible if there is an error.
+          .attr({title})
+          .on({click}));
     }
 
     // /////

@@ -83,6 +83,7 @@
   bottom: 0px;
   left: 0px;
   padding: 5px;
+  width: 100%;
   z-index: 2;
 }
 #rtcbox .interface-btn {
@@ -103,6 +104,16 @@
 
 #rtcbox .interface-btn.enlarge-btn:before { content: '\e840'; }
 #rtcbox .interface-btn.enlarge-btn.large:before { content: '\e83f'; }
+
+#rtcbox .video-container .interface-container .interface-btn.error-btn {
+  --interface-background-alpha: 1.0;
+  --interface-text-alpha: 1.0;
+  --interface-text-color-rgb: 255, 0, 0;
+}
+#rtcbox .video-container .interface-container .interface-btn.error-btn:before {
+  content: "\f071";
+  font-family: "fontawesome-ep_webrtc";
+}
 
 #rtcbox .video-container .resize-handle {
   --handle-size: 15px;
