@@ -700,6 +700,8 @@ exports.rtc = new class {
     try {
       await $video[0].play();
       debug('video is playing', $video[0]);
+      $videoContainer.find('.automuted-error-btn')
+          .css({display: $video.data('automuted') ? '' : 'none'});
       $playErrorBtn.css({display: 'none'});
     } catch (err) {
       debug('failed to play video', $video[0], err);
@@ -936,6 +938,11 @@ exports.rtc = new class {
     // TODO: These should be converted into accessible popovers/toggletips that work on touch-only
     // devices. See: https://inclusive-components.design/tooltips-toggletips/
     const errorBtns = [
+      {
+        cls: 'automuted-error-btn',
+        title: 'Your browser blocked audio playback. Click to unmute.',
+        click: () => this.unmuteAndPlayAll(),
+      },
       {
         cls: 'play-error-btn',
         title: 'Playback failed. Click to retry.',
