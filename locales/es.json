@@ -1,0 +1,10 @@
+{
+	"@metadata": {
+		"authors": [
+			"Jackiezelaya"
+		]
+	},
+	"pad.ep_webrtc.error.ssl": "TLS (https) es necesario para utilizar WebRTC.",
+	"pad.ep_webrtc.error.permission": "No se pudo obtener permiso para acceder a la cámara o al micrófono.",
+	"pad.ep_webrtc.error.notFound": "No se pudo encontrar una cámara y/o un micrófono. Vuelva a cargar la página para volver a intentarlo."
+}
