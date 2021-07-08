@@ -364,18 +364,26 @@ exports.rtc = new class {
     })();
     this._blankStream = new MediaStream([this._disabledSilence]);
     this._localTracks = new LocalTracks();
+    this._localTracks.setTrack(this._disabledSilence.kind, this._disabledSilence);
     this._localTracks.addEventListener('trackchanged', ({oldTrack, newTrack}) => {
-      if (newTrack != null) return;
       // Normally the self-view UI only needs to be updated if the user clicks on something, but it
       // also needs to be updated if the browser decides to end the local stream for whatever
       // reason. (Safari v14.1 on macOS v11.3.1 (Big Sur) seems to have a bug that causes it to
       // unexpectedly end local streams.)
+
+      // Display an alert if the track went away, or hide the alert if there is a track.
+      const $videoContainer = $(`#container_${getVideoId(this.getUserId())}`);
+      $videoContainer.find(`.${(oldTrack || newTrack).kind}ended-error-btn`)
+          .css('display', newTrack == null ? '' : 'none');
+      ($videoContainer.data('updateMinSize') || (() => {}))();
+
+      // Update the audio/video buttons to reflect the new state.
+      if (newTrack != null) return;
       switch (oldTrack.kind) {
         case 'audio': this._selfViewButtons.audio.enabled = false; break;
         case 'video': this._selfViewButtons.video.enabled = false; break;
       }
     });
-    this._localTracks.setTrack(this._disabledSilence.kind, this._disabledSilence);
     this._pad = null;
     this._peers = new Map();
     // Populated with convenience methods once the self-view interface is created.
@@ -940,6 +948,11 @@ exports.rtc = new class {
     // devices. See: https://inclusive-components.design/tooltips-toggletips/
     const errorBtns = [
       {
+        cls: 'audioended-error-btn',
+        title: 'Audio stopped unexpectedly. Click to clear this notification.',
+        click: (ev) => $(ev.currentTarget).css({display: 'none'}),
+      },
+      {
         cls: 'automuted-error-btn',
         title: 'Your browser blocked audio playback. Click to unmute.',
         click: () => this.unmuteAndPlayAll(),
@@ -953,6 +966,11 @@ exports.rtc = new class {
         cls: 'play-error-btn',
         title: 'Playback failed. Click to retry.',
         click: () => this.unmuteAndPlayAll(),
+      },
+      {
+        cls: 'videoended-error-btn',
+        title: 'Video stopped unexpectedly. Click to clear this notification.',
+        click: (ev) => $(ev.currentTarget).css({display: 'none'}),
       },
     ];
     for (const {cls, title, click} of errorBtns) {
