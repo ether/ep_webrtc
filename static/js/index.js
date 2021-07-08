@@ -362,6 +362,7 @@ exports.rtc = new class {
       track.enabled = false;
       return track;
     })();
+    this._blankStream = new MediaStream([this._disabledSilence]);
     this._localTracks = new LocalTracks();
     this._localTracks.addEventListener('trackchanged', ({oldTrack, newTrack}) => {
       if (newTrack != null) return;
@@ -944,6 +945,11 @@ exports.rtc = new class {
         click: () => this.unmuteAndPlayAll(),
       },
       {
+        cls: 'disconnected-error-btn',
+        title: 'Connection lost; waiting for automatic reconnect. Click to force reconnection.',
+        click: () => { this.hangup(userId); this.getPeerConnection(userId); },
+      },
+      {
         cls: 'play-error-btn',
         title: 'Playback failed. Click to retry.',
         click: () => this.unmuteAndPlayAll(),
@@ -1113,11 +1119,17 @@ exports.rtc = new class {
       this._peers.set(userId, peer);
       peer.addEventListener('stream', async ({stream}) => {
         _debug(`remote stream ${stream.id} added`);
+        const $videoContainer = $(`#container_${getVideoId(userId)}`);
+        $videoContainer.find('.disconnected-error-btn').css({display: 'none'});
+        ($videoContainer.data('updateMinSize') || (() => {}))();
         await this.setStream(userId, stream);
       });
       peer.addEventListener('streamgone', async ({stream}) => {
         _debug(`remote stream ${stream.id} removed`);
-        await this.setStream(userId, null);
+        const $videoContainer = $(`#container_${getVideoId(userId)}`);
+        $videoContainer.find('.disconnected-error-btn').css({display: ''});
+        ($videoContainer.data('updateMinSize') || (() => {}))();
+        await this.setStream(userId, this._blankStream);
       });
       peer.addEventListener('closed', () => {
         _debug('PeerState closed');
