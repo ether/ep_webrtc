@@ -896,11 +896,11 @@ exports.rtc = new class {
     const setVideoSize = () => {
       const wide = !aspectRatio || aspectRatio >= 1.0;
       const longSide =
-          !aspectRatio ? '0' : `${this._settings.video.sizes[videoEnlarged ? 'large' : 'small']}px`;
-      const shortSide = !aspectRatio ? '0' : '';
+          !aspectRatio ? 0 : this._settings.video.sizes[videoEnlarged ? 'large' : 'small'];
+      const shortSide = !aspectRatio ? 0 : longSide * (wide ? 1.0 / aspectRatio : aspectRatio);
       $videoContainer.css({
-        height: wide ? shortSide : longSide,
-        width: wide ? longSide : shortSide,
+        height: `${wide ? shortSide : longSide}px`,
+        width: `${wide ? longSide : shortSide}px`,
       });
       ($videoContainer.data('updateMinSize') || (() => {}))();
     };
