@@ -951,6 +951,8 @@ exports.rtc = new class {
             const onpointermove = (pm) => {
               if (pm.pointerId !== pd.pointerId) return;
               pm.preventDefault();
+              videoEnlarged = true;
+              $enlargeBtn.attr('title', 'Reset video size').addClass('large');
               // Adjust the video container's size both by how much the pointer has moved and by how
               // much the container itself has moved. The latter is included so that resizing
               // behaves as users expect when the act of resizing itself causes an overflowing
