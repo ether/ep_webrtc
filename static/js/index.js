@@ -1003,7 +1003,11 @@ exports.rtc = new class {
       resize: (event) => {
         const {videoWidth: vw, videoHeight: vh} = event.currentTarget;
         aspectRatio = vw && vh ? 1.0 * vw / vh : null;
-        $enlargeBtn.css({display: aspectRatio != null ? '' : 'none'});
+        videoEnlarged = false;
+        $enlargeBtn
+            .removeClass('large')
+            .attr('title', 'Make video larger')
+            .css({display: aspectRatio != null ? '' : 'none'});
         setVideoSize();
       },
     });
