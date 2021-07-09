@@ -505,6 +505,8 @@ exports.rtc = new class {
   }
 
   showUserMediaError(err) { // show an error returned from getUserMedia
+    err.devices.sort();
+    const devices = err.devices.join('');
     let msgId = null;
     const extraInfo = $(document.createDocumentFragment());
     // For reference on standard errors returned by getUserMedia:
@@ -519,7 +521,7 @@ exports.rtc = new class {
         if (location.protocol === 'https:' ||
             location.hostname === 'localhost' ||
             location.hostname === '127.0.0.1') {
-          msgId = 'error_permission';
+          msgId = `error_permission_${devices}`;
           this.sendErrorStat('Permission');
         } else {
           msgId = 'error_ssl';
@@ -531,7 +533,7 @@ exports.rtc = new class {
         // Safari v14.1 on macOS v11.13.1 (Big Sur) on Sauce Labs emits OverconstrainedError when it
         // can't find a camera. Fall through to the NotFoundError case:
       case 'NotFoundError':
-        msgId = 'error_notFound';
+        msgId = `error_notFound_${devices}`;
         this.sendErrorStat('NotFound');
         break;
       case 'NotReadableError':
@@ -576,16 +578,16 @@ exports.rtc = new class {
     if (updateAudio) await this._trackLocks.audio.lock();
     if (updateVideo) await this._trackLocks.video.lock();
     try {
+      const devices = [];
       const addAudioTrack = updateAudio && this._selfViewButtons.audio.enabled &&
           !this._localTracks.stream.getAudioTracks().some(
               (t) => t !== this._disabledSilence && t.readyState === 'live');
+      if (addAudioTrack) devices.push('mic');
       const addVideoTrack = updateVideo && this._selfViewButtons.video.enabled &&
           !this._localTracks.stream.getVideoTracks().some((t) => t.readyState === 'live');
+      if (addVideoTrack) devices.push('cam');
       if (addAudioTrack || addVideoTrack) {
-        debug(`requesting permission to access ${
-          addAudioTrack && addVideoTrack ? 'camera and microphone'
-          : addAudioTrack ? 'microphone'
-          : 'camera'}`);
+        debug(`requesting permission to access ${devices.join(' and ')}`);
         let stream;
         try {
           stream = await window.navigator.mediaDevices.getUserMedia({
@@ -597,6 +599,7 @@ exports.rtc = new class {
           // Display but otherwise ignore the error. The button(s) will be toggled back to
           // disabled below if we failed to access the microphone/camera. The user can re-click
           // the button to try again.
+          err.devices = devices;
           (async () => this.showUserMediaError(err))();
           stream = new MediaStream();
         }
