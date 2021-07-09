@@ -341,6 +341,12 @@ const isPolite = (myId, otherId) => {
 // Periods in element IDs make it hard to build a selector string because period is for class match.
 const getVideoId = (userId) => `video_${userId.replace(/\./g, '_')}`;
 
+// Returns the computed width and height in px of the given element.
+const getContentSize = (elt) => {
+  const {width, height} = window.getComputedStyle(elt);
+  return {width: Number.parseFloat(width), height: Number.parseFloat(height)};
+};
+
 exports.rtc = new class {
   constructor() {
     this._activated = null;
@@ -480,6 +486,7 @@ exports.rtc = new class {
     $videoContainer.find('.user-name').attr('title', name).text(name);
     const color = typeof colorId === 'number' ? clientVars.colorPalette[colorId] : colorId;
     $videoContainer.css({borderLeftColor: color});
+    ($videoContainer.data('updateMinSize') || (() => {}))();
   }
 
   showUserMediaError(err) { // show an error returned from getUserMedia
@@ -732,7 +739,7 @@ exports.rtc = new class {
         (...args) => debug(`(${isLocal ? 'self-view' : `peer ${userId}`} interface)`, ...args);
     _debug('adding interface');
     const videoId = getVideoId(userId);
-    const size = `${this._settings.video.sizes.small}px`;
+    const $name = $('<div>').addClass('user-name');
     const $video = $('<video>')
         .attr({
           id: videoId,
@@ -751,12 +758,38 @@ exports.rtc = new class {
         .attr('id', `container_${videoId}`)
         .addClass('video-container')
         .toggleClass('local-user', isLocal)
-        .css({width: size})
-        .append($('<div>').addClass('user-name'))
+        .css({width: '0', height: '0'})
+        .append($name)
         .append($video)
         .append($interface)
+        // `min-width: min-content` and `min-height: min-content` don't work on all browsers. Even
+        // if they did, the peer name display has `position: absolute` so that a really long name
+        // doesn't cause $videoContainer to become overly wide. This function sets `min-width` and
+        // `min-height` to the actual computed lengths as needed.
+        .data('updateMinSize', () => {
+          // Allow $videoContainer to be too small so that we can detect overflow.
+          $videoContainer.css({minWidth: '', minHeight: ''});
+          const {height: nh} = $name[0].getBoundingClientRect();
+          const {width: iw, height: ih} = $interface[0].getBoundingClientRect();
+          const {width, height} = getContentSize($videoContainer[0]);
+          // There is no API for determining the min-content width/height of an element, so
+          // min width/height is only set if overflow is detected.
+          $videoContainer.css({
+            minWidth: iw > width ? `${iw}px` : '',
+            minHeight: nh + ih > height ? `${nh + ih}px` : '',
+          });
+        })
         .appendTo($('#rtcbox'));
     this.updatePeerNameAndColor(this.getUserFromId(userId));
+    let updateMinSizePending = false;
+    new ResizeObserver(() => {
+      if (updateMinSizePending) return; // Avoid spamming the event loop (for smoother resizing).
+      updateMinSizePending = true;
+      setTimeout(() => {
+        ($videoContainer.data('updateMinSize') || (() => {}))();
+        updateMinSizePending = false;
+      }, 0);
+    }).observe($videoContainer[0]);
 
     // For tests it is important to know when an asynchronous event handler has finishing handling
     // an event. This function wraps async event handler functions so that tests can wait for all
@@ -859,14 +892,17 @@ exports.rtc = new class {
 
     let videoEnlarged = false;
     const resizeElements = [$video, $videoContainer];
-    let aspectRatio = 4 / 3;
+    let aspectRatio = null;
     const setVideoSize = () => {
-      const wide = aspectRatio >= 1.0;
-      const size = `${this._settings.video.sizes[videoEnlarged ? 'large' : 'small']}px`;
+      const wide = !aspectRatio || aspectRatio >= 1.0;
+      const longSide =
+          !aspectRatio ? '0' : `${this._settings.video.sizes[videoEnlarged ? 'large' : 'small']}px`;
+      const shortSide = !aspectRatio ? '0' : '';
       $videoContainer.css({
-        height: wide ? '' : size,
-        width: wide ? size : '',
+        height: wide ? shortSide : longSide,
+        width: wide ? longSide : shortSide,
       });
+      ($videoContainer.data('updateMinSize') || (() => {}))();
     };
     const $enlargeBtn = $('<span>')
         .addClass('interface-btn enlarge-btn buttonicon')
@@ -889,20 +925,24 @@ exports.rtc = new class {
         })
         .appendTo($interface);
     for (const $element of resizeElements) {
-      $element.on('transitionend transitioncancel', (event) => $element.css('transition', ''));
+      $element.on('transitionend transitioncancel', (event) => {
+        $element.css('transition', '');
+        ($videoContainer.data('updateMinSize') || (() => {}))();
+      });
     }
 
     $video.on({
       resize: (event) => {
         const {videoWidth: vw, videoHeight: vh} = event.currentTarget;
-        aspectRatio = vw && vh ? 1.0 * vw / vh : 4 / 3;
-        $enlargeBtn.css({display: vw && vh ? '' : 'none'});
+        aspectRatio = vw && vh ? 1.0 * vw / vh : null;
+        $enlargeBtn.css({display: aspectRatio != null ? '' : 'none'});
         $videoContainer.css(
             'resize', !vw || !vh ? '' : aspectRatio >= 1.0 ? 'horizontal' : 'vertical');
         setVideoSize();
       },
     });
 
+    $videoContainer.data('updateMinSize')();
     return $video;
   }
 

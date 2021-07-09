@@ -82,6 +82,7 @@
 
 #rtcbox .interface-container {
   display: flex;
+  min-width: min-content;
   position: absolute;
   bottom: 0px;
   left: 0px;
