@@ -428,22 +428,22 @@ exports.rtc = new class {
         if (location.protocol === 'https:' ||
             location.hostname === 'localhost' ||
             location.hostname === '127.0.0.1') {
-          reason = html10n.get('pad.ep_webrtc.error.permission');
+          reason = html10n.get('ep_webrtc_error_permission');
           this.sendErrorStat('Permission');
         } else {
-          reason = html10n.get('pad.ep_webrtc.error.ssl');
+          reason = html10n.get('ep_webrtc_error_ssl');
           this.sendErrorStat('SecureConnection');
         }
         break;
       case 'NotFoundError':
-        reason = html10n.get('pad.ep_webrtc.error.notFound');
+        reason = html10n.get('ep_webrtc_error_notFound');
         this.sendErrorStat('NotFound');
         break;
       case 'NotReadableError':
         // `err.message` might give useful info to the user (not necessarily
         // useful for other error messages)
         reason = $('<div>')
-            .append($('<p>').text(html10n.get('pad.ep_webrtc.error.notReadable')))
+            .append($('<p>').text(html10n.get('ep_webrtc_error_notReadable')))
             .append($('<p>').text(err.message));
         this.sendErrorStat('Hardware');
         break;
@@ -451,7 +451,7 @@ exports.rtc = new class {
         // `err.message` might give useful info to the user (not necessarily useful for
         // other error messages)
         reason = $('<div>')
-            .append($('<p>').text(html10n.get('pad.ep_webrtc.error.otherCantAccess')))
+            .append($('<p>').text(html10n.get('ep_webrtc_error_otherCantAccess')))
             .append($('<p>').text(err.message));
         this.sendErrorStat('Abort');
         break;

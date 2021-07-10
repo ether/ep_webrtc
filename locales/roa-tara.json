@@ -4,12 +4,12 @@
 			"Joetaras"
 		]
 	},
-	"pad.settings.enablertc": "Abbilite 'a ciat audio/video",
-	"pad.ep_webrtc.error.ssl": "TLS (https) jè obbligatorije pe ausà WebRTC.",
-	"pad.ep_webrtc.error.permission": "'Mbossibbele pigghià le permesse pe ausà 'a fotocamere e 'u microfone tune.",
-	"pad.ep_webrtc.error.notFound": "'Mbossibbele acchià 'na fotocamere e/o 'nu microfone. Recareche 'a pàgene pe pruvà arrete.",
-	"pad.ep_webrtc.error.notReadable": "Ne despiace, ha assute 'n'errore harduer ca ave 'mbedite l'accesse a 'a fotocamera e/o 'u microfone tune:",
-	"pad.ep_webrtc.error.otherCantAccess": "Ne despiace, 'u browser non ge tène l'accesse a 'a fotocamere e/o microfone tune. Pe piacere condrolle le permesse jndr'à le 'mbostaziune d'u browser tune. Quiste non ge pare 'n'errore harduer:",
-	"pad.settings.audioenabledonstart": "Audio appizzecate a l'avvie",
-	"pad.settings.videoenabledonstart": "Video appizzecate a l'avvie"
+	"ep_webrtc_settings_enablertc": "Abbilite 'a ciat audio/video",
+	"ep_webrtc_error_ssl": "TLS (https) jè obbligatorije pe ausà WebRTC.",
+	"ep_webrtc_error_permission": "'Mbossibbele pigghià le permesse pe ausà 'a fotocamere e 'u microfone tune.",
+	"ep_webrtc_error_notFound": "'Mbossibbele acchià 'na fotocamere e/o 'nu microfone. Recareche 'a pàgene pe pruvà arrete.",
+	"ep_webrtc_error_notReadable": "Ne despiace, ha assute 'n'errore harduer ca ave 'mbedite l'accesse a 'a fotocamera e/o 'u microfone tune:",
+	"ep_webrtc_error_otherCantAccess": "Ne despiace, 'u browser non ge tène l'accesse a 'a fotocamere e/o microfone tune. Pe piacere condrolle le permesse jndr'à le 'mbostaziune d'u browser tune. Quiste non ge pare 'n'errore harduer:",
+	"ep_webrtc_settings_audioenabledonstart": "Audio appizzecate a l'avvie",
+	"ep_webrtc_settings_videoenabledonstart": "Video appizzecate a l'avvie"
 }

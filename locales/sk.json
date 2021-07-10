@@ -4,12 +4,12 @@
 			"Yardom78"
 		]
 	},
-	"pad.settings.enablertc": "Zapnúť Audio/Video rozhovor",
-	"pad.ep_webrtc.error.ssl": "Pre použitie WebRTC je vytžadované TLS(https).",
-	"pad.ep_webrtc.error.permission": "Nepodarilo sa získať povolenie pre použitie Vašej kamery a mikrofónu.",
-	"pad.ep_webrtc.error.notFound": "Nepodarilo sa nájsť kameru a/alebo mikrofón. Skúste znovu načítať stránku.",
-	"pad.ep_webrtc.error.notReadable": "Prepáčte, došlo k hardvérovej chybe, ktorá znemožňuje prístup k Vašej kamere a/alebo mikrofónu:",
-	"pad.ep_webrtc.error.otherCantAccess": "Prepáčte, prehliadač nemá prístup k Vašej kamere a/alebo mikrofónu. Prosím skontrolujte nastavenia vo Vašom prehliadači.",
-	"pad.settings.audioenabledonstart": "Pri spustení zapnúť zvuk",
-	"pad.settings.videoenabledonstart": "Pri spustení zapnúť obraz"
+	"ep_webrtc_settings_enablertc": "Zapnúť Audio/Video rozhovor",
+	"ep_webrtc_error_ssl": "Pre použitie WebRTC je vytžadované TLS(https).",
+	"ep_webrtc_error_permission": "Nepodarilo sa získať povolenie pre použitie Vašej kamery a mikrofónu.",
+	"ep_webrtc_error_notFound": "Nepodarilo sa nájsť kameru a/alebo mikrofón. Skúste znovu načítať stránku.",
+	"ep_webrtc_error_notReadable": "Prepáčte, došlo k hardvérovej chybe, ktorá znemožňuje prístup k Vašej kamere a/alebo mikrofónu:",
+	"ep_webrtc_error_otherCantAccess": "Prepáčte, prehliadač nemá prístup k Vašej kamere a/alebo mikrofónu. Prosím skontrolujte nastavenia vo Vašom prehliadači.",
+	"ep_webrtc_settings_audioenabledonstart": "Pri spustení zapnúť zvuk",
+	"ep_webrtc_settings_videoenabledonstart": "Pri spustení zapnúť obraz"
 }

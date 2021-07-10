@@ -4,12 +4,12 @@
 			"Kly"
 		]
 	},
-	"pad.settings.enablertc": "啟用音訊/視訊聊天",
-	"pad.ep_webrtc.error.ssl": "需要 TLS（https）來使用 WebRTC。",
-	"pad.ep_webrtc.error.permission": "取得存取您的攝影機與麥克風的權限失敗。",
-	"pad.ep_webrtc.error.notFound": "找不到攝影機以及/或是麥克風。請重新載入頁面來重試。",
-	"pad.ep_webrtc.error.notReadable": "很抱歉，發生硬體錯誤導致無法存取您的攝影機以及/或是麥克風。",
-	"pad.ep_webrtc.error.otherCantAccess": "很抱歉，瀏覽器無法存取您的攝影機以及/或是麥克風。請檢查在您瀏覽器設定裡的權限。這可能不是硬體錯誤：",
-	"pad.settings.audioenabledonstart": "在開始時啟用音訊",
-	"pad.settings.videoenabledonstart": "在開始時啟用視訊"
+	"ep_webrtc_settings_enablertc": "啟用音訊/視訊聊天",
+	"ep_webrtc_error_ssl": "需要 TLS（https）來使用 WebRTC。",
+	"ep_webrtc_error_permission": "取得存取您的攝影機與麥克風的權限失敗。",
+	"ep_webrtc_error_notFound": "找不到攝影機以及/或是麥克風。請重新載入頁面來重試。",
+	"ep_webrtc_error_notReadable": "很抱歉，發生硬體錯誤導致無法存取您的攝影機以及/或是麥克風。",
+	"ep_webrtc_error_otherCantAccess": "很抱歉，瀏覽器無法存取您的攝影機以及/或是麥克風。請檢查在您瀏覽器設定裡的權限。這可能不是硬體錯誤：",
+	"ep_webrtc_settings_audioenabledonstart": "在開始時啟用音訊",
+	"ep_webrtc_settings_videoenabledonstart": "在開始時啟用視訊"
 }

@@ -5,12 +5,12 @@
 			"YaronSh"
 		]
 	},
-	"pad.settings.enablertc": "הפעלת שיחת שמע/וידאו",
-	"pad.ep_webrtc.error.ssl": "חובה להשתמש ב־TLS (ב־https) כדי להשתמש ב־WebRTC.",
-	"pad.ep_webrtc.error.permission": "לא עבדה קבלת הרשאות גישה למצלמה או מיקרופון.",
-	"pad.ep_webrtc.error.notFound": "לא הצלחנו למצוא מצלמה או מיקרופון. נא לרענן את הדף כדי לנסות שוב.",
-	"pad.ep_webrtc.error.notReadable": "אירעה שגיאת חומרה שמנעה גישה למצלמה ו/או המיקרופון שלך:",
-	"pad.ep_webrtc.error.otherCantAccess": "לדפדפן אין גישה למצלמה ו/או למיקרופון שלך. נא לבדוק את ההרשאות בהגדרות הדפדפן שלך, עמך הסליחה. ככל הנראה זאת אינה תקלת חומרה:",
-	"pad.settings.audioenabledonstart": "השמע פעיל עם ההתחלה",
-	"pad.settings.videoenabledonstart": "הווידאו פעיל עם ההתחלה"
+	"ep_webrtc_settings_enablertc": "הפעלת שיחת שמע/וידאו",
+	"ep_webrtc_error_ssl": "חובה להשתמש ב־TLS (ב־https) כדי להשתמש ב־WebRTC.",
+	"ep_webrtc_error_permission": "לא עבדה קבלת הרשאות גישה למצלמה או מיקרופון.",
+	"ep_webrtc_error_notFound": "לא הצלחנו למצוא מצלמה או מיקרופון. נא לרענן את הדף כדי לנסות שוב.",
+	"ep_webrtc_error_notReadable": "אירעה שגיאת חומרה שמנעה גישה למצלמה ו/או המיקרופון שלך:",
+	"ep_webrtc_error_otherCantAccess": "לדפדפן אין גישה למצלמה ו/או למיקרופון שלך. נא לבדוק את ההרשאות בהגדרות הדפדפן שלך, עמך הסליחה. ככל הנראה זאת אינה תקלת חומרה:",
+	"ep_webrtc_settings_audioenabledonstart": "השמע פעיל עם ההתחלה",
+	"ep_webrtc_settings_videoenabledonstart": "הווידאו פעיל עם ההתחלה"
 }

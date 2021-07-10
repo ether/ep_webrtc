@@ -5,12 +5,12 @@
 			"Izendegi"
 		]
 	},
-	"pad.settings.enablertc": "Gaitu Audio/Bideo Txata",
-	"pad.ep_webrtc.error.ssl": "TLS (https) beharrezkoa da WebRTC erabiltzeko.",
-	"pad.ep_webrtc.error.permission": "Zure kamera eta mikrofonoa erabili ahal izateko baimena lortzeko errorea gertatu da.",
-	"pad.ep_webrtc.error.notFound": "Ez dugu aurkitu kamera edota mikrofonorik topatu. Freskatu ezazu berriz saiatzeko.",
-	"pad.ep_webrtc.error.notReadable": "Sentitzen dugu, zure kamera edo mikrofonorako sarbidea ukatzen duen hardware errore bat gertatu da:",
-	"pad.ep_webrtc.error.otherCantAccess": "Sentitzen dugu, nabigatzaileak ez dauka zure kamera edo mikrofonorako sarbiderik. Egiaztatu itzazu zure zure nabigatzailearen ezarpenak. Ziuraski hau ez da hardware errore bat izango:",
-	"pad.settings.audioenabledonstart": "Audioa GAITU abiaraztean",
-	"pad.settings.videoenabledonstart": "Bideoa GAITU habiaraztean"
+	"ep_webrtc_settings_enablertc": "Gaitu Audio/Bideo Txata",
+	"ep_webrtc_error_ssl": "TLS (https) beharrezkoa da WebRTC erabiltzeko.",
+	"ep_webrtc_error_permission": "Zure kamera eta mikrofonoa erabili ahal izateko baimena lortzeko errorea gertatu da.",
+	"ep_webrtc_error_notFound": "Ez dugu aurkitu kamera edota mikrofonorik topatu. Freskatu ezazu berriz saiatzeko.",
+	"ep_webrtc_error_notReadable": "Sentitzen dugu, zure kamera edo mikrofonorako sarbidea ukatzen duen hardware errore bat gertatu da:",
+	"ep_webrtc_error_otherCantAccess": "Sentitzen dugu, nabigatzaileak ez dauka zure kamera edo mikrofonorako sarbiderik. Egiaztatu itzazu zure zure nabigatzailearen ezarpenak. Ziuraski hau ez da hardware errore bat izango:",
+	"ep_webrtc_settings_audioenabledonstart": "Audioa GAITU abiaraztean",
+	"ep_webrtc_settings_videoenabledonstart": "Bideoa GAITU habiaraztean"
 }

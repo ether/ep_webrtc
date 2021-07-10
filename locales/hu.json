@@ -2,12 +2,12 @@
 	"@metadata": {
 		"authors": []
 	},
-	"pad.settings.enablertc": "Hang/video csevegés engedélyezése",
-	"pad.ep_webrtc.error.ssl": "A WebRTC az Etherpad-példány használatához SSL-tanúsítványt kell telepíteni.",
-	"pad.ep_webrtc.error.permission": "Kérjük, engedélyezze a fényképezőgép és a mikrofon engedélyét.",
-	"pad.ep_webrtc.error.notFound": "Sajnos nem találtunk megfelelő fényképezőgépet az eszközén. Ha van fényképezőgépe, ellenőrizze, hogy megfelelően van-e beállítva és frissítse újra ezt a weboldalt az újrapróbálkozáshoz.",
-	"pad.ep_webrtc.error.notReadable": "Sajnos hardverhiba történt, amely megakadályozta a fényképezőgéphez és/vagy a mikrofonhoz való hozzáférést:",
-	"pad.ep_webrtc.error.otherCantAccess": "Sajnáljuk, de a böngésző nem fér hozzá a fényképezőgéphez és/vagy a mikrofonhoz. Ellenőrizze az engedélyeket a böngésző beállításaiban. Ez valószínűleg nem hardverhiba:",
-	"pad.settings.audioenabledonstart": "Kezdje hanggal",
-	"pad.settings.videoenabledonstart": "Kezdje videóval"
+	"ep_webrtc_settings_enablertc": "Hang/video csevegés engedélyezése",
+	"ep_webrtc_error_ssl": "A WebRTC az Etherpad-példány használatához SSL-tanúsítványt kell telepíteni.",
+	"ep_webrtc_error_permission": "Kérjük, engedélyezze a fényképezőgép és a mikrofon engedélyét.",
+	"ep_webrtc_error_notFound": "Sajnos nem találtunk megfelelő fényképezőgépet az eszközén. Ha van fényképezőgépe, ellenőrizze, hogy megfelelően van-e beállítva és frissítse újra ezt a weboldalt az újrapróbálkozáshoz.",
+	"ep_webrtc_error_notReadable": "Sajnos hardverhiba történt, amely megakadályozta a fényképezőgéphez és/vagy a mikrofonhoz való hozzáférést:",
+	"ep_webrtc_error_otherCantAccess": "Sajnáljuk, de a böngésző nem fér hozzá a fényképezőgéphez és/vagy a mikrofonhoz. Ellenőrizze az engedélyeket a böngésző beállításaiban. Ez valószínűleg nem hardverhiba:",
+	"ep_webrtc_settings_audioenabledonstart": "Kezdje hanggal",
+	"ep_webrtc_settings_videoenabledonstart": "Kezdje videóval"
 }
