@@ -505,7 +505,8 @@ exports.rtc = new class {
   }
 
   showUserMediaError(err) { // show an error returned from getUserMedia
-    let reason;
+    let msgId = null;
+    const extraInfo = $(document.createDocumentFragment());
     // For reference on standard errors returned by getUserMedia:
     // https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/getUserMedia
     switch (err.name) {
@@ -518,10 +519,10 @@ exports.rtc = new class {
         if (location.protocol === 'https:' ||
             location.hostname === 'localhost' ||
             location.hostname === '127.0.0.1') {
-          reason = html10n.get('ep_webrtc_error_permission');
+          msgId = 'error_permission';
           this.sendErrorStat('Permission');
         } else {
-          reason = html10n.get('ep_webrtc_error_ssl');
+          msgId = 'error_ssl';
           this.sendErrorStat('SecureConnection');
         }
         break;
@@ -530,23 +531,17 @@ exports.rtc = new class {
         // Safari v14.1 on macOS v11.13.1 (Big Sur) on Sauce Labs emits OverconstrainedError when it
         // can't find a camera. Fall through to the NotFoundError case:
       case 'NotFoundError':
-        reason = html10n.get('ep_webrtc_error_notFound');
+        msgId = 'error_notFound';
         this.sendErrorStat('NotFound');
         break;
       case 'NotReadableError':
-        // `err.message` might give useful info to the user (not necessarily
-        // useful for other error messages)
-        reason = $('<div>')
-            .append($('<p>').text(html10n.get('ep_webrtc_error_notReadable')))
-            .append($('<p>').text(err.message));
+        msgId = 'error_notReadable';
+        extraInfo.append($('<p>').text(err.message));
         this.sendErrorStat('Hardware');
         break;
       case 'AbortError':
-        // `err.message` might give useful info to the user (not necessarily useful for
-        // other error messages)
-        reason = $('<div>')
-            .append($('<p>').text(html10n.get('ep_webrtc_error_otherCantAccess')))
-            .append($('<p>').text(err.message));
+        msgId = 'error_otherCantAccess';
+        extraInfo.append($('<p>').text(err.message));
         this.sendErrorStat('Abort');
         break;
       default:
@@ -555,7 +550,9 @@ exports.rtc = new class {
     }
     $.gritter.add({
       title: 'Error',
-      text: reason,
+      text: $(document.createDocumentFragment())
+          .append($('<p>').text(html10n.get(`ep_webrtc_${msgId}`)))
+          .append(extraInfo),
       sticky: true,
       class_name: 'error',
     });
