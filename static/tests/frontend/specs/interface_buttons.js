@@ -51,8 +51,11 @@ describe('Test the behavior of the interface buttons: Mute, Video Disable, Enlar
       // All of these sizes have to allow for tolerances.
       // I.e. it has come back a quarter pixel off before.
       const $video = chrome$('video');
-      expect(numFromCssSize($video.css('width'))).to.be.within(159, 161);
-      expect(numFromCssSize($video.css('height'))).to.be.within(119, 121);
+      await helper.waitForPromise(() => {
+        const w = numFromCssSize($video.css('width'));
+        const h = numFromCssSize($video.css('height'));
+        return 159 < w && w < 161 && 119 < h && h < 121;
+      });
 
       const $enlargeBtn = chrome$('.enlarge-btn');
       $enlargeBtn.click();
