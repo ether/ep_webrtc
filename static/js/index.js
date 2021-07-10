@@ -548,6 +548,12 @@ exports.rtc = new class {
         // Let Etherpad's error handling handle the error.
         throw err;
     }
+    const moreInfoUrl = this._settings.moreInfoUrl[msgId];
+    if (moreInfoUrl) {
+      extraInfo.append($('<p>').append($('<a>')
+          .attr({href: moreInfoUrl, target: '_blank', rel: 'noopener noreferrer'})
+          .text('Click here for more information.')));
+    }
     $.gritter.add({
       title: 'Error',
       text: $(document.createDocumentFragment())
