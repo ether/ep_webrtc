@@ -6,8 +6,6 @@
 	},
 	"ep_webrtc_settings_enablertc": "Zapnúť Audio/Video rozhovor",
 	"ep_webrtc_error_ssl": "Pre použitie WebRTC je vytžadované TLS(https).",
-	"ep_webrtc_error_permission": "Nepodarilo sa získať povolenie pre použitie Vašej kamery a mikrofónu.",
-	"ep_webrtc_error_notFound": "Nepodarilo sa nájsť kameru a/alebo mikrofón. Skúste znovu načítať stránku.",
 	"ep_webrtc_error_notReadable": "Prepáčte, došlo k hardvérovej chybe, ktorá znemožňuje prístup k Vašej kamere a/alebo mikrofónu:",
 	"ep_webrtc_error_otherCantAccess": "Prepáčte, prehliadač nemá prístup k Vašej kamere a/alebo mikrofónu. Prosím skontrolujte nastavenia vo Vašom prehliadači.",
 	"ep_webrtc_settings_audioenabledonstart": "Pri spustení zapnúť zvuk",

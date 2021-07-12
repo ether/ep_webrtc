@@ -7,8 +7,6 @@
 	},
 	"ep_webrtc_settings_enablertc": "Sesli/Görüntülü Sohbeti Etkinleştir",
 	"ep_webrtc_error_ssl": "WebRTC'yi kullanmak için TLS (https) gereklidir.",
-	"ep_webrtc_error_permission": "Kameranıza veya mikrofonunuza erişim izni alınamadı.",
-	"ep_webrtc_error_notFound": "Bir kamera ve/veya mikrofon bulunamadı. Yeniden denemek için sayfayı yeniden yükleyin.",
 	"ep_webrtc_error_notReadable": "Üzgünüz, kameranıza ve/veya mikrofonunuza erişimi engelleyen bir donanım hatası oluştu:",
 	"ep_webrtc_error_otherCantAccess": "Üzgünüz, tarayıcının kameranıza ve/veya mikrofonunuza erişimi yok. Lütfen tarayıcınızın ayarlarındaki izinleri kontrol edin. Bu büyük olasılıkla bir donanım hatası değildir:",
 	"ep_webrtc_settings_audioenabledonstart": "Başlangıçta Ses AÇIK",

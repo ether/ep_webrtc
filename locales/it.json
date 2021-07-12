@@ -1,0 +1,15 @@
+{
+	"@metadata": {
+		"authors": [
+			"Beta16"
+		]
+	},
+	"ep_webrtc_error_ssl": "TLS (https) è obbligatorio per utilizzare WebRTC.",
+	"ep_webrtc_error_permission_cam": "Impossibile ottenere l'autorizzazione per accedere alla fotocamera.",
+	"ep_webrtc_error_permission_mic": "Impossibile ottenere l'autorizzazione per accedere al microfono.",
+	"ep_webrtc_error_permission_cammic": "Impossibile ottenere l'autorizzazione per accedere alla fotocamera e al microfono.",
+	"ep_webrtc_error_notFound_cam": "Impossibile accedere alla fotocamera.",
+	"ep_webrtc_error_notFound_mic": "Impossibile accedere al microfono.",
+	"ep_webrtc_error_notFound_cammic": "Impossibile accedere alla fotocamera e al microfono.",
+	"ep_webrtc_error_notReadable": "Spiacenti, si è verificato un errore hardware che ha impedito l'accesso alla tua telecamera e/o microfono:"
+}

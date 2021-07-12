@@ -7,8 +7,6 @@
 	},
 	"ep_webrtc_settings_enablertc": "Habilita el xat d'àudio/vídeo",
 	"ep_webrtc_error_ssl": "Ho sento, has d'instal·lar certificats SSL al teu Etherpad per utilitzar WebRTC.",
-	"ep_webrtc_error_permission": "Ho sento, ens has de donar permís per utilitzar la càmera i el micròfon.",
-	"ep_webrtc_error_notFound": "Ho sento, no hem pogut trobar una càmera o un micròfon. Per tornar-ho a intentar, carrega la pàgina",
 	"ep_webrtc_error_notReadable": "Ho sento, s'ha produït un error de maquinari que ha impedit l'accés a la càmera i/o al micròfon:",
 	"ep_webrtc_error_otherCantAccess": "Ho sento, el navegador no té accés a la teva càmera ni al micròfon.  Comproveu els permisos a la configuració del vostre navegador.  Això probablement no és un error de maquinari:",
 	"ep_webrtc_settings_audioenabledonstart": "Àudio activat al començament",

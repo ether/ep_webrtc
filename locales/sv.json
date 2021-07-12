@@ -7,8 +7,6 @@
 	},
 	"ep_webrtc_settings_enablertc": "Aktivera ljud-/videochatt",
 	"ep_webrtc_error_ssl": "TLS (https) krävs för att använda WebRTC.",
-	"ep_webrtc_error_permission": "Misslyckades att få behörighet till att använda din kamera eller mikrofon.",
-	"ep_webrtc_error_notFound": "Misslyckades att hitta en kamera och/eller mikrofon. Uppdatera sidan för att försöka igen.",
 	"ep_webrtc_error_notReadable": "Tyvärr, ett hårdvarufel uppstod som förhindrade åtkomst till din kamera och /eller mikrofon:",
 	"ep_webrtc_error_otherCantAccess": "Tyvärr, webbläsaren har inte åtkomst till din kamera och/eller mikrofon. Kontrollera behörigheterna i din webbläsares inställningar. Detta är mest troligt inte ett hårdvarufel:",
 	"ep_webrtc_settings_audioenabledonstart": "Ljud PÅ vid start",

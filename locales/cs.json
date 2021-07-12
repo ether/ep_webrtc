@@ -6,8 +6,6 @@
 	},
 	"ep_webrtc_settings_enablertc": "Povolit Audio / Video chat",
 	"ep_webrtc_error_ssl": "Je nám líto, abyste mohli používat WebRTC, musíte pro svou instanci Etherpad nainstalovat certifikáty SSL.",
-	"ep_webrtc_error_permission": "Je nám líto, ale musíte nám dát souhlas k používání vaší kamery a mikrofonu.",
-	"ep_webrtc_error_notFound": "Litujeme, ve vašem zařízení jsme nenašli vhodnou kameru. Pokud máte kameru, ujistěte se, že je správně nastavena a obnovte tento web a zkuste to znovu.",
 	"ep_webrtc_error_notReadable": "Je nám líto, došlo k hardwarové chybě, která znemožnila přístup k vaší kameře nebo mikrofonu:",
 	"ep_webrtc_error_otherCantAccess": "Je nám líto, ale prohlížeč nemá přístup k vaší kameře nebo mikrofonu. Zkontrolujte oprávnění v nastavení prohlížeče. Nejpravděpodobněji nejde o hardwarovou chybu:",
 	"ep_webrtc_settings_audioenabledonstart": "Zvuk zapnut při spuštění",

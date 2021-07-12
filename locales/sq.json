@@ -6,10 +6,8 @@
 	},
 	"ep_webrtc_settings_enablertc": "Aktivizo Fjalosje Audio/Video",
 	"ep_webrtc_error_ssl": "Na ndjeni, që të përdorni WebRTC, lypset të instaloni dëshmi SSL për instancën tuaj të Etherpad-it.",
-	"ep_webrtc_error_permission": "Na ndjeni, duhet të na jepni leje të përdorim kamerën dhe mikrofonin tuaj.",
-	"ep_webrtc_error_notFound": "Na ndjeni, s’gjetëm dot një kamera të përshtatshme në pajisjen tuaj. Nëse keni një kamera, sigurohuni ta ujdisni si duhet dhe rifreskoni këtë sajt, që të riprovohet.",
 	"ep_webrtc_error_notReadable": "Na ndjeni, u has një gabim hardware-i që e pengoi hyrjen te kamera dhe/ose mikrofoni juaj:",
-	"ep_webrtc_error_otherCantAccess": "Na ndjeni, shfletuesi, s’ka leje të përdorë kamerën dhe/ose mikrofonin tuaj. Ju lutemi, kontrolloni lejet te rregullimet e shfletuesit tuaj. Kjo ka shumë gjasa të vijë nga një gaibm hardware-i:",
+	"ep_webrtc_error_otherCantAccess": "Na ndjeni, shfletuesi s’ka leje të përdorë kamerën dhe/ose mikrofonin tuaj. Ju lutemi, kontrolloni lejet te rregullimet e shfletuesit tuaj. Ka shumë gjasa që kjo të vijë nga një gabim hardware-i:",
 	"ep_webrtc_settings_audioenabledonstart": "Audio ON që në Nisje",
 	"ep_webrtc_settings_videoenabledonstart": "Video ON që në Nisje"
 }

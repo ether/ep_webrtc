@@ -6,8 +6,6 @@
 	},
 	"ep_webrtc_settings_enablertc": "Ativé la conversassion sonora/filmà",
 	"ep_webrtc_error_ssl": "An dëspias, a l'ha damanca d'anstalé dij sertificà SSL për soa istansa Etherpad për dovré WebRTC.",
-	"ep_webrtc_error_permission": "An dëspias, a dev dene ël përmess ëd dovré soa telecàmera e sò micròfon.",
-	"ep_webrtc_error_notFound": "An dëspias, i l'oma nen trovà na telecàmera adata su sò angign. S'a l'ha pro na telecàmera, ch'a contròla ch'a sia configurà për da bin e ch'a rinfrësca ës sit a linia për prové torna.",
 	"ep_webrtc_error_notReadable": "An dëspias, a-i é staje n'eror material che a l'ha ampedì l'acess a sò telecàmera o micròfon:",
 	"ep_webrtc_error_otherCantAccess": "An dëspias, ël navigador a l'ha nen acess a sò telecàmera o micròfon. Për piasì, ch'a contròla j'autorisassion ant ij paràmeter ëd sò navigador. Probabilman a l'é nen n'eror material:",
 	"ep_webrtc_settings_audioenabledonstart": "Sonor ativà a la partensa",

@@ -6,8 +6,6 @@
 	},
 	"ep_webrtc_settings_enablertc": "Trowch y Sgwrs Sain/Fideo ymlaen",
 	"ep_webrtc_error_ssl": "Mae'n rhaid gosod tystysgrif SSL ar gyfer eich Etherpad i ddefnyddio WebRTC.",
-	"ep_webrtc_error_permission": "Er mwyn i ni ddefnyddio'ch camera / meic, rhowch ganiatad!",
-	"ep_webrtc_error_notFound": "Methwyd a chael hyd i gamera addas ar eich dyfais.",
 	"ep_webrtc_error_notReadable": "Cafwyd nam yn y caledwedd, ac o'r herwydd ni allwyd cael mynediad i'ch camera a/neu meic:",
 	"ep_webrtc_error_otherCantAccess": "'Does gan y porwr ddim mynediad i'ch camera a meic. Gwirwch eich bod wedi rhoi'r hawliau cywir o fewn eich porwr. Nid nam ar y caledwedd yw hyn.",
 	"ep_webrtc_settings_audioenabledonstart": "Sain YMLAEN ar y dechrau",
