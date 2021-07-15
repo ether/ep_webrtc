@@ -1,0 +1,13 @@
+{
+	"@metadata": {
+		"authors": [
+			"MathXplore"
+		]
+	},
+	"ep_webrtc_error_permission_cam": "カメラへのアクセス許可を取得できませんでした。",
+	"ep_webrtc_error_permission_mic": "マイクへのアクセス許可を取得できませんでした。",
+	"ep_webrtc_error_permission_cammic": "カメラとマイクへのアクセス許可を取得できませんでした。",
+	"ep_webrtc_error_notFound_cam": "カメラにアクセスできませんでした。",
+	"ep_webrtc_error_notFound_mic": "マイクにアクセスできませんでした。",
+	"ep_webrtc_error_notFound_cammic": "カメラとマイクにアクセスできませんでした。"
+}
