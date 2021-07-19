@@ -1,12 +1,19 @@
 {
 	"@metadata": {
 		"authors": [
+			"Hedda",
 			"MuratTheTurkish",
 			"SaldırganSincap"
 		]
 	},
 	"ep_webrtc_settings_enablertc": "Sesli/Görüntülü Sohbeti Etkinleştir",
 	"ep_webrtc_error_ssl": "WebRTC'yi kullanmak için TLS (https) gereklidir.",
+	"ep_webrtc_error_permission_cam": "Kameranıza erişim izni alınamadı.",
+	"ep_webrtc_error_permission_mic": "Mikrofonunuza erişim izni alınamadı.",
+	"ep_webrtc_error_permission_cammic": "Kameranıza ve mikrofonunuza erişim izni alınamadı.",
+	"ep_webrtc_error_notFound_cam": "Kameranıza erişilemedi.",
+	"ep_webrtc_error_notFound_mic": "Mikrofonunuza erişilemedi.",
+	"ep_webrtc_error_notFound_cammic": "Kameranıza ve mikrofonunuza erişilemedi.",
 	"ep_webrtc_error_notReadable": "Üzgünüz, kameranıza ve/veya mikrofonunuza erişimi engelleyen bir donanım hatası oluştu:",
 	"ep_webrtc_error_otherCantAccess": "Üzgünüz, tarayıcının kameranıza ve/veya mikrofonunuza erişimi yok. Lütfen tarayıcınızın ayarlarındaki izinleri kontrol edin. Bu büyük olasılıkla bir donanım hatası değildir:",
 	"ep_webrtc_settings_audioenabledonstart": "Başlangıçta Ses AÇIK",
