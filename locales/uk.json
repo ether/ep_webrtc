@@ -1,0 +1,19 @@
+{
+	"@metadata": {
+		"authors": [
+			"DDPAT"
+		]
+	},
+	"ep_webrtc_settings_enablertc": "Увімкніть аудіо/відеочат",
+	"ep_webrtc_error_ssl": "Для використання WebRTC необхідний TLS (https).",
+	"ep_webrtc_error_permission_cam": "Не вдалося отримати дозвіл на доступ до камери.",
+	"ep_webrtc_error_permission_mic": "Не вдалося отримати дозвіл на доступ до вашого мікрофона.",
+	"ep_webrtc_error_permission_cammic": "Не вдалося отримати дозвіл на доступ до камери та мікрофона.",
+	"ep_webrtc_error_notFound_cam": "Не вдалося отримати доступ до камери.",
+	"ep_webrtc_error_notFound_mic": "Не вдалося отримати доступ до мікрофона.",
+	"ep_webrtc_error_notFound_cammic": "Не вдалося отримати доступ до камери та мікрофона.",
+	"ep_webrtc_error_notReadable": "На жаль, сталася апаратна помилка, яка перешкоджала доступу до вашої камери та/або мікрофона:",
+	"ep_webrtc_error_otherCantAccess": "На жаль, браузер не має доступу до вашої камери та/або мікрофона. Перевірте дозволи в налаштуваннях вашого браузера. Це, швидше за все, не апаратна помилка:",
+	"ep_webrtc_settings_audioenabledonstart": "Аудіо ввімкнено на початку",
+	"ep_webrtc_settings_videoenabledonstart": "Відео увімкнено на початку"
+}
