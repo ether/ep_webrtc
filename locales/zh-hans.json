@@ -1,8 +1,13 @@
 {
 	"@metadata": {
 		"authors": [
+			"Crowley666",
 			"Zhang8569"
 		]
 	},
-	"ep_webrtc_error_ssl": "TLS（https）要求使用WebRTC。"
+	"ep_webrtc_error_ssl": "TLS（https）要求使用WebRTC。",
+	"ep_webrtc_error_permission_cam": "无法获取访问摄像头的权限。",
+	"ep_webrtc_error_permission_cammic": "无法获取访问摄像头和麦克风的权限。",
+	"ep_webrtc_error_notFound_cam": "无法访问您的摄像头。",
+	"ep_webrtc_error_notFound_mic": "无法访问您的麦克风。"
 }

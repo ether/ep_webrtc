@@ -1,0 +1,20 @@
+{
+	"@metadata": {
+		"authors": [
+			"Kareyac",
+			"Okras"
+		]
+	},
+	"ep_webrtc_settings_enablertc": "Включить аудио/видео чат",
+	"ep_webrtc_error_ssl": "TLS (https) необходим для использования WebRTC.",
+	"ep_webrtc_error_permission_cam": "Не удалось получить разрешение на доступ к вашей камере.",
+	"ep_webrtc_error_permission_mic": "Не удалось получить разрешение на доступ к вашему микрофону.",
+	"ep_webrtc_error_permission_cammic": "Не удалось получить разрешение на доступ к вашей камере и микрофону.",
+	"ep_webrtc_error_notFound_cam": "Не удалось получить доступ к вашей камере.",
+	"ep_webrtc_error_notFound_mic": "Не удалось получить доступ к вашему микрофону.",
+	"ep_webrtc_error_notFound_cammic": "Не удалось получить доступ к вашей камере и микрофону.",
+	"ep_webrtc_error_notReadable": "К сожалению, произошла аппаратная ошибка, из-за которой не удалось получить доступ к вашей камере и/или микрофону:",
+	"ep_webrtc_error_otherCantAccess": "К сожалению, у браузера нет доступа к вашей камере и/или микрофону. Пожалуйста, проверьте разрешения в настройках вашего браузера. Скорее всего, это не аппаратная ошибка:",
+	"ep_webrtc_settings_audioenabledonstart": "Звук ВКЛЮЧЕН при запуске",
+	"ep_webrtc_settings_videoenabledonstart": "Видео ВКЛЮЧЕНО при запуске"
+}
