@@ -504,6 +504,24 @@ exports.rtc = new class {
     ($videoContainer.data('updateMinSize') || (() => {}))();
   }
 
+  logErrorToServer(err) {
+    // Mimick Etherpad core's global exception handler in pad_utils.js.
+    const {message = 'unknown', fileName = 'unknown', lineNumber = -1} = err;
+    let msg = message;
+    if (err.name != null && msg !== err.name && !msg.startsWith(`${err.name}: `)) {
+      msg = `${err.name}: ${msg}`;
+    }
+    $.post('../jserror', {
+      type: 'Plugin ep_screenrtc',
+      msg,
+      url: window.location.href,
+      source: fileName,
+      linenumber: lineNumber,
+      userAgent: navigator.userAgent,
+      stack: err.stack,
+    });
+  }
+
   showUserMediaError(err) { // show an error returned from getUserMedia
     err.devices.sort();
     const devices = err.devices.join('');
@@ -564,6 +582,7 @@ exports.rtc = new class {
       sticky: true,
       class_name: 'error',
     });
+    this.logErrorToServer(err);
   }
 
   // Performs the following steps for the local audio and/or video tracks:
@@ -732,6 +751,7 @@ exports.rtc = new class {
         $video.data('automuted', true);
         return await this.playVideo($video);
       }
+      this.logErrorToServer(err);
       $playErrorBtn.css({display: ''});
     }
     ($videoContainer.data('updateMinSize') || (() => {}))();
