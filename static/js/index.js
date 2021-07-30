@@ -1232,6 +1232,13 @@ exports.rtc = new class {
         _debug('PeerState closed');
         clearTimeout(logDisconnectErrorTimeout);
         this.hangup(userId);
+        // The peer might have disconnected due to an error, not because the user navigated away.
+        // Re-invite the peer to retry the connection. If the peer really did leave then it will
+        // ignore the invite. A random delay is added to avoid an infinite hangup-invite loop.
+        //
+        // TODO: Figure out if the delay can be safely removed. If not, cancel the timeout if the
+        // peer leaves the pad or the plugin is deactivated.
+        setTimeout(() => this.invitePeer(userId), 500 * Math.random() + 500);
       });
     }
     return peer;
