@@ -373,8 +373,12 @@ exports.rtc = new class {
 
       // Display an alert if the track went away, or hide the alert if there is a track.
       const $videoContainer = $(`#container_${getVideoId(this.getUserId())}`);
-      $videoContainer.find(`.${(oldTrack || newTrack).kind}ended-error-btn`)
+      const {kind} = oldTrack || newTrack;
+      $videoContainer.find(`.${kind}ended-error-btn`)
           .css('display', newTrack == null ? '' : 'none');
+      if (newTrack == null) {
+        this.logErrorToServer(new Error(`Local ${kind} track ended unexpectedly`));
+      }
       ($videoContainer.data('updateMinSize') || (() => {}))();
 
       // Update the audio/video buttons to reflect the new state.
@@ -1174,6 +1178,7 @@ exports.rtc = new class {
         _debug(`remote stream ${stream.id} removed`);
         const $videoContainer = $(`#container_${getVideoId(userId)}`);
         $videoContainer.find('.disconnected-error-btn').css({display: ''});
+        this.logErrorToServer(new Error('RTC connection lost'));
         ($videoContainer.data('updateMinSize') || (() => {}))();
         await this.setStream(userId, this._blankStream);
       });
