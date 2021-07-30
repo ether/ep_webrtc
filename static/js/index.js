@@ -512,13 +512,15 @@ exports.rtc = new class {
       msg = `${err.name}: ${msg}`;
     }
     $.post('../jserror', {
-      type: 'Plugin ep_screenrtc',
-      msg,
-      url: window.location.href,
-      source: fileName,
-      linenumber: lineNumber,
-      userAgent: navigator.userAgent,
-      stack: err.stack,
+      errorInfo: JSON.stringify({
+        type: 'Plugin ep_screenrtc',
+        msg,
+        url: window.location.href,
+        source: fileName,
+        linenumber: lineNumber,
+        userAgent: navigator.userAgent,
+        stack: err.stack,
+      }),
     });
   }
 
