@@ -1013,11 +1013,6 @@ exports.rtc = new class {
     // devices. See: https://inclusive-components.design/tooltips-toggletips/
     const errorBtns = [
       {
-        cls: 'audioended-error-btn',
-        title: 'Audio stopped unexpectedly. Click to clear this notification.',
-        click: (ev) => $(ev.currentTarget).css({display: 'none'}),
-      },
-      {
         cls: 'automuted-error-btn',
         title: 'Your browser blocked audio playback. Click to unmute.',
         click: () => this.unmuteAndPlayAll(),
@@ -1032,11 +1027,18 @@ exports.rtc = new class {
         title: 'Playback failed. Click to retry.',
         click: () => this.unmuteAndPlayAll(),
       },
-      {
-        cls: 'videoended-error-btn',
-        title: 'Video stopped unexpectedly. Click to clear this notification.',
-        click: (ev) => $(ev.currentTarget).css({display: 'none'}),
-      },
+      ...(isLocal ? [
+        {
+          cls: 'audioended-error-btn',
+          title: 'Audio stopped unexpectedly. Click to clear this notification.',
+          click: (ev) => $(ev.currentTarget).css({display: 'none'}),
+        },
+        {
+          cls: 'videoended-error-btn',
+          title: 'Video stopped unexpectedly. Click to clear this notification.',
+          click: (ev) => $(ev.currentTarget).css({display: 'none'}),
+        },
+      ] : []),
     ];
     for (const {cls, title, click} of errorBtns) {
       $interface.append($('<span>')
