@@ -928,9 +928,9 @@ exports.rtc = new class {
     // Disable Video button
     // /////
 
+    let $videoBtn;
     if (isLocal) {
-      const $videoBtn =
-          $('<span>').addClass('interface-btn video-btn buttonicon').appendTo($interface);
+      $videoBtn = $('<span>').addClass('interface-btn video-btn buttonicon').appendTo($interface);
       this._selfViewButtons.video = {
         get enabled() { return !$videoBtn.hasClass('off'); },
         set enabled(val) {
@@ -1030,13 +1030,13 @@ exports.rtc = new class {
       ...(isLocal ? [
         {
           cls: 'audioended-error-btn',
-          title: 'Audio stopped unexpectedly. Click to clear this notification.',
-          click: (ev) => $(ev.currentTarget).css({display: 'none'}),
+          title: 'Audio stopped unexpectedly. Click to retry.',
+          click: () => $audioBtn.click(),
         },
         {
           cls: 'videoended-error-btn',
-          title: 'Video stopped unexpectedly. Click to clear this notification.',
-          click: (ev) => $(ev.currentTarget).css({display: 'none'}),
+          title: 'Video stopped unexpectedly. Click to retry.',
+          click: () => $videoBtn.click(),
         },
       ] : []),
     ];
