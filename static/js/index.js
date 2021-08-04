@@ -1202,10 +1202,12 @@ exports.rtc = new class {
           this._localTracks,
           _debug);
       this._peers.set(userId, peer);
+      let logDisconnectErrorTimeout = null;
       peer.addEventListener('stream', async ({stream}) => {
         _debug(`remote stream ${stream.id} added`);
         const $videoContainer = $(`#container_${getVideoId(userId)}`);
         $videoContainer.find('.disconnected-error-btn').css({display: 'none'});
+        clearTimeout(logDisconnectErrorTimeout);
         ($videoContainer.data('updateMinSize') || (() => {}))();
         await this.setStream(userId, stream);
       });
@@ -1213,12 +1215,16 @@ exports.rtc = new class {
         _debug(`remote stream ${stream.id} removed`);
         const $videoContainer = $(`#container_${getVideoId(userId)}`);
         $videoContainer.find('.disconnected-error-btn').css({display: ''});
-        this.logErrorToServer(new Error('RTC connection lost'));
+        // The userLeave hook isn't called until it has been 8s since the peer left. Wait a bit
+        // longer than that before logging the disconnect to the server.
+        logDisconnectErrorTimeout =
+            setTimeout(() => this.logErrorToServer(new Error('RTC connection lost')), 10000);
         ($videoContainer.data('updateMinSize') || (() => {}))();
         await this.setStream(userId, this._blankStream);
       });
       peer.addEventListener('closed', () => {
         _debug('PeerState closed');
+        clearTimeout(logDisconnectErrorTimeout);
         this.hangup(userId);
       });
     }
