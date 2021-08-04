@@ -691,7 +691,9 @@ exports.rtc = new class {
       if (updateVideo) this._trackLocks.video.unlock();
       if (updateAudio) this._trackLocks.audio.unlock();
     }
-    await this.playVideo($(`#${getVideoId(this.getUserId())}`));
+    // For most browsers, autoplay with audio is allowed if the user grants access to the camera or
+    // microphone, so unmuting auto-muted videos is likely to succeed.
+    await this.unmuteAndPlayAll();
   }
 
   async activate() {
