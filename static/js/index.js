@@ -309,7 +309,7 @@ class PeerState extends EventTargetPolyfill {
   }
 
   async receiveMessage({ids, candidate, description, hangup}) {
-    if (this._closed) throw new Error('Unable to process message because PeerState is closed');
+    if (this._closed) return debug('Ignoring message because PeerState is closed');
     if (hangup != null) {
       this.close(true);
       return;
