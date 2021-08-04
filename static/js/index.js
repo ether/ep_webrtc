@@ -146,7 +146,7 @@ class PeerState extends EventTargetPolyfill {
     this._onremovetrack =
         () => { if (this._remoteStream.getTracks().length === 0) this._setRemoteStream(null); };
     this._ontrackchanged = async ({oldTrack, newTrack}) => {
-      if (this._pc == null) return;
+      if (this._pc == null || this._pc.connectionState === 'closed') return;
       this._debug(`replacing ${oldTrack ? oldTrack.kind : newTrack.kind} track ` +
                   `${oldTrack ? oldTrack.id : '(null)'} with ` +
                   `${newTrack ? newTrack.id : '(null)'}`);
