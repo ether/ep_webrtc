@@ -541,14 +541,18 @@ exports.rtc = new class {
     ($videoContainer.data('updateMinSize') || (() => {}))();
   }
 
-  logErrorToServer(err) {
+  async logErrorToServer(err, delay = 10000) {
+    // Sleep to avoid logging benign errors caused by the user leaving the page (e.g., audio/video
+    // stream ended unexpectedly). If the user navigates away during this sleep the error will not
+    // be logged.
+    if (delay) await new Promise((resolve) => setTimeout(resolve, delay));
     // Mimick Etherpad core's global exception handler in pad_utils.js.
     const {message = 'unknown', fileName = 'unknown', lineNumber = -1} = err;
     let msg = message;
     if (err.name != null && msg !== err.name && !msg.startsWith(`${err.name}: `)) {
       msg = `${err.name}: ${msg}`;
     }
-    $.post('../jserror', {
+    await $.post('../jserror', {
       errorInfo: JSON.stringify({
         type: 'Plugin ep_screenrtc',
         msg,
@@ -1218,7 +1222,7 @@ exports.rtc = new class {
         // The userLeave hook isn't called until it has been 8s since the peer left. Wait a bit
         // longer than that before logging the disconnect to the server.
         logDisconnectErrorTimeout =
-            setTimeout(() => this.logErrorToServer(new Error('RTC connection lost')), 10000);
+            setTimeout(() => this.logErrorToServer(new Error('RTC connection lost'), 0), 10000);
         ($videoContainer.data('updateMinSize') || (() => {}))();
         await this.setStream(userId, this._blankStream);
       });
