@@ -654,7 +654,7 @@ exports.rtc = new class {
         try {
           stream = await window.navigator.mediaDevices.getUserMedia({
             audio: addAudioTrack,
-            video: addVideoTrack && {width: {max: 320}, height: {max: 240}},
+            video: addVideoTrack && {width: {ideal: 320}, height: {ideal: 240}},
           });
           debug('successfully accessed device(s)');
         } catch (err) {
