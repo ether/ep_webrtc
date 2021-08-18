@@ -1,47 +1,40 @@
 ![Publish Status](https://github.com/ether/ep_webrtc/workflows/Node.js%20Package/badge.svg) ![Backend Tests Status](https://github.com/ether/ep_webrtc/workflows/Backend%20tests/badge.svg)
 
-ep_webrtc
-=========
+# ep_webrtc
 
-WebRTC-based audio/video chat for your documents. This plugin creates an
-audio/video chat with all active users of the pad using WebRTC.
+WebRTC-based audio/video chat with other users visiting the same pad.
 
-# Installing
+The audio and video streams are peer-to-peer: every user sends a copy of their
+audio/video streams directly to every other user visiting the same pad. Because
+of this, it works well for small groups (2 to 4 users, more if video is disabled
+or everyone has fast Internet connections) but not for large groups.
+
+## Installation
 
 * Option 1: Use the `/admin` interface, search for `ep_webrtc`, and click
   Install.
 * Option 2:
   ```shell
-  cd your_etherpad_install
-  npm install ep_webrtc
+  cd /path/to/etherpad
+  npm install --no-save --legacy-peer-deps ep_webrtc
   ```
 * Option 3:
   ```shell
-  cd your_etherpad_install/node_modules
+  cd /path/to/etherpad/node_modules
   git clone https://github.com/ether/ep_webrtc
   ```
 
-## Post installation
+## Settings
 
-You should use a STUN/TURN server to ensure consistant connecivty between
-clients. See STUN/TURN in settings.
+### Plugin On/Off
 
-# Settings
+In the settings menu there is a toggle to turn the plugin on and off for the
+user. When toggled, its state is saved in a cookie and applied when any pad is
+visited. The value can also be changed by adding `av=true` or `av=false` to the
+URL query parameters.
 
-## Enabling or disabling the feature
-
-### Per-User
-
-There's a setting for each user under their settings menu that can turn
-audio/video chat feature off and on. The setting is saved in cookies and will
-apply when they reload the page. The user can also change the value of this
-setting by adding `av=true` or `av=false` to the URL query parameters.
-
-### Site-Wide
-
-There is a site-wide setting in `settings.json` that determines whether the
-feature is initially turned on or off for users who have not yet set their own
-preference:
+The default value for this setting can be controlled in the server's
+`settings.json` file (it defaults to `true`):
 
 ```json
   "ep_webrtc": {
@@ -49,32 +42,19 @@ preference:
   }
 ```
 
-The `"enabled"` setting can either be `true` or `false`. It is optional, with a
-default value of `true`.
+### Video/Audio On/Off
 
-## Enabling or disabling audio or video individually
+The settings menu also contains separate toggles for starting video and audio
+sharing when the plugin is enabled. When toggled, their state is saved in a
+cookie and applied when any pad is visited. They can also be changed by adding
+the following to the URL query parameters:
 
-The audio/video chat feature gives the user the ability to temporarily disable
-("mute") audio, and similarly temporarily disable video. A site admin may also
-choose to make audio or video entirely unavailable to users.
+* `webrtcaudioenabled=true`
+* `webrtcaudioenabled=false`
+* `webrtcvideoenabled=true`
+* `webrtcvideoenabled=false`
 
-### Per-User
-
-Each user has the ability, using a setting under the settings menu, to set
-whether video or audio are initially disabled when the page is loaded. The user
-can also change the value of these settings by loading the page with the
-appropriate parameters in the URL path:
-
-* `?webrtcaudioenabled=true`
-* `?webrtcaudioenabled=false`
-* `?webrtcvideoenabled=true`
-* `?webrtcvideoenabled=false`
-
-### Site-Wide
-
-There are site-wide settings in `settings.json` that determine whether audio or
-video are available to users, and whether they are initially turned on or off
-for users who have not yet set their own preference:
+The default value can be controlled in the server's `settings.json` file:
 
 ```json
   "ep_webrtc": {
@@ -87,32 +67,31 @@ for users who have not yet set their own preference:
   }
 ```
 
-The `"disabled"` setting under both `"audio"` and `"video"` can have one of the
-following values:
+Supported values for `"disabled"`:
 
-* `"none"`: available and initially turned on for users who haven't set their
-  own preference
-* `"soft"`: available but initially turned off for users who haven't set their
-  own preference
-* `"hard"`: unavailable to users
+* `"none"` (the default): Initially enabled by default.
+* `"soft"`: Initially disabled by default.
+* `"hard"`: Unavailable (it cannot be enabled).
 
-The setting is optional, with a default value of `"none"`.
+### Custom Activate Button
 
-## Other Interface
-
-To set an element or class to listen for an init event set
-`ep_webrtc.listenClass` in your `settings.json`. This is often stabled with
-`"enabled": false` and a button to provide a button to begin video sessions.
+The misnamed `listenClass` setting allows you to specify a CSS selector for an
+element (or elements) that will activate the plugin when clicked. This is
+usually combined with `"enabled": false`. Example:
 
 ```json
   "ep_webrtc": {
-    "listenClass": "#chatLabel"
+    "enabled": false,
+    "listenClass": "#startVideoSessionButton"
   }
 ```
 
-## ICE Servers
+### ICE (STUN/TURN) Servers
 
-To set a custom stun server, set `ep_webrtc.iceServer` in your `settings.json`:
+By default, this plugin uses Google's STUN servers. To use custom STUN/TURN
+servers, set `ep_webrtc.iceServers` in your `settings.json` to a list of
+[RTCIceServer](https://developer.mozilla.org/en-US/docs/Web/API/RTCIceServer)
+objects:
 
 ```json
   "ep_webrtc": {
@@ -122,32 +101,25 @@ To set a custom stun server, set `ep_webrtc.iceServer` in your `settings.json`:
   }
 ```
 
-To ensure reliable connectivity we recommend setting both a STUN and TURN
-server. We don't set this by default and below are just example servers, you
-should ensure you use reliable STUN and TURN servers.
+Include a TURN server to support users behind symmetric NAT devices. For
+example:
 
 ```json
   "ep_webrtc": {
     "iceServers": [
       {
-        "urls": [
-          "stun:74.125.140.127:19302",
-          "stun:[2a00:1450:400c:c08::7f]:19302"
-        ]
+        "urls": ["stun:stun.l.google.com:19302"]
       },
       {
-        "urls": ["turn:numb.viagenie.ca"],
-        "credential": "muazkh",
-        "username": "webrtc@live.com"
-      },
-      {
-        "urls": ["turn:192.158.29.39:3478?transport=udp"],
-        "credential": "JZEOEt2V3Qb0y27GRntt2u2PAYA=",
-        "username": "28224511:1379330808"
+        "urls": ["turn:turn.example.com:3478"],
+        "username": "the_username",
+        "credential": "the_password"
       }
-    ],
+    ]
   }
 ```
+
+### Video Sizes
 
 To set a custom small and/or large size in pixels, for the video displays, set
 one or both of the following in your `settings.json`:
@@ -180,9 +152,9 @@ connect their camera/microphone:
 * `ep_webrtc_err_Unknown`: Some other unspecified error. Perhaps a bug in this
   plugin.
 
-# Developing and contributing
+## Developing and contributing
 
-## Basic
+### Basic
 
 If you're just working on the interface and don't need to test connections to
 other computers, you can point your browser to `localhost` instead of `0.0.0.0`.
@@ -190,7 +162,7 @@ WebRTC generally requires a secure connection (https), but [an exception is
 made](https://w3c.github.io/webappsec-secure-contexts/#localhost) specifically
 for localhost and domains that end in `.localhost`.
 
-## Developing / Testing Communications
+### Developing / Testing Communications
 
 If you need to test communication, you may get away with opening two browser
 windows to the same URL on `localhost`. However this may be of limited utility,
@@ -215,7 +187,7 @@ file system:
 Point your browser to your outward facing IP address, preceeded by `https://`,
 and accept the security warning (since this is a self-signed cert).
 
-## Bug Reports
+### Bug Reports
 
 Please submit bug reports or patches at
 https://github.com/ether/ep_webrtc/issues
