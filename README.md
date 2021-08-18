@@ -119,6 +119,40 @@ example:
   }
 ```
 
+To limit abuse, the [coturn](https://github.com/coturn/coturn) TURN server
+supports [ephemeral (temporary) usernames and
+passwords](https://github.com/coturn/coturn/blob/60e7a199fe748cb7080594a458d22c2f7bb15a8c/README.turnserver#L664-L729).
+To take advantage of this feature, configure your TURN entry as follows:
+
+* `credentialType`: Must be set to the exact string `"coturn ephemeral
+  password"`.
+* `username`: Ignored. (The username that will be sent to the TURN server is
+  dynamically generated and based on the user's Etherpad-generated author ID.)
+* `credential`: Must be set to coturn's [`static-auth-secret`
+  setting](https://github.com/coturn/coturn/blob/60e7a199fe748cb7080594a458d22c2f7bb15a8c/README.turnserver#L445-L450).
+* `lifetime`: How long (in seconds) the password will remain valid after the
+  user visits a pad. After this amount of time, new TURN connections will fail
+  until the user reloads the page (which will generate a new password). Defaults
+  to 43200 (12 hours).
+
+Example:
+
+```json
+  "ep_webrtc": {
+    "iceServers": [
+      {
+        "urls": ["stun:stun.l.google.com:19302"]
+      },
+      {
+        "urls": ["turn:coturn.example.com:3478"],
+        "credentialType": "coturn ephemeral password",
+        "credential": "your_coturn_secret",
+        "lifetime": 3600
+      }
+    ]
+  }
+```
+
 ### Video Sizes
 
 To set a custom small and/or large size in pixels, for the video displays, set
