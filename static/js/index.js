@@ -554,7 +554,7 @@ exports.rtc = new class {
     }
     await $.post('../jserror', {
       errorInfo: JSON.stringify({
-        type: 'Plugin ep_screenrtc',
+        type: 'Plugin ep_webrtc',
         msg,
         url: window.location.href,
         source: fileName,
