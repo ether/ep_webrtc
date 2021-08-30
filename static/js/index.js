@@ -158,6 +158,7 @@ class PeerState extends EventTargetPolyfill {
               return await sender.replaceTrack(newTrack);
             } catch (err) {
               this._debug('renegotiation is required');
+              this.logErrorToServer(err);
             }
           }
           this._pc.removeTrack(sender);
@@ -216,6 +217,7 @@ class PeerState extends EventTargetPolyfill {
         this._sendMessage({description: pc.localDescription});
       } catch (err) {
         console.error('Error setting local description:', err);
+        this.logErrorToServer(err);
         if (++this._failedSLDAttempts > 10) throw err; // Avoid an infinite loop.
         this._resetConnection();
         return;
@@ -344,6 +346,7 @@ class PeerState extends EventTargetPolyfill {
       if (candidate != null) await this._addIceCandidate(candidate);
     } catch (err) {
       console.error('Error processing message from peer:', err);
+      this.logErrorToServer(err);
       this._resetConnection();
       return;
     }
