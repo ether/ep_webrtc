@@ -209,7 +209,11 @@ class PeerState extends EventTargetPolyfill {
     }
   }
 
-  _resetConnection(peerIds = null) {
+  _resetConnection(err = null, peerIds = null) {
+    if (err != null) {
+      this._debug('resetting connection due to error:', err);
+      logErrorToServer(err);
+    }
     if (this._closed) {
       this._debug('ignoring _resetConnection() on closed PeerState');
       return;
@@ -241,9 +245,8 @@ class PeerState extends EventTargetPolyfill {
         this._sendMessage({description: pc.localDescription});
       } catch (err) {
         console.error('Error setting local description:', err);
-        logErrorToServer(err);
         if (++this._failedSLDAttempts > 10) throw err; // Avoid an infinite loop.
-        this._resetConnection();
+        this._resetConnection(err);
         return;
       } finally {
         negotiationState.makingOffer = false;
@@ -252,7 +255,9 @@ class PeerState extends EventTargetPolyfill {
     pc.addEventListener('connectionstatechange', () => {
       this._debug(`connection state changed to ${pc.connectionState}`);
       switch (pc.connectionState) {
-        case 'closed': this._resetConnection(); break;
+        case 'closed':
+          this._resetConnection(new Error('connectionState changed to closed'));
+          break;
         case 'connected':
           if (this._remoteStream == null) this._setRemoteStream(this._disconnectedRemoteStream);
           break;
@@ -266,7 +271,7 @@ class PeerState extends EventTargetPolyfill {
         // seems that on at least Chrome 90 the 'failed' state is terminal (it can never go back to
         // working) so a new RTCPeerConnection must be made.
         case 'failed':
-          this._resetConnection();
+          this._resetConnection(new Error('connectionState changed to failed'));
           break;
       }
     });
@@ -357,21 +362,20 @@ class PeerState extends EventTargetPolyfill {
         if (newId == null || newId < currentId) return;
         // The remote peer reloaded the page or experienced an error. Destroy and recreate the local
         // RTCPeerConnection to avoid browser quirks caused by state mismatches.
-        this._debug(`remote peer forced WebRTC renegotiation via new ${idType} ID ` +
-                    `(old ID ${currentId}, new ID ${newId})`);
-        this._resetConnection(ids.from);
+        this._resetConnection(new Error(
+            `remote peer forced WebRTC renegotiation via new ${idType} ID ` +
+            `(old ID ${currentId}, new ID ${newId})`), ids.from);
         break;
       }
       this._ids.to = ids.from;
     }
-    if (this._pc == null) this._resetConnection(this._ids.to);
+    if (this._pc == null) this._resetConnection(null, this._ids.to);
     try {
       if (description != null) await this._setRemoteDescription(description);
       if (candidate != null) await this._addIceCandidate(candidate);
     } catch (err) {
       console.error('Error processing message from peer:', err);
-      logErrorToServer(err);
-      this._resetConnection();
+      this._resetConnection(err);
       return;
     }
   }
