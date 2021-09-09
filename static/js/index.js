@@ -44,6 +44,30 @@ const sessionId = Date.now();
 // Incremented each time a new RTCPeerConnection is created.
 let nextInstanceId = 0;
 
+const logErrorToServer = async (err, delay = 10000) => {
+  // Sleep to avoid logging benign errors caused by the user leaving the page (e.g., audio/video
+  // stream ended unexpectedly). If the user navigates away during this sleep the error will not
+  // be logged.
+  if (delay) await new Promise((resolve) => setTimeout(resolve, delay));
+  // Mimick Etherpad core's global exception handler in pad_utils.js.
+  const {message = 'unknown', fileName = 'unknown', lineNumber = -1} = err;
+  let msg = message;
+  if (err.name != null && msg !== err.name && !msg.startsWith(`${err.name}: `)) {
+    msg = `${err.name}: ${msg}`;
+  }
+  await $.post('../jserror', {
+    errorInfo: JSON.stringify({
+      type: 'Plugin ep_webrtc',
+      msg,
+      url: window.location.href,
+      source: fileName,
+      linenumber: lineNumber,
+      userAgent: navigator.userAgent,
+      stack: err.stack,
+    }),
+  });
+};
+
 class Mutex {
   async lock() {
     while (this._locked != null) await this._locked;
@@ -158,7 +182,7 @@ class PeerState extends EventTargetPolyfill {
               return await sender.replaceTrack(newTrack);
             } catch (err) {
               this._debug('renegotiation is required');
-              this.logErrorToServer(err);
+              logErrorToServer(err);
             }
           }
           this._pc.removeTrack(sender);
@@ -217,7 +241,7 @@ class PeerState extends EventTargetPolyfill {
         this._sendMessage({description: pc.localDescription});
       } catch (err) {
         console.error('Error setting local description:', err);
-        this.logErrorToServer(err);
+        logErrorToServer(err);
         if (++this._failedSLDAttempts > 10) throw err; // Avoid an infinite loop.
         this._resetConnection();
         return;
@@ -346,7 +370,7 @@ class PeerState extends EventTargetPolyfill {
       if (candidate != null) await this._addIceCandidate(candidate);
     } catch (err) {
       console.error('Error processing message from peer:', err);
-      this.logErrorToServer(err);
+      logErrorToServer(err);
       this._resetConnection();
       return;
     }
@@ -412,9 +436,7 @@ exports.rtc = new class {
       const {kind} = oldTrack || newTrack;
       $videoContainer.find(`.${kind}ended-error-btn`)
           .css('display', newTrack == null ? '' : 'none');
-      if (newTrack == null) {
-        this.logErrorToServer(new Error(`Local ${kind} track ended unexpectedly`));
-      }
+      if (newTrack == null) logErrorToServer(new Error(`Local ${kind} track ended unexpectedly`));
       ($videoContainer.data('updateMinSize') || (() => {}))();
 
       // Update the audio/video buttons to reflect the new state.
@@ -544,30 +566,6 @@ exports.rtc = new class {
     ($videoContainer.data('updateMinSize') || (() => {}))();
   }
 
-  async logErrorToServer(err, delay = 10000) {
-    // Sleep to avoid logging benign errors caused by the user leaving the page (e.g., audio/video
-    // stream ended unexpectedly). If the user navigates away during this sleep the error will not
-    // be logged.
-    if (delay) await new Promise((resolve) => setTimeout(resolve, delay));
-    // Mimick Etherpad core's global exception handler in pad_utils.js.
-    const {message = 'unknown', fileName = 'unknown', lineNumber = -1} = err;
-    let msg = message;
-    if (err.name != null && msg !== err.name && !msg.startsWith(`${err.name}: `)) {
-      msg = `${err.name}: ${msg}`;
-    }
-    await $.post('../jserror', {
-      errorInfo: JSON.stringify({
-        type: 'Plugin ep_webrtc',
-        msg,
-        url: window.location.href,
-        source: fileName,
-        linenumber: lineNumber,
-        userAgent: navigator.userAgent,
-        stack: err.stack,
-      }),
-    });
-  }
-
   showUserMediaError(err) { // show an error returned from getUserMedia
     err.devices.sort();
     const devices = err.devices.join('');
@@ -628,7 +626,7 @@ exports.rtc = new class {
       sticky: true,
       class_name: 'error',
     });
-    this.logErrorToServer(err);
+    logErrorToServer(err);
   }
 
   // Performs the following steps for the local audio and/or video tracks:
@@ -799,7 +797,7 @@ exports.rtc = new class {
         $video.data('automuted', true);
         return await this.playVideo($video);
       }
-      this.logErrorToServer(err);
+      logErrorToServer(err);
       $playErrorBtn.css({display: ''});
     }
     ($videoContainer.data('updateMinSize') || (() => {}))();
@@ -1227,7 +1225,7 @@ exports.rtc = new class {
         // The userLeave hook isn't called until it has been 8s since the peer left. Wait a bit
         // longer than that before logging the disconnect to the server.
         logDisconnectErrorTimeout =
-            setTimeout(() => this.logErrorToServer(new Error('RTC connection lost'), 0), 10000);
+            setTimeout(() => logErrorToServer(new Error('RTC connection lost'), 0), 10000);
         ($videoContainer.data('updateMinSize') || (() => {}))();
         await this.setStream(userId, this._blankStream);
       });
