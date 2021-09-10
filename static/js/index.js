@@ -356,7 +356,7 @@ class PeerState extends EventTargetPolyfill {
         return;
       }
       for (const idType of ['session', 'instance']) {
-        const newId = ids.from[idType];
+        const newId = (ids.from || {})[idType];
         const currentId = (this._ids.to || {})[idType];
         if (currentId == null || newId === currentId) continue;
         if (newId == null || newId < currentId) return;
