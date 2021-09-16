@@ -776,8 +776,15 @@ exports.rtc = new class {
       const $rtcbox = $('#rtcbox');
       $rtcbox.empty(); // In case any peer videos didn't get cleaned up for some reason.
       $rtcbox.hide();
-      for (const track of this._localTracks.stream.getTracks()) {
-        this._localTracks.setTrack(track.kind, null);
+      await this._trackLocks.audio.lock();
+      await this._trackLocks.video.lock();
+      try {
+        for (const track of this._localTracks.stream.getTracks()) {
+          this._localTracks.setTrack(track.kind, null);
+        }
+      } finally {
+        this._trackLocks.video.unlock();
+        this._trackLocks.audio.unlock();
       }
     } finally {
       $checkbox.prop('disabled', false);
