@@ -1,8 +1,11 @@
 {
 	"@metadata": {
 		"authors": [
+			"Fewasser Traduce",
 			"Jackiezelaya"
 		]
 	},
-	"ep_webrtc_error_ssl": "TLS (https) es necesario para utilizar WebRTC."
+	"ep_webrtc_error_ssl": "TLS (https) es necesario para utilizar WebRTC.",
+	"ep_webrtc_error_permission_screen": "Error al conseguir permiso para acceder a tu pantalla.",
+	"ep_webrtc_error_notFound_screen": "Error al acceder a tu pantalla."
 }
