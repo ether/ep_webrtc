@@ -1,0 +1,21 @@
+{
+	"@metadata": {
+		"authors": [
+			"Andibecker"
+		]
+	},
+	"ep_webrtc_settings_enablertc": "เปิดใช้งานการแชทด้วยเสียง/วิดีโอ",
+	"ep_webrtc_error_ssl": "ต้องใช้ TLS (https) เพื่อใช้ WebRTC",
+	"ep_webrtc_error_permission_cam": "ไม่ได้รับสิทธิ์ในการเข้าถึงกล้องของคุณ",
+	"ep_webrtc_error_permission_mic": "ไม่สามารถรับสิทธิ์เข้าถึงไมโครโฟนของคุณ",
+	"ep_webrtc_error_permission_cammic": "ไม่สามารถรับสิทธิ์เข้าถึงกล้องและไมโครโฟนของคุณ",
+	"ep_webrtc_error_permission_screen": "ไม่สามารถรับสิทธิ์ในการเข้าถึงหน้าจอของคุณ",
+	"ep_webrtc_error_notFound_cam": "เข้าถึงกล้องของคุณไม่สำเร็จ",
+	"ep_webrtc_error_notFound_mic": "เข้าถึงไมโครโฟนของคุณไม่สำเร็จ",
+	"ep_webrtc_error_notFound_cammic": "เข้าถึงกล้องและไมโครโฟนของคุณไม่สำเร็จ",
+	"ep_webrtc_error_notFound_screen": "ไม่สามารถเข้าถึงหน้าจอของคุณ",
+	"ep_webrtc_error_notReadable": "ขออภัย เกิดข้อผิดพลาดของฮาร์ดแวร์ที่ทำให้ไม่สามารถเข้าใช้งานกล้องและ/หรือไมโครโฟนของคุณ:",
+	"ep_webrtc_error_otherCantAccess": "ขออภัย เบราว์เซอร์ไม่มีสิทธิ์เข้าถึงกล้องและ/หรือไมโครโฟนของคุณ โปรดตรวจสอบการอนุญาตในการตั้งค่าเบราว์เซอร์ของคุณ ไม่น่าจะใช่ข้อผิดพลาดของฮาร์ดแวร์:",
+	"ep_webrtc_settings_audioenabledonstart": "เปิดเสียงเมื่อเริ่ม",
+	"ep_webrtc_settings_videoenabledonstart": "เปิดวิดีโอเมื่อเริ่ม"
+}

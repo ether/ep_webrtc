@@ -1,0 +1,21 @@
+{
+	"@metadata": {
+		"authors": [
+			"Andibecker"
+		]
+	},
+	"ep_webrtc_settings_enablertc": "အသံ/ဗီဒီယိုစကားပြောခြင်းကိုဖွင့်ပါ",
+	"ep_webrtc_error_ssl": "WebRTC ကိုသုံးရန် TLS (https) လိုအပ်သည်။",
+	"ep_webrtc_error_permission_cam": "မင်းရဲ့ကင်မရာကိုသုံးခွင့်ရရန်မအောင်မြင်ပါ။",
+	"ep_webrtc_error_permission_mic": "သင်၏မိုက်ခရိုဖုန်းကိုသုံးရန်ခွင့်ပြုချက်မရခဲ့ပါ။",
+	"ep_webrtc_error_permission_cammic": "မင်းရဲ့ကင်မရာနဲ့မိုက်ခရိုဖုန်းကိုသုံးခွင့်ပြုချက်မရခဲ့ပါ။",
+	"ep_webrtc_error_permission_screen": "သင်၏ဖန်သားပြင်ကိုသုံးရန်ခွင့်ပြုချက်မရခဲ့ပါ။",
+	"ep_webrtc_error_notFound_cam": "သင်၏ကင်မရာကို သုံး၍ မရပါ။",
+	"ep_webrtc_error_notFound_mic": "သင်၏မိုက်ခရိုဖုန်းကို သုံး၍ မရပါ။",
+	"ep_webrtc_error_notFound_cammic": "သင်၏ကင်မရာနှင့်မိုက်ခရိုဖုန်းကို သုံး၍ မရပါ။",
+	"ep_webrtc_error_notFound_screen": "သင်၏မျက်နှာပြင်ကို သုံး၍ မရပါ။",
+	"ep_webrtc_error_notReadable": "ဝမ်းနည်းပါတယ်၊ သင်၏ကင်မရာနှင့်/သို့မဟုတ်မိုက်ခရိုဖုန်းကို ၀ င်ရောက်ခြင်းကိုတားဆီးသောဟာ့ဒ်ဝဲအမှားတစ်ခုဖြစ်ပွားခဲ့သည်။",
+	"ep_webrtc_error_otherCantAccess": "ဝမ်းနည်းပါတယ်၊ ဘရောင်ဇာကမင်းရဲ့ကင်မရာနဲ့/ဒါမှမဟုတ်မိုက်ခရိုဖုန်းကိုသုံးခွင့်မရှိဘူး။ ကျေးဇူးပြု၍ သင်၏ browser ၏ setting တွင်ခွင့်ပြုချက်များကိုစစ်ဆေးပါ။ ၎င်းသည် hardware error မဟုတ်ပါ။",
+	"ep_webrtc_settings_audioenabledonstart": "အစတွင်အသံဖွင့်ပါ",
+	"ep_webrtc_settings_videoenabledonstart": "Start မှာဗီဒီယိုဖွင့်ပါ"
+}

@@ -1,0 +1,21 @@
+{
+	"@metadata": {
+		"authors": [
+			"Andibecker"
+		]
+	},
+	"ep_webrtc_settings_enablertc": "Washa Gumzo la Sauti / Video",
+	"ep_webrtc_error_ssl": "TLS (https) inahitajika kutumia WebRTC.",
+	"ep_webrtc_error_permission_cam": "Imeshindwa kupata ruhusa ya kufikia kamera yako.",
+	"ep_webrtc_error_permission_mic": "Imeshindwa kupata ruhusa ya kufikia maikrofoni yako.",
+	"ep_webrtc_error_permission_cammic": "Imeshindwa kupata ruhusa ya kufikia kamera na maikrofoni yako.",
+	"ep_webrtc_error_permission_screen": "Imeshindwa kupata ruhusa ya kufikia skrini yako.",
+	"ep_webrtc_error_notFound_cam": "Imeshindwa kufikia kamera yako.",
+	"ep_webrtc_error_notFound_mic": "Imeshindwa kufikia maikrofoni yako.",
+	"ep_webrtc_error_notFound_cammic": "Imeshindwa kufikia kamera na maikrofoni yako.",
+	"ep_webrtc_error_notFound_screen": "Imeshindwa kufikia skrini yako.",
+	"ep_webrtc_error_notReadable": "Samahani, hitilafu ya vifaa ilitokea ambayo ilizuia ufikiaji wa kamera yako na / au kipaza sauti:",
+	"ep_webrtc_error_otherCantAccess": "Samahani, kivinjari hakiwezi kufikia kamera yako na / au kipaza sauti. Tafadhali angalia ruhusa katika mipangilio ya kivinjari chako. Labda hii sio kosa la vifaa:",
+	"ep_webrtc_settings_audioenabledonstart": "Audio ON wakati wa Mwanzo",
+	"ep_webrtc_settings_videoenabledonstart": "Video ON mwanzoni"
+}
