@@ -56,7 +56,7 @@ const logErrorToServer = async (err, delay = 10000) => {
     msg = `${err.name}: ${msg}`;
   }
   await $.post('../jserror', {
-    errorInfo: JSON.stringify({
+    errorInfo: JSON.stringify(Object.assign({
       type: 'Plugin ep_webrtc',
       msg,
       url: window.location.href,
@@ -64,7 +64,7 @@ const logErrorToServer = async (err, delay = 10000) => {
       linenumber: lineNumber,
       userAgent: navigator.userAgent,
       stack: err.stack,
-    }),
+    }, err.peerMessage == null ? {} : {peerMessage: err.peerMessage})),
   });
 };
 
@@ -340,8 +340,9 @@ class PeerState extends EventTargetPolyfill {
     if (tracks.length === 0) this._sendMessage({invite: 'invite'});
   }
 
-  async receiveMessage({ids, candidate, description, hangup}) {
+  async receiveMessage(msg) {
     if (this._closed) return debug('Ignoring message because PeerState is closed');
+    const {ids, candidate, description, hangup} = msg;
     if (hangup != null) {
       this.close(true);
       return;
@@ -375,6 +376,7 @@ class PeerState extends EventTargetPolyfill {
       if (description != null) await this._setRemoteDescription(description);
       if (candidate != null) await this._addIceCandidate(candidate);
     } catch (err) {
+      err.peerMessage = msg;
       console.error('Error processing message from peer:', err);
       this._resetConnection(err);
       return;
