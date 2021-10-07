@@ -1,11 +1,16 @@
 {
 	"@metadata": {
 		"authors": [
+			"MITO",
 			"Maantietäjä"
 		]
 	},
 	"ep_webrtc_settings_enablertc": "Ota ääni- / videopuhelu käyttöön",
 	"ep_webrtc_error_ssl": "Valitettavasti sinun on asennettava SSL-varmenteet Etherpad-ilmentymään, jotta voit käyttää WebRTC:tä.",
+	"ep_webrtc_error_notFound_cam": "Kameraasi ei saatu pääsyä.",
+	"ep_webrtc_error_notFound_mic": "Mikrofoniisi ei saatu pääsyä.",
+	"ep_webrtc_error_notFound_cammic": "Kameraasi ja mikrofoniisi ei saatu pääsyä.",
+	"ep_webrtc_error_notFound_screen": "Näyttöösi ei saatu pääsyä.",
 	"ep_webrtc_error_notReadable": "Valitettavasti tapahtui laitteistovirhe, joka esti kameran ja/tai mikrofonin käytön.",
 	"ep_webrtc_error_otherCantAccess": "Valitettavasti selaimella ei ole pääsyä kamerallesi ja/tai mikrofonillesi. Tarkista käyttöoikeudet selaimesi asetuksista. Tämä ei todennäköisesti ole laitteistovirhe.",
 	"ep_webrtc_settings_audioenabledonstart": "Ääni PÄÄLLÄ aloitusvaiheessa",
