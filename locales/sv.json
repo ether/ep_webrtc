@@ -2,6 +2,7 @@
 	"@metadata": {
 		"authors": [
 			"Bengtsson96",
+			"Haxpett",
 			"Sabelöga",
 			"WikiPhoenix"
 		]
@@ -11,9 +12,11 @@
 	"ep_webrtc_error_permission_cam": "Kunde inte få behörighet till att använda din kamera.",
 	"ep_webrtc_error_permission_mic": "Kunde inte få behörighet till att använda din mikrofon.",
 	"ep_webrtc_error_permission_cammic": "Kunde inte få behörighet till att använda din kamera och mikrofon.",
+	"ep_webrtc_error_permission_screen": "Kunde inte få behörighet till att använda din skärm.",
 	"ep_webrtc_error_notFound_cam": "Kunde inte komma åt din kamera.",
 	"ep_webrtc_error_notFound_mic": "Kunde inte komma åt din mikrofon.",
 	"ep_webrtc_error_notFound_cammic": "Kunde inte komma åt din kamera och mikrofon.",
+	"ep_webrtc_error_notFound_screen": "Kunde inte komma åt din skärm.",
 	"ep_webrtc_error_notReadable": "Tyvärr, ett hårdvarufel uppstod som förhindrade åtkomst till din kamera och /eller mikrofon:",
 	"ep_webrtc_error_otherCantAccess": "Tyvärr, webbläsaren har inte åtkomst till din kamera och/eller mikrofon. Kontrollera behörigheterna i din webbläsares inställningar. Detta är mest troligt inte ett hårdvarufel:",
 	"ep_webrtc_settings_audioenabledonstart": "Ljud PÅ vid start",
