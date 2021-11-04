@@ -1,16 +1,20 @@
 {
 	"@metadata": {
 		"authors": [
-			"Ykhwong"
+			"Ykhwong",
+			"그냥기여자"
 		]
 	},
 	"ep_webrtc_settings_enablertc": "오디오/비디오 채팅 활성화",
 	"ep_webrtc_error_ssl": "죄송합니다. WebRTC를 사용하려면 이더패드 인스턴스를 위해 SSL 인증서를 설치해야 합니다.",
 	"ep_webrtc_error_permission_cam": "카메라 접근 권한을 얻지 못했습니다.",
 	"ep_webrtc_error_permission_mic": "마이크 접근 권한을 얻지 못했습니다.",
+	"ep_webrtc_error_permission_cammic": "마이크 및 카메라 접근 권한을 얻지 못했습니다.",
+	"ep_webrtc_error_permission_screen": "화면 접근 권한을 얻지 못했습니다.",
 	"ep_webrtc_error_notFound_cam": "카메라 접근을 실패했습니다.",
 	"ep_webrtc_error_notFound_mic": "마이크 접근을 실패했습니다.",
 	"ep_webrtc_error_notFound_cammic": "카메라와 마이크 접근을 실패했습니다.",
+	"ep_webrtc_error_notFound_screen": "화면에 접근할 수 없습니다.",
 	"ep_webrtc_error_notReadable": "죄송합니다. 하드웨어 오류가 발생하여 카메라 및 마이크에 접근할 수 없습니다:",
 	"ep_webrtc_error_otherCantAccess": "브라우저에 카메라 및 마이크 접근 권한이 없습니다. 브라우저의 설정에서 권한을 확인해 주십시오. 하드웨어 오류가 아닐 가능성이 높습니다.",
 	"ep_webrtc_settings_audioenabledonstart": "시작 시 소리 켜기",
