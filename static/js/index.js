@@ -341,7 +341,7 @@ class PeerState extends EventTargetPolyfill {
   }
 
   async receiveMessage(msg) {
-    if (this._closed) return debug('Ignoring message because PeerState is closed');
+    if (this._closed) return this._debug('Ignoring message because PeerState is closed');
     const {ids, candidate, description, hangup} = msg;
     if (hangup != null) {
       this.close(true);
