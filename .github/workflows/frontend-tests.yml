@@ -19,22 +19,42 @@ jobs:
       with:
         node-version: 12
 
-    - name: Install Etherpad core
+    - name: Check out Etherpad core
       uses: actions/checkout@v2
       with:
         repository: ether/etherpad-lite
 
-    - name: Install ${{github.event.repository.name}}
+    - name: Check out the plugin
       uses: actions/checkout@v2
       with:
-        path: ./node_modules/${{github.event.repository.name}}
+        path: ./node_modules/__tmp
 
-    - name: Install ${{github.event.repository.name}} dependencies
+    - name: export GIT_HASH to env
+      id: environment
       run: |
-        cd node_modules/${{github.event.repository.name}}
+        cd ./node_modules/__tmp
+        echo "::set-output name=sha_short::$(git rev-parse --short ${{ github.sha }})"
+
+    - name: Determine plugin name
+      id: plugin_name
+      run: |
+        cd ./node_modules/__tmp
+        npx -c 'printf %s\\n "::set-output name=plugin_name::${npm_package_name}"'
+
+    - name: Rename plugin directory
+      env:
+        PLUGIN_NAME: ${{ steps.plugin_name.outputs.plugin_name }}
+      run: |
+        mv ./node_modules/__tmp ./node_modules/"${PLUGIN_NAME}"
+
+    - name: Install plugin dependencies
+      env:
+        PLUGIN_NAME: ${{ steps.plugin_name.outputs.plugin_name }}
+      run: |
+        cd ./node_modules/"${PLUGIN_NAME}"
         npm ci
 
-    # This must be run after installing the plugins, otherwise npm will try to
+    # This must be run after setting up the plugin, otherwise npm will try to
     # hoist common dependencies by removing them from src/node_modules and
     # installing them in the top-level node_modules. As of v6.14.10, npm's hoist
     # logic appears to be buggy, because it sometimes removes dependencies from
@@ -43,10 +63,6 @@ jobs:
     # tools such as `npm outdated`, `npm update`, and some ESLint rules.
     - name: Install Etherpad core dependencies
       run: src/bin/installDeps.sh
-
-    - name: export GIT_HASH to env
-      id: environment
-      run: echo "::set-output name=sha_short::$(git rev-parse --short ${{ github.sha }})"
 
     - name: Create settings.json
       run: cp settings.json.template settings.json

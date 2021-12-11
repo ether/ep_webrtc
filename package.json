@@ -10,23 +10,23 @@
   "author": "John McLear <john@mclear.co.uk>",
   "contributors": [],
   "engines": {
-    "node": ">=10.13.0"
+    "node": ">=12.13.0"
   },
   "dependencies": {},
   "funding": {
     "type": "individual",
-    "url": "http://etherpad.org/"
+    "url": "https://etherpad.org/"
   },
   "devDependencies": {
-    "eslint": "^7.22.0",
-    "eslint-config-etherpad": "^1.0.26",
-    "eslint-plugin-cypress": "^2.11.2",
+    "eslint": "^7.32.0",
+    "eslint-config-etherpad": "^2.0.2",
+    "eslint-plugin-cypress": "^2.12.1",
     "eslint-plugin-eslint-comments": "^3.2.0",
-    "eslint-plugin-mocha": "^8.1.0",
+    "eslint-plugin-mocha": "^9.0.0",
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-prefer-arrow": "^1.2.3",
-    "eslint-plugin-promise": "^4.3.1",
-    "eslint-plugin-you-dont-need-lodash-underscore": "^6.11.0"
+    "eslint-plugin-promise": "^5.1.1",
+    "eslint-plugin-you-dont-need-lodash-underscore": "^6.12.0"
   },
   "eslintConfig": {
     "ignorePatterns": [
