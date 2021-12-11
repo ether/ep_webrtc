@@ -18,7 +18,7 @@
 require('./adapter');
 const padcookie = require('ep_etherpad-lite/static/js/pad_cookie').padcookie;
 
-const enableDebugLogging = false;
+let enableDebugLogging = false;
 const debug = (...args) => { if (enableDebugLogging) console.debug('ep_webrtc:', ...args); };
 
 const EventTargetPolyfill = (() => {
@@ -463,6 +463,9 @@ exports.rtc = new class {
     // When grabbing both locks the audio lock must be grabbed first to avoid deadlock.
     this._trackLocks = {audio: new Mutex(), video: new Mutex()};
   }
+
+  get enableDebugLogging() { return enableDebugLogging; }
+  set enableDebugLogging(val) { enableDebugLogging = !!val; }
 
   // API HOOKS
 
