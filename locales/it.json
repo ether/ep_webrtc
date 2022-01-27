@@ -5,7 +5,7 @@
 			"VamosErik88"
 		]
 	},
-	"ep_webrtc_settings_enablertc": "Abilita Chat Audio/Video",
+	"ep_webrtc_settings_enablertc": "Abilita chat audio/video",
 	"ep_webrtc_error_ssl": "Il TLS (https) è obbligatorio per utilizzare WebRTC.",
 	"ep_webrtc_error_permission_cam": "Impossibile ottenere l'autorizzazione per accedere alla fotocamera.",
 	"ep_webrtc_error_permission_mic": "Impossibile ottenere l'autorizzazione per accedere al microfono.",
@@ -14,9 +14,9 @@
 	"ep_webrtc_error_notFound_cam": "Impossibile accedere alla fotocamera.",
 	"ep_webrtc_error_notFound_mic": "Impossibile accedere al microfono.",
 	"ep_webrtc_error_notFound_cammic": "Impossibile accedere alla fotocamera e al microfono.",
-	"ep_webrtc_error_notFound_screen": "Errore all'accedere al tuo schermo.",
+	"ep_webrtc_error_notFound_screen": "Impossibile accedere al tuo schermo.",
 	"ep_webrtc_error_notReadable": "Spiacenti, si è verificato un errore hardware che ha impedito l'accesso alla tua telecamera e/o microfono:",
-	"ep_webrtc_error_otherCantAccess": "Spiacenti, il browser non ha accesso alla fotocamera e/o al microfono. Controlla i permessi nelle impostazioni del tuo browser.\nMolto probabilmente si tratta di un errore hardware.",
+	"ep_webrtc_error_otherCantAccess": "Spiacenti, il browser non ha accesso alla fotocamera e/o al microfono. Controlla i permessi nelle impostazioni del tuo browser.\nMolto probabilmente non si tratta di un errore hardware.",
 	"ep_webrtc_settings_audioenabledonstart": "Audio attivato all'avvio",
 	"ep_webrtc_settings_videoenabledonstart": "Video attivato all'avvio"
 }
