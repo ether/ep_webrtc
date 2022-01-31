@@ -2,12 +2,22 @@
 	"@metadata": {
 		"authors": [
 			"Crowley666",
+			"GuoPC",
 			"Zhang8569"
 		]
 	},
+	"ep_webrtc_settings_enablertc": "启用音频/视频聊天",
 	"ep_webrtc_error_ssl": "TLS（https）要求使用WebRTC。",
 	"ep_webrtc_error_permission_cam": "无法获取访问摄像头的权限。",
+	"ep_webrtc_error_permission_mic": "无法获取访问麦克风的权限。",
 	"ep_webrtc_error_permission_cammic": "无法获取访问摄像头和麦克风的权限。",
+	"ep_webrtc_error_permission_screen": "无法获取访问屏幕的权限。",
 	"ep_webrtc_error_notFound_cam": "无法访问您的摄像头。",
-	"ep_webrtc_error_notFound_mic": "无法访问您的麦克风。"
+	"ep_webrtc_error_notFound_mic": "无法访问您的麦克风。",
+	"ep_webrtc_error_notFound_cammic": "无法访问您的摄像头和麦克风。",
+	"ep_webrtc_error_notFound_screen": "无法访问您的屏幕。",
+	"ep_webrtc_error_notReadable": "抱歉，发生硬件错误导致无法访问您的摄像头和/或麦克风：",
+	"ep_webrtc_error_otherCantAccess": "抱歉，浏览器无法访问您的摄像头和/或麦克风。请检查您浏览器设置里的权限。这可能不是硬件错误：",
+	"ep_webrtc_settings_audioenabledonstart": "在开始时开启音频",
+	"ep_webrtc_settings_videoenabledonstart": "在开始时开启视频"
 }
