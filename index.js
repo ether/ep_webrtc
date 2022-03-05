@@ -32,6 +32,10 @@ const settings = {
     disabled: 'none',
     sizes: {large: 260, small: 160},
   },
+  videoConstraints: {
+    width: {ideal: 320},
+    height: {ideal: 240},
+  },
   iceServers: [{urls: ['stun:stun.l.google.com:19302']}],
   listenClass: null,
   moreInfoUrl: {},

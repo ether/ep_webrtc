@@ -74,6 +74,20 @@ Supported values for `"disabled"`:
 * `"soft"`: Initially disabled by default.
 * `"hard"`: Unavailable (it cannot be enabled).
 
+The camera's record resolution can be configured by setting `videoConstraints`
+to any [video
+constraints](https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/getUserMedia#parameters)
+value acceptable to client browsers. It has the following default value:
+
+```json
+  "ep_webrtc": {
+    "videoConstraints": {
+      "width": {"ideal": 320},
+      "height": {"ideal": 240}
+    }
+  }
+```
+
 ### Custom Activate Button
 
 The misnamed `listenClass` setting allows you to specify a CSS selector for an
@@ -169,6 +183,9 @@ one or both of the following in your `settings.json`:
     }
   }
 ```
+
+This only controls the size of the video display widget. To set the camera's
+record resolution, see the `videoConstraints` setting.
 
 ## Metrics
 
