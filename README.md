@@ -82,8 +82,8 @@ value acceptable to client browsers. It has the following default value:
 ```json
   "ep_webrtc": {
     "videoConstraints": {
-      "width": {"ideal": 320},
-      "height": {"ideal": 240}
+      "width": {"ideal": 160},
+      "height": {"ideal": 120}
     }
   }
 ```
