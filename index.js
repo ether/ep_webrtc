@@ -111,13 +111,17 @@ const handleErrorStatMessage = (statName) => {
 exports.clientVars = async (hookName, {clientVars: {userId: authorId}}) => ({ep_webrtc: {
   ...settings,
   iceServers: settings.iceServers.map((server) => {
-    if (server.credentialType !== 'coturn ephemeral password') return server;
-    const {lifetime = 60 * 60 * 12 /* seconds */} = server;
-    const username = `${Math.floor(Date.now() / 1000) + lifetime}:${authorId}`;
-    const hmac = crypto.createHmac('sha1', server.credential);
-    hmac.update(username);
-    const credential = hmac.digest('base64');
-    return {urls: server.urls, username, credential};
+    switch (server.credentialType) {
+      case 'coturn ephemeral password': {
+        const {lifetime = 60 * 60 * 12 /* seconds */} = server;
+        const username = `${Math.floor(Date.now() / 1000) + lifetime}:${authorId}`;
+        const hmac = crypto.createHmac('sha1', server.credential);
+        hmac.update(username);
+        const credential = hmac.digest('base64');
+        return {urls: server.urls, username, credential};
+      }
+      default: return server;
+    }
   }),
 }});
 
