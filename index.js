@@ -26,7 +26,7 @@ for (const level of ['debug', 'info', 'warn', 'error']) {
   logger[level] = console[level].bind(console, 'ep_webrtc:');
 }
 
-const settings = {
+const defaultSettings = {
   // The defaults here are overridden by the values in the `ep_webrtc` object from `settings.json`.
   enabled: true,
   audio: {
@@ -44,6 +44,7 @@ const settings = {
   listenClass: null,
   moreInfoUrl: {},
 };
+let settings = null;
 let socketio;
 
 const addContextToError = (err, pfx) => {
@@ -222,7 +223,7 @@ exports.eejsBlock_styles = (hookName, context) => {
 };
 
 exports.loadSettings = async (hookName, {settings: {ep_webrtc: s = {}}}) => {
-  _.mergeWith(settings, s, (objV, srcV) => {
+  settings = _.mergeWith({}, defaultSettings, s, (objV, srcV) => {
     if (Array.isArray(srcV)) return _.cloneDeep(srcV); // Don't merge arrays, replace them.
   });
   settings.configError = (() => {
