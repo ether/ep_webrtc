@@ -14,6 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+const _ = require('lodash');
 const {Buffer} = require('buffer');
 const crypto = require('crypto');
 const eejs = require('ep_etherpad-lite/node/eejs/');
@@ -220,19 +221,10 @@ exports.eejsBlock_styles = (hookName, context) => {
   context.content += eejs.require('./templates/styles.html', {}, module);
 };
 
-exports.loadSettings = async (hookName, {settings: {ep_webrtc = {}}}) => {
-  const isObj = (o) => o != null && typeof o === 'object' && !Array.isArray(o);
-  const merge = (target, source) => {
-    for (const [k, sv] of Object.entries(source)) {
-      const tv = target[k];
-      // The own-property check on the target prevents prototype pollution. (Prototype pollution
-      // shouldn't be exploitable here because the source comes from admin-controlled settings.json,
-      // but the check is added anyway to hopefully pacify static analysis tools.)
-      if (Object.prototype.hasOwnProperty.call(target, k) && isObj(tv) && isObj(sv)) merge(tv, sv);
-      else target[k] = sv;
-    }
-  };
-  merge(settings, ep_webrtc);
+exports.loadSettings = async (hookName, {settings: {ep_webrtc: s = {}}}) => {
+  _.mergeWith(settings, s, (objV, srcV) => {
+    if (Array.isArray(srcV)) return _.cloneDeep(srcV); // Don't merge arrays, replace them.
+  });
   settings.configError = (() => {
     for (const k of ['audio', 'video']) {
       const {[k]: {disabled} = {}} = settings;
