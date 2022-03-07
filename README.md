@@ -134,6 +134,8 @@ example:
   }
 ```
 
+#### Ephemeral credentials
+
 To limit abuse, the [coturn](https://github.com/coturn/coturn) TURN server
 supports [ephemeral (temporary) usernames and
 passwords](https://github.com/coturn/coturn/blob/60e7a199fe748cb7080594a458d22c2f7bb15a8c/README.turnserver#L664-L729).
@@ -165,7 +167,36 @@ Example:
         "lifetime": 3600
       }
     ]
-  }
+  },
+```
+
+There is also support for ephemeral credentials from the
+[Xirsys](https://xirsys.com/) [API](https://docs.xirsys.com/?pg=api-turn):
+
+  * `credentialType` (required): Must be set to the exact string `"xirsys
+    ephemeral credentials"`.
+  * `url` (required): The desired Xirsys TURN API endpoint.
+  * `username` (required): Your Xirsys username.
+  * `credential` (required): Your Xirsys API secret.
+  * `lifetime` (optional; defaults to 43200 = 12 hours): How long (in seconds)
+    the ephemeral credentials will remain valid after the user visits a pad.
+    After this amount of time, new TURN connections will fail until the user
+    reloads the page (which will generate a new password).
+
+Example:
+
+```json
+  "ep_webrtc": {
+    "iceServers": [
+      {
+        "credentialType": "xirsys ephemeral credentials",
+        "url": "https://global.xirsys.net/_turn/myChannel",
+        "username": "myUsername",
+        "credential": "myPassword",
+        "lifetime": 3600
+      }
+    ]
+  },
 ```
 
 ### Video Sizes

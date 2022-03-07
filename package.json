@@ -12,7 +12,10 @@
   "engines": {
     "node": ">=12.17.0"
   },
-  "dependencies": {},
+  "dependencies": {
+    "abort-controller": "^3.0.0",
+    "node-fetch": "^3.2.1"
+  },
   "funding": {
     "type": "individual",
     "url": "https://etherpad.org/"

@@ -14,6 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+const {Buffer} = require('buffer');
 const crypto = require('crypto');
 const eejs = require('ep_etherpad-lite/node/eejs/');
 const sessioninfos = require('ep_etherpad-lite/node/handler/PadMessageHandler').sessioninfos;
@@ -43,6 +44,15 @@ const settings = {
   moreInfoUrl: {},
 };
 let socketio;
+
+const addContextToError = (err, pfx) => {
+  const newErr = new Error(`${pfx}${err.message}`, {cause: err});
+  if (Error.captureStackTrace) Error.captureStackTrace(newErr, addContextToError);
+  // Check for https://github.com/tc39/proposal-error-cause support, available in Node.js >= v16.10.
+  if (newErr.cause === err) return newErr;
+  err.message = `${pfx}${err.message}`;
+  return err;
+};
 
 // Copied from:
 // https://github.com/ether/etherpad-lite/blob/f95b09e0b6752a0d226d58d8b246831164dc9533/src/node/handler/PadMessageHandler.js#L1411-L1420
@@ -108,9 +118,22 @@ const handleErrorStatMessage = (statName) => {
   }
 };
 
+const fetchJson = async (url, opts = {}) => {
+  const c = new globalThis.AbortController();
+  const t = setTimeout(() => c.abort(), 5000);
+  let res;
+  try {
+    res = await globalThis.fetch(url, {signal: c.signal, ...opts});
+  } finally {
+    clearTimeout(t);
+  }
+  if (!res.ok) throw new Error(`HTTP ${res.status} ${res.statusText}`);
+  return await res.json();
+};
+
 exports.clientVars = async (hookName, {clientVars: {userId: authorId}}) => ({ep_webrtc: {
   ...settings,
-  iceServers: settings.iceServers.map((server) => {
+  iceServers: await Promise.all(settings.iceServers.map(async (server) => {
     switch (server.credentialType) {
       case 'coturn ephemeral password': {
         const {lifetime = 60 * 60 * 12 /* seconds */} = server;
@@ -120,9 +143,41 @@ exports.clientVars = async (hookName, {clientVars: {userId: authorId}}) => ({ep_
         const credential = hmac.digest('base64');
         return {urls: server.urls, username, credential};
       }
+      case 'xirsys ephemeral credentials': {
+        const {
+          url,
+          username,
+          credential,
+          lifetime: expire = 12 * 60 * 60, // seconds
+          method = 'PUT',
+          headers: h = {},
+          jsonBody: b = {},
+        } = server;
+        // Can't set default values for the Content-Type and Authorization headers by using an
+        // object literal with spread (e.g., `{'content-type': 'foo', ...h}`) because the Headers
+        // constructor uses `.append()` internally instead of `.set()`. This matters if a header is
+        // repeated multiple times by using different mixes of upper- and lower-case letters.
+        const headers = new globalThis.Headers(h);
+        if (!headers.has('content-type')) headers.set('content-type', 'application/json');
+        if (username && !headers.has('authorization')) {
+          headers.set('authorization',
+              `Basic ${Buffer.from(`${username}:${credential}`).toString('base64')}`);
+        }
+        const body =
+            JSON.stringify(b && typeof b === 'object' ? {format: 'urls', expire, ...b} : b);
+        try {
+          const {v, s} = await fetchJson(url, {method, headers, body});
+          if (s !== 'ok') throw new Error(`API error: ${v}`);
+          return v.iceServers;
+        } catch (err) {
+          const newErr = addContextToError(err, 'failed to get TURN credentials: ');
+          logger.error(newErr.stack || newErr.toString());
+          throw newErr;
+        }
+      }
       default: return server;
     }
-  }),
+  })),
 }});
 
 exports.handleMessage = async (hookName, {message, socket}) => {
@@ -138,6 +193,18 @@ exports.handleMessage = async (hookName, {message, socket}) => {
 
 exports.init_ep_webrtc = async (hookName, {logger: l}) => {
   if (l != null) logger = l;
+  // TODO: Remove this once all supported Node.js versions have the fetch API (added in Node.js
+  // v17.5.0 behind the --experimental-fetch flag).
+  if (!globalThis.fetch) {
+    // eslint-disable-next-line node/no-unsupported-features/es-syntax -- https://github.com/mysticatea/eslint-plugin-node/issues/250
+    const {default: fetch, Headers, Request, Response} = await import('node-fetch');
+    Object.assign(globalThis, {fetch, Headers, Request, Response});
+  }
+  // TODO: Remove this once all supported Node.js versions have AbortController (>= v15.4.0).
+  if (!globalThis.AbortController) {
+    // eslint-disable-next-line node/no-unsupported-features/es-syntax -- https://github.com/mysticatea/eslint-plugin-node/issues/250
+    globalThis.AbortController = (await import('abort-controller')).default;
+  }
 };
 
 exports.setSocketIO = (hookName, {io}) => { socketio = io; };
