@@ -5,6 +5,7 @@
       "hooks": {
         "clientVars": "",
         "handleMessage": "",
+        "init_ep_webrtc": "",
         "loadSettings": "",
         "socketio": ":setSocketIO",
         "eejsBlock_mySettings": "",

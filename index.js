@@ -15,12 +15,14 @@
  * limitations under the License.
  */
 const crypto = require('crypto');
-const log4js = require('ep_etherpad-lite/node_modules/log4js');
-const statsLogger = log4js.getLogger('stats');
-const configLogger = log4js.getLogger('configuration');
 const eejs = require('ep_etherpad-lite/node/eejs/');
 const sessioninfos = require('ep_etherpad-lite/node/handler/PadMessageHandler').sessioninfos;
 const stats = require('ep_etherpad-lite/node/stats');
+
+let logger = {};
+for (const level of ['debug', 'info', 'warn', 'error']) {
+  logger[level] = console[level].bind(console, 'ep_webrtc:');
+}
 
 const settings = {
   // The defaults here are overridden by the values in the `ep_webrtc` object from `settings.json`.
@@ -102,7 +104,7 @@ const handleErrorStatMessage = (statName) => {
   if (statErrorNames.includes(statName)) {
     stats.meter(`ep_webrtc_err_${statName}`).mark();
   } else {
-    statsLogger.warn(`Invalid ep_webrtc error stat: ${statName}`);
+    logger.warn(`Invalid ep_webrtc error stat: ${statName}`);
   }
 };
 
@@ -128,6 +130,10 @@ exports.handleMessage = async (hookName, {message, socket}) => {
     handleErrorStatMessage(message.data.statName);
     return [null];
   }
+};
+
+exports.init_ep_webrtc = async (hookName, {logger: l}) => {
+  if (l != null) logger = l;
 };
 
 exports.setSocketIO = (hookName, {io}) => { socketio = io; };
@@ -160,7 +166,7 @@ exports.loadSettings = async (hookName, {settings: {ep_webrtc = {}}}) => {
     for (const k of ['audio', 'video']) {
       const {[k]: {disabled} = {}} = settings;
       if (disabled != null && !['none', 'hard', 'soft'].includes(disabled)) {
-        configLogger.error(`Invalid value in settings.json for ep_webrtc.${k}.disabled`);
+        logger.error(`Invalid value in settings.json for ep_webrtc.${k}.disabled`);
         return true;
       }
     }
