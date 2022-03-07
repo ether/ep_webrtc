@@ -243,4 +243,8 @@ exports.loadSettings = async (hookName, {settings: {ep_webrtc = {}}}) => {
     }
     return false;
   })();
+  logger.info('configured:', {
+    ...settings,
+    iceServers: settings.iceServers.map((s) => s.credential ? {...s, credential: '*****'} : s),
+  });
 };
