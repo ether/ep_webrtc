@@ -223,8 +223,9 @@ exports.eejsBlock_styles = (hookName, context) => {
 };
 
 exports.loadSettings = async (hookName, {settings: {ep_webrtc: s = {}}}) => {
-  settings = _.mergeWith({}, defaultSettings, s, (objV, srcV) => {
+  settings = _.mergeWith({}, defaultSettings, s, (objV, srcV, key, obj, src) => {
     if (Array.isArray(srcV)) return _.cloneDeep(srcV); // Don't merge arrays, replace them.
+    if (src === s && key === 'videoConstraints') return _.cloneDeep(srcV);
   });
   settings.configError = (() => {
     for (const k of ['audio', 'video']) {
