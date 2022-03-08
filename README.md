@@ -185,6 +185,31 @@ Example:
   },
 ```
 
+#### Horizontally scaled TURN servers
+
+To spread load across multiple TURN services, you can enable sharding:
+
+```json
+  "ep_webrtc": {
+    "iceServers": [
+      {"urls": ["stun:shard0.example.com", "turn:shard0.example.com"]},
+      {"urls": ["stun:shard1.example.com", "turn:shard1.example.com"]},
+      {"urls": ["stun:shard2.example.com", "turn:shard2.example.com"]},
+      {"urls": ["stun:shard3.example.com", "turn:shard3.example.com"]},
+    ],
+    "shardIceServers": true
+  },
+```
+
+When `shardIceServers` is `false` (the default), all clients receive all
+RTCIceServer objects in the `iceServers` list and it's up to the browser to
+figure out how to use them to connect with peers. When `true`, this plugin
+assigns a single entry from `iceServers` to each pad and gives out only that
+assigned entry to users that connect to the pad. The intention is to provide a
+better guarantee of load distribution across a set of TURN servers, and to avoid
+an unnecessary network hop when both peers are configured to force the use of
+TURN.
+
 ### Microphone Settings
 
 The microphone can be configured by setting `audio.constraints` to any [audio
