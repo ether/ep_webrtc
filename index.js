@@ -31,6 +31,7 @@ const defaultSettings = {
   // The defaults here are overridden by the values in the `ep_webrtc` object from `settings.json`.
   enabled: true,
   audio: {
+    constraints: {},
     disabled: 'none',
   },
   video: {

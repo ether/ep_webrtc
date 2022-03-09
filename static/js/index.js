@@ -668,7 +668,7 @@ exports.rtc = new class {
         if (!addAudioTrack && !addVideoTrack) return new MediaStream();
         debug(`requesting permission to access ${devices.join(' and ')}`);
         const stream = await window.navigator.mediaDevices.getUserMedia({
-          audio: addAudioTrack,
+          audio: addAudioTrack && this._settings.audio.constraints,
           video: addVideoTrack && this._settings.video.constraints,
         });
         debug('successfully accessed device(s)');

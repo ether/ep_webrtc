@@ -185,6 +185,23 @@ Example:
   },
 ```
 
+### Microphone Settings
+
+The microphone can be configured by setting `audio.constraints` to any [audio
+constraints](https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/getUserMedia#parameters)
+value acceptable to client browsers. It has the following default value:
+
+```json
+  "ep_webrtc": {
+    "audio": {
+      "constraints": {}
+    }
+  },
+```
+
+For a full list of available constraints, see [the
+standard](https://www.w3.org/TR/2022/CRD-mediacapture-streams-20220307/#constrainable-properties).
+
 ### Video Sizes
 
 The camera's record resolution can be configured by setting `video.constraints`
