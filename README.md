@@ -194,7 +194,11 @@ value acceptable to client browsers. It has the following default value:
 ```json
   "ep_webrtc": {
     "audio": {
-      "constraints": {}
+      "constraints": {
+        "autoGainControl": {"ideal": true},
+        "echoCancellation": {"ideal": true},
+        "noiseSuppression": {"ideal": true}
+      }
     }
   },
 ```
