@@ -20,6 +20,7 @@ const crypto = require('crypto');
 const eejs = require('ep_etherpad-lite/node/eejs/');
 const sessioninfos = require('ep_etherpad-lite/node/handler/PadMessageHandler').sessioninfos;
 const stats = require('ep_etherpad-lite/node/stats');
+const util = require('util');
 
 let logger = {};
 for (const level of ['debug', 'info', 'warn', 'error']) {
@@ -33,12 +34,12 @@ const defaultSettings = {
     disabled: 'none',
   },
   video: {
+    constraints: {
+      width: {ideal: 160},
+      height: {ideal: 120},
+    },
     disabled: 'none',
     sizes: {large: 260, small: 160},
-  },
-  videoConstraints: {
-    width: {ideal: 160},
-    height: {ideal: 120},
   },
   iceServers: [{urls: ['stun:stun.l.google.com:19302']}],
   listenClass: null,
@@ -225,7 +226,7 @@ exports.eejsBlock_styles = (hookName, context) => {
 exports.loadSettings = async (hookName, {settings: {ep_webrtc: s = {}}}) => {
   settings = _.mergeWith({}, defaultSettings, s, (objV, srcV, key, obj, src) => {
     if (Array.isArray(srcV)) return _.cloneDeep(srcV); // Don't merge arrays, replace them.
-    if (src === s && key === 'videoConstraints') return _.cloneDeep(srcV);
+    if (src === s.video && key === 'constraints') return _.cloneDeep(srcV);
   });
   settings.configError = (() => {
     for (const k of ['audio', 'video']) {
@@ -237,8 +238,8 @@ exports.loadSettings = async (hookName, {settings: {ep_webrtc: s = {}}}) => {
     }
     return false;
   })();
-  logger.info('configured:', {
+  logger.info('configured:', util.inspect({
     ...settings,
     iceServers: settings.iceServers.map((s) => s.credential ? {...s, credential: '*****'} : s),
-  });
+  }, {depth: Infinity}));
 };

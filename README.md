@@ -74,20 +74,6 @@ Supported values for `"disabled"`:
 * `"soft"`: Initially disabled by default.
 * `"hard"`: Unavailable (it cannot be enabled).
 
-The camera's record resolution can be configured by setting `videoConstraints`
-to any [video
-constraints](https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/getUserMedia#parameters)
-value acceptable to client browsers. It has the following default value:
-
-```json
-  "ep_webrtc": {
-    "videoConstraints": {
-      "width": {"ideal": 160},
-      "height": {"ideal": 120}
-    }
-  }
-```
-
 ### Custom Activate Button
 
 The misnamed `listenClass` setting allows you to specify a CSS selector for an
@@ -201,8 +187,28 @@ Example:
 
 ### Video Sizes
 
-To set a custom small and/or large size in pixels, for the video displays, set
-one or both of the following in your `settings.json`:
+The camera's record resolution can be configured by setting `video.constraints`
+to any [video
+constraints](https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/getUserMedia#parameters)
+value acceptable to client browsers. It has the following default value:
+
+```json
+  "ep_webrtc": {
+    "video": {
+      "constraints": {
+        "width": {"ideal": 160},
+        "height": {"ideal": 120}
+      }
+    }
+  },
+```
+
+For a full list of available constraints, see [the
+standard](https://www.w3.org/TR/2022/CRD-mediacapture-streams-20220307/#constrainable-properties).
+
+Changing the record resolution does not change the size of the displayed video
+widgets. To change the video widget size, set `video.sizes.small` and/or
+`video.sizes.large`:
 
 ```json
   "ep_webrtc": {
@@ -212,11 +218,8 @@ one or both of the following in your `settings.json`:
         "large": 400
       }
     }
-  }
+  },
 ```
-
-This only controls the size of the video display widget. To set the camera's
-record resolution, see the `videoConstraints` setting.
 
 ## Metrics
 
