@@ -886,7 +886,10 @@ exports.rtc = new class {
           autoplay: '',
           muted: isLocal ? '' : null,
         })
-        .prop('muted', isLocal); // Setting the 'muted' attribute isn't sufficient for some reason.
+        .prop({
+          muted: isLocal, // Setting the 'muted' attribute isn't sufficient for some reason.
+          volume: isLocal ? 0.0 : 1.0, // Long shot attempt at fixing echo in Safari.
+        });
     const $interface = $('<div>')
         .addClass('interface-container')
         .attr('id', `interface_${videoId}`);
