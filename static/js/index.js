@@ -220,6 +220,7 @@ class PeerState extends EventTargetPolyfill {
       return;
     }
     this._debug('creating RTCPeerConnection with config', this._pcConfig);
+    this._debug('peer IDs:', peerIds);
     this._setRemoteStream(null);
     this._ids.from.instance = ++nextInstanceId;
     this._ids.to = peerIds;
