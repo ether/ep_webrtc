@@ -135,10 +135,6 @@ class ClosedEvent extends CustomEvent {
   }
 }
 
-// The WebRTC negotiation logic used here is based on the "Perfect Negotiation Example" at
-// https://www.w3.org/TR/2021/REC-webrtc-20210126/#perfect-negotiation-example. See there for
-// details about how it works.
-//
 // Events:
 //   * 'stream' (see StreamEvent): Emitted when the remote stream is ready. For every 'stream' event
 //     there will be a corresponding 'streamgone' event. Once a stream is added another stream will
@@ -148,15 +144,15 @@ class ClosedEvent extends CustomEvent {
 //   * 'closed' (see ClosedEvent): Emitted when the PeerState is closed, except when closed by a
 //     call to close(). The PeerState must not be used after it is closed.
 class PeerState extends EventTargetPolyfill {
-  constructor(pcConfig, polite, sendMessage, localTracks, debug) {
+  constructor(pcConfig, caller, sendMessage, localTracks, debug) {
     super();
     this._pcConfig = pcConfig;
-    this._polite = polite;
+    this._caller = caller;
     this._sendMessage = (msg) => sendMessage(Object.assign({ids: this._ids}, msg));
     this._localTracks = localTracks;
     this._failedSLDAttempts = 0;
     this._debug = debug;
-    this._debug(`I am the ${this._polite ? '' : 'im'}polite peer`);
+    this._debug(`I am the ${this._caller ? 'calling' : 'answering'} peer`);
     this._ids = {
       from: {
         // Only changes when the user reloads the page.
@@ -224,15 +220,6 @@ class PeerState extends EventTargetPolyfill {
     this._setRemoteStream(null);
     this._ids.from.instance = ++nextInstanceId;
     this._ids.to = peerIds;
-    // This negotiation state is captured in closures (instead of doing something like
-    // this._negotiationState) because this._resetConnection() needs to be sure that all of the
-    // event handlers for the old RTCPeerConnection do not mutate the negotiation state for the new
-    // RTCPeerConnection.
-    const negotiationState = {
-      makingOffer: false,
-      ignoreOffer: false,
-      isSettingRemoteAnswerPending: false,
-    };
     const pc = new RTCPeerConnection(this._pcConfig);
     pc.addEventListener('track', ({track, streams}) => {
       if (streams.length !== 1) throw new Error('Expected track to be in exactly one stream');
@@ -240,8 +227,16 @@ class PeerState extends EventTargetPolyfill {
     });
     pc.addEventListener('icecandidate', ({candidate}) => this._sendMessage({candidate}));
     pc.addEventListener('negotiationneeded', async () => {
+      if (!this._caller) {
+        this._debug('Waiting for peer to call');
+        // It is possible that the last invite sent to the peer was sent before the peer was ready
+        // to accept invites. If that is the case and there are no local tracks to trigger a WebRTC
+        // message exchange, the peer won't know that it is OK to connect back. Send another invite
+        // just in case. The peer will ignore any superfluous invites.
+        this._sendMessage({invite: 'invite'});
+        return;
+      }
       try {
-        negotiationState.makingOffer = true;
         await pc.setLocalDescription();
         this._failedSLDAttempts = 0;
         this._sendMessage({description: pc.localDescription});
@@ -250,8 +245,6 @@ class PeerState extends EventTargetPolyfill {
         if (++this._failedSLDAttempts > 10) throw err; // Avoid an infinite loop.
         this._resetConnection(err);
         return;
-      } finally {
-        negotiationState.makingOffer = false;
       }
     });
     pc.addEventListener('connectionstatechange', () => {
@@ -299,46 +292,12 @@ class PeerState extends EventTargetPolyfill {
 
     if (this._pc != null) this._pc.close();
     this._pc = pc;
-    this._setRemoteDescription = async (description) => {
-      const readyForOffer = !negotiationState.makingOffer &&
-          (pc.signalingState === 'stable' || negotiationState.isSettingRemoteAnswerPending);
-      const offerCollision = description.type === 'offer' && !readyForOffer;
-      negotiationState.ignoreOffer = !this._polite && offerCollision;
-      if (negotiationState.ignoreOffer) {
-        this._debug('ignoring offer due to offer collision');
-        return;
-      }
-      negotiationState.isSettingRemoteAnswerPending = description.type === 'answer';
-      await pc.setRemoteDescription(description);
-      // The "Perfect Negotiation Example" doesn't put this next line inside a `finally` block. It
-      // is unclear whether that is intentional. Fortunately it doesn't matter here: If the above
-      // pc.setRemoteDescription() call throws, _resetConnection() is called to restart the
-      // negotiation anyway.
-      negotiationState.isSettingRemoteAnswerPending = false;
-      if (description.type === 'offer') {
-        await pc.setLocalDescription();
-        this._sendMessage({description: pc.localDescription});
-      }
-    };
-    this._addIceCandidate = async (candidate) => {
-      try {
-        await pc.addIceCandidate(candidate);
-      } catch (err) {
-        if (!negotiationState.ignoreOffer) throw err;
-      }
-    };
 
     const tracks = this._localTracks.stream.getTracks();
     for (const track of tracks) {
       this._debug(`start streaming ${track.kind} track ${track.id}`);
       pc.addTrack(track, this._localTracks.stream);
     }
-    // Creating an RTCPeerConnection doesn't actually generate any control messages until
-    // RTCPeerConnection.addTrack() is called. It is possible that the last invite sent to the peer
-    // was sent before the peer was ready to accept invites. If that is the case and there are no
-    // local tracks to trigger a WebRTC message exchange, the peer won't know that it is OK to
-    // connect back. Send another invite just in case. The peer will ignore any superfluous invites.
-    if (tracks.length === 0) this._sendMessage({invite: 'invite'});
   }
 
   async receiveMessage(msg) {
@@ -374,8 +333,14 @@ class PeerState extends EventTargetPolyfill {
     }
     if (this._pc == null) this._resetConnection(null, this._ids.to);
     try {
-      if (description != null) await this._setRemoteDescription(description);
-      if (candidate != null) await this._addIceCandidate(candidate);
+      if (description != null) {
+        await this._pc.setRemoteDescription(description);
+        if (description.type === 'offer') {
+          await this._pc.setLocalDescription();
+          this._sendMessage({description: this._pc.localDescription});
+        }
+      }
+      if (candidate != null) await this._pc.addIceCandidate(candidate);
     } catch (err) {
       err.peerMessage = msg;
       console.error('Error processing message from peer:', err);
@@ -396,14 +361,13 @@ class PeerState extends EventTargetPolyfill {
   }
 }
 
-const isPolite = (myId, otherId) => {
-  // Compare user IDs to determine which of the two users is the "polite" user.
-  const polite = myId.localeCompare(otherId) < 0;
-  if ((otherId.localeCompare(myId) < 0) === polite) {
-    // One peer must be polite and the other must be impolite.
+const isCaller = (myId, otherId) => {
+  // Compare user IDs to determine which of the two users will initiate the call.
+  const caller = myId.localeCompare(otherId) < 0;
+  if ((otherId.localeCompare(myId) < 0) === caller) {
     throw new Error(`Peer ID ${otherId} compares equivalent to own ID ${myId}`);
   }
-  return polite;
+  return caller;
 };
 
 // Periods in element IDs make it hard to build a selector string because period is for class match.
@@ -1292,7 +1256,7 @@ exports.rtc = new class {
       _debug('creating PeerState');
       peer = new PeerState(
           {iceServers: this._settings.iceServers},
-          isPolite(this.getUserId(), userId),
+          isCaller(this.getUserId(), userId),
           (msg) => this.sendMessage(userId, msg),
           this._localTracks,
           _debug);
