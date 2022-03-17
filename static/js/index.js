@@ -230,9 +230,8 @@ class PeerState extends EventTargetPolyfill {
       if (!this._caller) {
         this._debug('Waiting for peer to call');
         // It is possible that the last invite sent to the peer was sent before the peer was ready
-        // to accept invites. If that is the case and there are no local tracks to trigger a WebRTC
-        // message exchange, the peer won't know that it is OK to connect back. Send another invite
-        // just in case. The peer will ignore any superfluous invites.
+        // to accept invites, so the peer might not know that it should call now. Send another
+        // invite just in case. The peer will ignore any superfluous invites.
         this._sendMessage({invite: 'invite'});
         return;
       }
