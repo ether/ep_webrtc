@@ -1239,6 +1239,9 @@ exports.rtc = new class {
   }
 
   sendMessage(to, data) {
+    if (data.ids == null) data.ids = {};
+    if (data.ids.from == null) data.ids.from = {};
+    data.ids.from.session = sessionId;
     debug(`(${to == null ? 'to everyone on the pad' : `peer ${to}`}) sending message`, data);
     this._pad.collabClient.sendMessage({
       type: 'RTC_MESSAGE',
@@ -1276,7 +1279,7 @@ exports.rtc = new class {
   // the WebRTC signaling messages. This is bad because WebRTC assumes reliable, in-order delivery
   // of signaling messages, so the discards will break future connection attempts.
   invitePeer(userId) {
-    this.sendMessage(userId, {ids: {from: {session: sessionId}}, invite: 'invite'});
+    this.sendMessage(userId, {invite: 'invite'});
   }
 
   getPeerConnection(userId) {
