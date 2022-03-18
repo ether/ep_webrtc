@@ -880,8 +880,9 @@ exports.rtc = new class {
             minWidth: iw > width ? `${iw}px` : '',
             minHeight: nh + ih > height ? `${nh + ih}px` : '',
           });
-        })
-        .appendTo($('#rtcbox'));
+        });
+    if (isLocal) $videoContainer.prependTo($('#rtcbox'));
+    else $videoContainer.appendTo($('#rtcbox'));
     this.updatePeerNameAndColor(this.getUserFromId(userId));
 
     // For tests it is important to know when an asynchronous event handler has finishing handling
