@@ -87,7 +87,7 @@ class LocalTracks extends EventTargetPolyfill {
     this.videoIsScreenshare = false;
   }
 
-  _getTracks(kind) {
+  getTracks(kind) {
     return kind === 'audio' ? this.stream.getAudioTracks()
       : kind === 'video' ? this.stream.getVideoTracks()
       : this.stream.getTracks();
@@ -96,7 +96,7 @@ class LocalTracks extends EventTargetPolyfill {
   setTrack(kind, newTrack) {
     newTrack = newTrack || null; // Convert undefined to null.
     let oldTrack = null;
-    const tracks = this._getTracks(kind);
+    const tracks = this.getTracks(kind);
     for (const track of tracks) {
       if (track.kind !== kind) continue;
       if (track === newTrack) return; // No change.
@@ -109,7 +109,7 @@ class LocalTracks extends EventTargetPolyfill {
       debug(`adding ${kind} track ${newTrack.id} to local stream`);
       newTrack.addEventListener('ended', () => {
         debug(`local ${kind} track ${newTrack.id} ended`);
-        if (!this._getTracks(kind).includes(newTrack)) return;
+        if (!this.getTracks(kind).includes(newTrack)) return;
         this.setTrack(kind, null);
       });
       this.stream.addTrack(newTrack);
@@ -163,45 +163,42 @@ class PeerState extends EventTargetPolyfill {
     };
     this._closed = false;
     this._pc = null;
+    this._xcvrs = {};
     this._remoteStream = null;
-    this._onremovetrack =
-        () => { if (this._remoteStream.getTracks().length === 0) this._setRemoteStream(null); };
     this._ontrackchanged = async ({oldTrack, newTrack}) => {
-      if (this._pc == null || this._pc.connectionState === 'closed') return;
-      this._debug(`replacing ${oldTrack ? oldTrack.kind : newTrack.kind} track ` +
-                  `${oldTrack ? oldTrack.id : '(null)'} with ` +
-                  `${newTrack ? newTrack.id : '(null)'}`);
-      if (oldTrack != null) {
-        for (const sender of this._pc.getSenders()) {
-          if (sender.track !== oldTrack) continue;
-          if (newTrack != null) {
-            try {
-              return await sender.replaceTrack(newTrack);
-            } catch (err) {
-              this._debug('renegotiation is required');
-              logErrorToServer(err);
-            }
-          }
-          this._pc.removeTrack(sender);
-          break;
-        }
-      }
-      if (newTrack != null) this._pc.addTrack(newTrack, this._localTracks.stream);
+      const {kind} = oldTrack || newTrack;
+      await this._sendLocalTrack(kind, newTrack);
     };
     this._localTracks.addEventListener('trackchanged', this._ontrackchanged);
+  }
+
+  async _sendLocalTrack(kind, track) {
+    if (this._pc == null || this._pc.connectionState === 'closed') return;
+    const {sender: {track: old} = {}} = this._xcvrs[kind] || {};
+    if ((old == null && track == null) || old === track) return;
+    this._debug(
+        `replacing ${kind} track ${old ? old.id : '(null)'} with ${track ? track.id : '(null)'}`);
+    const xcvr = this._xcvrs[kind];
+    if (!xcvr) return;
+    try {
+      if (track != null) xcvr.direction = 'sendrecv'; // Will throw if not already bidirectional.
+      await xcvr.sender.replaceTrack(track);
+    } catch (err) {
+      this._debug('renegotiation is required');
+      this._resetConnection(err);
+      return;
+    }
   }
 
   _setRemoteStream(stream) {
     if (stream === this._remoteStream) return;
     if (this._remoteStream != null) {
       const oldStream = this._remoteStream;
-      oldStream.removeEventListener('removetrack', this._onremovetrack);
       this._remoteStream = null;
       this.dispatchEvent(new StreamEvent('streamgone', oldStream));
     }
     if (stream != null) {
       this._remoteStream = stream;
-      stream.addEventListener('removetrack', this._onremovetrack);
       this.dispatchEvent(new StreamEvent('stream', stream));
     }
   }
@@ -221,20 +218,19 @@ class PeerState extends EventTargetPolyfill {
     this._ids.from.instance = ++nextInstanceId;
     this._ids.to = peerIds;
     const pc = new RTCPeerConnection(this._pcConfig);
-    pc.addEventListener('track', ({track, streams}) => {
-      if (streams.length !== 1) throw new Error('Expected track to be in exactly one stream');
-      this._setRemoteStream(streams[0]);
+    pc.addEventListener('track', async ({track, transceiver}) => {
+      this._debug(`Received ${track.kind} track from peer, ID: ${track.id}`);
+      const stream = this._remoteStream || new MediaStream();
+      stream.addTrack(track);
+      this._setRemoteStream(stream);
+      if (!this._caller) {
+        this._xcvrs[track.kind] = transceiver;
+        // _sendLocalTrack might call _resetConnection, so it should be called last.
+        await this._sendLocalTrack(track.kind, this._localTracks.getTracks(track.kind)[0]);
+      }
     });
     pc.addEventListener('icecandidate', ({candidate}) => this._sendMessage({candidate}));
     pc.addEventListener('negotiationneeded', async () => {
-      if (!this._caller) {
-        this._debug('Waiting for peer to call');
-        // It is possible that the last invite sent to the peer was sent before the peer was ready
-        // to accept invites, so the peer might not know that it should call now. Send another
-        // invite just in case. The peer will ignore any superfluous invites.
-        this._sendMessage({invite: 'invite'});
-        return;
-      }
       try {
         await pc.setLocalDescription();
         this._failedSLDAttempts = 0;
@@ -291,11 +287,32 @@ class PeerState extends EventTargetPolyfill {
 
     if (this._pc != null) this._pc.close();
     this._pc = pc;
+    this._xcvrs = {};
 
-    const tracks = this._localTracks.stream.getTracks();
-    for (const track of tracks) {
-      this._debug(`start streaming ${track.kind} track ${track.id}`);
-      pc.addTrack(track, this._localTracks.stream);
+    if (this._caller) {
+      // Adding transceivers triggers negotiation with the peer, which we want to do as soon as
+      // possible to warm up the peer connection (ICE takes a while). Adding a track implicitly adds
+      // a transceiver so we could do that instead, but:
+      //
+      //   * We might not have a local track yet (maybe the user hasn't yet allowed access to the
+      //     camera/mic).
+      //   * Using a dummy silence track until a real track is ready might result in two
+      //     unidirectional SDP m-lines (one in each direction) instead of a single bidirectional
+      //     m-line. This seems to trigger an echo bug in Safari.
+      //
+      // Using transceivers to warm up the connection is the approach taken in:
+      // https://www.w3.org/TR/2021/REC-webrtc-20210126/#advanced-peer-to-peer-example-with-warm-up
+      // Also see: https://webrtcstandards.info/ice-warm-up-m-line-webrtc-transceivers/
+      Promise.all(['audio', 'video'].map(async (t) => {
+        this._debug(`adding ${t} transceiver`);
+        this._xcvrs[t] = this._pc.addTransceiver(t);
+        await this._sendLocalTrack(t, this._localTracks.getTracks(t)[0]);
+      }));
+    } else {
+      // It is possible that the last invite sent to the peer was sent before the peer was ready to
+      // accept invites, so the peer might not know that it should call now. Send another invite
+      // just in case. The peer will ignore any superfluous invites.
+      this._sendMessage({invite: 'invite'});
     }
   }
 
@@ -385,17 +402,7 @@ exports.rtc = new class {
   constructor() {
     this._activated = null;
     this._settings = null;
-    this._disabledSilence = (() => {
-      const ctx = new AudioContext();
-      const gain = ctx.createGain();
-      const dst = gain.connect(ctx.createMediaStreamDestination());
-      const track = dst.stream.getAudioTracks()[0];
-      track.enabled = false;
-      return track;
-    })();
-    this._blankStream = new MediaStream([this._disabledSilence]);
     this._localTracks = new LocalTracks();
-    this._localTracks.setTrack(this._disabledSilence.kind, this._disabledSilence);
     this._localTracks.addEventListener('trackchanged', ({oldTrack, newTrack}) => {
       // Normally the self-view UI only needs to be updated if the user clicks on something, but it
       // also needs to be updated if the browser decides to end the local stream for whatever
@@ -620,8 +627,7 @@ exports.rtc = new class {
     try {
       const devices = [];
       const addAudioTrack = updateAudio && this._selfViewButtons.audio.enabled &&
-          !this._localTracks.stream.getAudioTracks().some(
-              (t) => t !== this._disabledSilence && t.readyState === 'live');
+          !this._localTracks.stream.getAudioTracks().some((t) => t.readyState === 'live');
       if (addAudioTrack) devices.push('mic');
       const addVideoTrack = updateVideo && this._selfViewButtons.video.enabled &&
           (!this._localTracks.stream.getVideoTracks().some((t) => t.readyState === 'live') ||
@@ -674,7 +680,7 @@ exports.rtc = new class {
         for (const track of this._localTracks.stream.getAudioTracks()) {
           // Re-check the state of the button because the user might have clicked it while
           // getUserMedia() was running.
-          track.enabled = track !== this._disabledSilence && this._selfViewButtons.audio.enabled;
+          track.enabled = this._selfViewButtons.audio.enabled;
         }
         const hasAudio = this._localTracks.stream.getAudioTracks().some(
             (t) => t.enabled && t.readyState === 'live');
@@ -1279,7 +1285,7 @@ exports.rtc = new class {
         logDisconnectErrorTimeout =
             setTimeout(() => logErrorToServer(new Error('RTC connection lost'), 0), 10000);
         ($videoContainer.data('updateMinSize') || (() => {}))();
-        await this.setStream(userId, this._blankStream);
+        await this.setStream(userId, new MediaStream());
       });
       peer.addEventListener('closed', () => {
         _debug('PeerState closed');
