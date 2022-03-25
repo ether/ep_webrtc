@@ -24,11 +24,13 @@
   "devDependencies": {
     "eslint": "^8.11.0",
     "eslint-config-etherpad": "^3.0.9",
+    "mocha": "^9.2.2",
     "typescript": "^4.6.2"
   },
   "scripts": {
     "lint": "eslint .",
-    "lint:fix": "eslint --fix ."
+    "lint:fix": "eslint --fix .",
+    "test": "mocha --recursive static/tests/backend/specs"
   },
   "peerDependencies": {
     "ep_etherpad-lite": ">=1.8.7"
