@@ -1,7 +1,8 @@
 {
 	"@metadata": {
 		"authors": [
-			"Andibecker"
+			"Andibecker",
+			"Trisorn Triboon"
 		]
 	},
 	"ep_webrtc_settings_enablertc": "เปิดใช้งานการแชทด้วยเสียง/วิดีโอ",
@@ -14,7 +15,7 @@
 	"ep_webrtc_error_notFound_mic": "เข้าถึงไมโครโฟนของคุณไม่สำเร็จ",
 	"ep_webrtc_error_notFound_cammic": "เข้าถึงกล้องและไมโครโฟนของคุณไม่สำเร็จ",
 	"ep_webrtc_error_notFound_screen": "ไม่สามารถเข้าถึงหน้าจอของคุณ",
-	"ep_webrtc_error_notReadable": "ขออภัย เกิดข้อผิดพลาดของฮาร์ดแวร์ที่ทำให้ไม่สามารถเข้าใช้งานกล้องและ/หรือไมโครโฟนของคุณ:",
+	"ep_webrtc_error_notReadable": "ขออภัย เกิดข้อผิดพลาดของฮาร์ดแวร์ที่ทำให้ไม่สามารถเข้าใช้งานกล้อง และ/หรือ ไมโครโฟนของคุณ:",
 	"ep_webrtc_error_otherCantAccess": "ขออภัย เบราว์เซอร์ไม่มีสิทธิ์เข้าถึงกล้องและ/หรือไมโครโฟนของคุณ โปรดตรวจสอบการอนุญาตในการตั้งค่าเบราว์เซอร์ของคุณ ไม่น่าจะใช่ข้อผิดพลาดของฮาร์ดแวร์:",
 	"ep_webrtc_settings_audioenabledonstart": "เปิดเสียงเมื่อเริ่ม",
 	"ep_webrtc_settings_videoenabledonstart": "เปิดวิดีโอเมื่อเริ่ม"
