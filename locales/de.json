@@ -1,0 +1,13 @@
+{
+	"@metadata": {
+		"authors": [
+			"Brettchenweber"
+		]
+	},
+	"ep_webrtc_settings_enablertc": "Audio-/Video-Chat aktivieren",
+	"ep_webrtc_error_ssl": "Um WebRTC zu nutzen, ist TLS (https) erforderlich.",
+	"ep_webrtc_error_permission_cam": "Der Zugriff auf deine Kamera wurde nicht zugelassen.",
+	"ep_webrtc_error_permission_mic": "Der Zugriff auf dein Mikrofon wurde nicht zugelassen.",
+	"ep_webrtc_error_permission_cammic": "Der Zugriff auf deine Kamera und dein Mikrofon wurde nicht zugelassen.",
+	"ep_webrtc_error_otherCantAccess": "Leider hat der Browser keinen Zugriff auf deine Kamera und/oder dein Mikrofon. Bitte überprüfe die Berechtigungen in den Browsereinstellungen. Höchstwahrscheinlich handelt es sich nicht um einen Hardware-Fehler:"
+}
