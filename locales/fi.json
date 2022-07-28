@@ -2,10 +2,11 @@
 	"@metadata": {
 		"authors": [
 			"MITO",
-			"Maantietäjä"
+			"Maantietäjä",
+			"Yupik"
 		]
 	},
-	"ep_webrtc_settings_enablertc": "Ota ääni- / videopuhelu käyttöön",
+	"ep_webrtc_settings_enablertc": "Ota ääni- tai videopuhelu käyttöön",
 	"ep_webrtc_error_ssl": "Valitettavasti sinun on asennettava SSL-varmenteet Etherpad-ilmentymään, jotta voit käyttää WebRTC:tä.",
 	"ep_webrtc_error_notFound_cam": "Kameraasi ei saatu pääsyä.",
 	"ep_webrtc_error_notFound_mic": "Mikrofoniisi ei saatu pääsyä.",
