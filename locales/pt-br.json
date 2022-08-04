@@ -2,11 +2,20 @@
 	"@metadata": {
 		"authors": [
 			"Eduardo Addad de Oliveira",
-			"Eduardoaddad"
+			"Eduardoaddad",
+			"YuriNikolai"
 		]
 	},
 	"ep_webrtc_settings_enablertc": "Ativar bate-papo de áudio/vídeo",
 	"ep_webrtc_error_ssl": "O TLS (HTTPS) é necessário para usar o WEBRTC.",
+	"ep_webrtc_error_permission_cam": "Falha ao obter permissão para acessar sua câmera.",
+	"ep_webrtc_error_permission_mic": "Falha ao obter permissão para acessar seu microfone.",
+	"ep_webrtc_error_permission_cammic": "Falha ao obter permissão para acessar sua câmera e microfone.",
+	"ep_webrtc_error_permission_screen": "Falha ao obter permissão para acessar sua tela.",
+	"ep_webrtc_error_notFound_cam": "Falha ao acessar sua câmera.",
+	"ep_webrtc_error_notFound_mic": "Falha ao acessar seu microfone.",
+	"ep_webrtc_error_notFound_cammic": "Falha ao acessar sua câmera e microfone.",
+	"ep_webrtc_error_notFound_screen": "Falha ao acessar sua tela.",
 	"ep_webrtc_error_notReadable": "Lamentamos, mas ocorreu um erro de hardware que impediu o acesso à sua câmara e/ou microfone:",
 	"ep_webrtc_error_otherCantAccess": "Desculpe, o navegador não tem acesso à sua câmera e/ou microfone. Verifique as permissões nas configurações do seu navegador. Provavelmente não é um erro de hardware:",
 	"ep_webrtc_settings_audioenabledonstart": "Ligar áudio no início",
