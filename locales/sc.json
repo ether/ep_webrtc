@@ -1,0 +1,21 @@
+{
+	"@metadata": {
+		"authors": [
+			"Adr mm"
+		]
+	},
+	"ep_webrtc_settings_enablertc": "Ativa sa tzarrada de àudio/vìdeu",
+	"ep_webrtc_error_ssl": "S'impreu de WebRTC rechedet TLS (https).",
+	"ep_webrtc_error_permission_cam": "Impossìbile otènnere permissu pro atzèdere a sa càmera tua.",
+	"ep_webrtc_error_permission_mic": "Impossìbile otènnere permissu pro atzèdere a su micròfonu tuo.",
+	"ep_webrtc_error_permission_cammic": "Impossìbile otènnere permissu pro atzèdere a sa càmera e a su micròfonu tuos.",
+	"ep_webrtc_error_permission_screen": "Impossìbile otènnere permissu pro atzèdere a s'ischermu tuo.",
+	"ep_webrtc_error_notFound_cam": "Impossìbile atzèdere a sa càmera tua.",
+	"ep_webrtc_error_notFound_mic": "Impossìbile atzèdere a su micròfonu tuo.",
+	"ep_webrtc_error_notFound_cammic": "Impossìbile atzèdere a sa fotocàmera e a su micròfonu tuos.",
+	"ep_webrtc_error_notFound_screen": "Impossìbile atzèdere a s'ischermu tuo.",
+	"ep_webrtc_error_notReadable": "Errore in s'atzessu a sa càmera o a su micròfonu tuos:",
+	"ep_webrtc_error_otherCantAccess": "Su navigadore non tenet atzessu a sa càmera o a su micròfonu tuos. Verìfica is permissos in sa cunfiguratzione de su navigadore tuo. Non paret un'errore de màchina:",
+	"ep_webrtc_settings_audioenabledonstart": "Àudio ativu a su cumintzu",
+	"ep_webrtc_settings_videoenabledonstart": "Vìdeu ativu a su cumintzu"
+}
