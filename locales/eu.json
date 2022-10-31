@@ -16,7 +16,7 @@
 	"ep_webrtc_error_notFound_cammic": "Ezin izan da zure kamerara eta mikrofonora sarbiderik izan.",
 	"ep_webrtc_error_notFound_screen": "Ezin izan da zure pantailara sarbiderik izan.",
 	"ep_webrtc_error_notReadable": "Sentitzen dugu, zure kamera edo mikrofonorako sarbidea ukatzen duen hardware errore bat gertatu da:",
-	"ep_webrtc_error_otherCantAccess": "Sentitzen dugu, nabigatzaileak ez dauka zure kamera edo mikrofonorako sarbiderik. Egiaztatu itzazu zure zure nabigatzailearen ezarpenak. Ziuraski hau ez da hardware errore bat izango:",
+	"ep_webrtc_error_otherCantAccess": "Sentitzen dugu, nabigatzaileak ez dauka zure kamera edo mikrofonorako sarbiderik. Egiaztatu itzazu zure nabigatzailearen ezarpenak. Ziur aski hau ez da hardware errore bat izango:",
 	"ep_webrtc_settings_audioenabledonstart": "Audioa GAITU abiaraztean",
 	"ep_webrtc_settings_videoenabledonstart": "Bideoa GAITU habiaraztean"
 }
