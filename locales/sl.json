@@ -1,0 +1,21 @@
+{
+	"@metadata": {
+		"authors": [
+			"Eleassar"
+		]
+	},
+	"ep_webrtc_settings_enablertc": "Omogoči avdio-/videoklepet",
+	"ep_webrtc_error_ssl": "Za uporabo WebRTC je potreben TLS (https).",
+	"ep_webrtc_error_permission_cam": "Ni bilo mogoče pridobiti dovoljenja za dostop do vaše kamere.",
+	"ep_webrtc_error_permission_mic": "Ni bilo mogoče pridobiti dovoljenja za dostop do vašega mikrofona.",
+	"ep_webrtc_error_permission_cammic": "Ni bilo mogoče pridobiti dovoljenja za dostop do vaše kamere in vašega mikrofona.",
+	"ep_webrtc_error_permission_screen": "Ni bilo mogoče pridobiti dovoljenja za dostop do vašega zaslona.",
+	"ep_webrtc_error_notFound_cam": "Dostop do vaše kamere ni uspel.",
+	"ep_webrtc_error_notFound_mic": "Dostop do vašega mikrofona ni uspel.",
+	"ep_webrtc_error_notFound_cammic": "Dostop do vaše kamere in vašega mikrofona ni uspel.",
+	"ep_webrtc_error_notFound_screen": "Dostop do vašega zaslona ni uspel.",
+	"ep_webrtc_error_notReadable": "Žal je prišlo do napake strojne opreme, ki je preprečila dostop do vaše kamere in/ali vašega mikrofona:",
+	"ep_webrtc_error_otherCantAccess": "Oprostite, brskalnik nima dostopa do vaše kamere in/ali vašega mikrofona. V natavitvah brskalnika preverite dovoljenja. To najverjetneje ni napaka strojne opreme:",
+	"ep_webrtc_settings_audioenabledonstart": "Vklopljen zvok ob zagonu",
+	"ep_webrtc_settings_videoenabledonstart": "Vklopljen video ob zagonu"
+}

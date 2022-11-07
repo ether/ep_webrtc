@@ -1,0 +1,21 @@
+{
+	"@metadata": {
+		"authors": [
+			"Meno25"
+		]
+	},
+	"ep_webrtc_settings_enablertc": "تفعيل الدردشة الصوتية / المرئية",
+	"ep_webrtc_error_ssl": "مطلوب TLS (https) لاستخدام WebRTC.",
+	"ep_webrtc_error_permission_cam": "فشل الحصول على إذن للوصول إلى الكاميرا الخاصة بك.",
+	"ep_webrtc_error_permission_mic": "فشل الحصول على إذن للوصول إلى الميكروفون الخاص بك.",
+	"ep_webrtc_error_permission_cammic": "فشل الحصول على إذن للوصول إلى الكاميرا والميكروفون.",
+	"ep_webrtc_error_permission_screen": "فشل الحصول على إذن للوصول إلى شاشتك.",
+	"ep_webrtc_error_notFound_cam": "فشل الوصول إلى الكاميرا الخاصة بك.",
+	"ep_webrtc_error_notFound_mic": "فشل الوصول إلى الميكروفون الخاص بك.",
+	"ep_webrtc_error_notFound_cammic": "فشل الوصول إلى الكاميرا والميكروفون.",
+	"ep_webrtc_error_notFound_screen": "فشل الوصول إلى شاشتك.",
+	"ep_webrtc_error_notReadable": "عذرًا ، حدث خطأ في الجهاز أدى إلى منع الوصول إلى الكاميرا و / أو الميكروفون:",
+	"ep_webrtc_error_otherCantAccess": "عذرًا ، لا يمكن للمتصفح الوصول إلى الكاميرا و / أو الميكروفون. يرجى التحقق من الأذونات في إعدادات المستعرض الخاص بك. هذا على الأرجح ليس خطأ في الجهاز:",
+	"ep_webrtc_settings_audioenabledonstart": "تشغيل الصوت عند البداية",
+	"ep_webrtc_settings_videoenabledonstart": "تشغيل الفيديو عند البداية"
+}
