@@ -1,0 +1,21 @@
+{
+	"@metadata": {
+		"authors": [
+			"Къарачайлы"
+		]
+	},
+	"ep_webrtc_settings_enablertc": "Аудио/Видео Ушакъны Джандыр",
+	"ep_webrtc_error_ssl": "WebRTC хайырланыр ючюн TLS (https) керекди.",
+	"ep_webrtc_error_permission_cam": "Камерагъызгъа кириш эркинлик алынамады.",
+	"ep_webrtc_error_permission_mic": "Микрофонугъузгъа кириш эркинлик алынамады.",
+	"ep_webrtc_error_permission_cammic": "Камерагъыз бла микрофонугъузгъа кириш эркинлик алынамады.",
+	"ep_webrtc_error_permission_screen": "Экраныгъызгъа кириш эркинлик алынамады.",
+	"ep_webrtc_error_notFound_cam": "Камерагъызгъа кириш джокъду.",
+	"ep_webrtc_error_notFound_mic": "Микрофонугъузгъа кириш джокъду.",
+	"ep_webrtc_error_notFound_cammic": "Камерагъыз бла микрофонугъузгъа кириш джокъду.",
+	"ep_webrtc_error_notFound_screen": "Экраныгъызгъа кириш джокъду.",
+	"ep_webrtc_error_notReadable": "Кечериксиз, камерагъызгъа эмда/неда микрофонугъузгъа киришни тыйгъан аппарат халат чыкгъгъанды.",
+	"ep_webrtc_error_otherCantAccess": "Кечериксиз, браузерни камерагъызгъа эмда/неда микрофонугъузгъа кириши джокъду. Тилейбиз, браузеригизни джарашдырыуларында эркинликлени тинтигиз. Бу аппарат халат болмагъанына уллу ишегибиз барды:",
+	"ep_webrtc_settings_audioenabledonstart": "Башланыуда Аудио АЧЫКЪДЫ",
+	"ep_webrtc_settings_videoenabledonstart": "Башланыуда видео АЧЫКЪДЫ"
+}
