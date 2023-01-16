@@ -1,7 +1,8 @@
 {
 	"@metadata": {
 		"authors": [
-			"Brettchenweber"
+			"Brettchenweber",
+			"Justman10000"
 		]
 	},
 	"ep_webrtc_settings_enablertc": "Audio-/Video-Chat aktivieren",
@@ -9,5 +10,13 @@
 	"ep_webrtc_error_permission_cam": "Der Zugriff auf deine Kamera wurde nicht zugelassen.",
 	"ep_webrtc_error_permission_mic": "Der Zugriff auf dein Mikrofon wurde nicht zugelassen.",
 	"ep_webrtc_error_permission_cammic": "Der Zugriff auf deine Kamera und dein Mikrofon wurde nicht zugelassen.",
-	"ep_webrtc_error_otherCantAccess": "Leider hat der Browser keinen Zugriff auf deine Kamera und/oder dein Mikrofon. Bitte überprüfe die Berechtigungen in den Browsereinstellungen. Höchstwahrscheinlich handelt es sich nicht um einen Hardware-Fehler:"
+	"ep_webrtc_error_permission_screen": "Die Erlaubnis, auf deinen Bildschirm zuzugreifen, wurde nicht erteilt.",
+	"ep_webrtc_error_notFound_cam": "Du konntest nicht auf deine Kamera zugreifen.",
+	"ep_webrtc_error_notFound_mic": "Du konntest nicht auf dein Mikrofon zugreifen.",
+	"ep_webrtc_error_notFound_cammic": "Du konntest nicht auf deine Kamera und dein Mikrofon zugreifen.",
+	"ep_webrtc_error_notFound_screen": "Du konntest nicht auf deinen Bildschirm zugreifen.",
+	"ep_webrtc_error_notReadable": "Leider ist ein Hardwarefehler aufgetreten, der den Zugriff auf deine Kamera und/oder dein Mikrofon verhindert hat:",
+	"ep_webrtc_error_otherCantAccess": "Leider hat der Browser keinen Zugriff auf deine Kamera und/oder dein Mikrofon. Bitte überprüfe die Berechtigungen in den Browsereinstellungen. Höchstwahrscheinlich handelt es sich nicht um einen Hardware-Fehler:",
+	"ep_webrtc_settings_audioenabledonstart": "Audio EIN beim Start",
+	"ep_webrtc_settings_videoenabledonstart": "Video EIN beim Start"
 }
