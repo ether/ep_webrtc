@@ -1,0 +1,21 @@
+{
+	"@metadata": {
+		"authors": [
+			"McDutchie"
+		]
+	},
+	"ep_webrtc_settings_enablertc": "Activar le conversation audio/video",
+	"ep_webrtc_error_ssl": "TLS (https) es necessari pro usar WebRTC.",
+	"ep_webrtc_error_permission_cam": "Non poteva obtener le permission de acceder a tu camera.",
+	"ep_webrtc_error_permission_mic": "Non poteva obtener le permission de acceder a tu microphono.",
+	"ep_webrtc_error_permission_cammic": "Non poteva obtener le permission de acceder a tu camera e microphono.",
+	"ep_webrtc_error_permission_screen": "Non poteva obtener le permission de acceder a tu schermo.",
+	"ep_webrtc_error_notFound_cam": "Error de accesso a tu camera.",
+	"ep_webrtc_error_notFound_mic": "Error de accesso a tu microphono.",
+	"ep_webrtc_error_notFound_cammic": "Error de accesso a tu camera e microphono.",
+	"ep_webrtc_error_notFound_screen": "Error de accesso a tu schermo.",
+	"ep_webrtc_error_notReadable": "Un error de hardware ha occurrite que ha impedite le accesso a tu camera e/o microphono:",
+	"ep_webrtc_error_otherCantAccess": "Le navigator non ha accesso a tu camera e/o microphono. Per favor verifica le permissiones in le parametros de tu navigator. Isto probabilemente non es un error de hardware:",
+	"ep_webrtc_settings_audioenabledonstart": "Activar audio al initio",
+	"ep_webrtc_settings_videoenabledonstart": "Activar video al initio"
+}
