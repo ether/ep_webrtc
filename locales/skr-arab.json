@@ -1,0 +1,14 @@
+{
+	"@metadata": {
+		"authors": [
+			"Saraiki"
+		]
+	},
+	"ep_webrtc_settings_enablertc": "آڈیو/وڈیو ڳالھ مہاڑ فعال کرو",
+	"ep_webrtc_error_notFound_cam": "تہاݙے کیمرے دی رسائی وچ ناکامی تھئی۔",
+	"ep_webrtc_error_notFound_mic": "تہاݙے مائیکروفون دی رسائی وچ ناکامی تھئی۔",
+	"ep_webrtc_error_notFound_cammic": "تہاݙے کیمرا تے مائیکروفون دی رسائی وچ ناکامی تھئی۔",
+	"ep_webrtc_error_notFound_screen": "تہاݙی سکرین دی رسائی وچ ناکامی تھئی۔",
+	"ep_webrtc_settings_audioenabledonstart": "شروع وچ آڈیو چالو",
+	"ep_webrtc_settings_videoenabledonstart": "شروع وچ وڈیو چالو"
+}
