@@ -1,0 +1,17 @@
+{
+	"@metadata": {
+		"authors": [
+			"Norhorn"
+		]
+	},
+	"ep_webrtc_settings_enablertc": "Ενεργοποίηση συνομιλίας ήχου/βίντεο",
+	"ep_webrtc_error_ssl": "Το TLS (https) απαιτείται για τη χρήση του WebRTC.",
+	"ep_webrtc_error_permission_cam": "Αποτυχία λήψης άδειας πρόσβασης στην κάμερά σας.",
+	"ep_webrtc_error_permission_mic": "Αποτυχία λήψης άδειας πρόσβασης στο μικρόφωνό σας.",
+	"ep_webrtc_error_permission_cammic": "Αποτυχία λήψης άδειας πρόσβασης στην κάμερα και το μικρόφωνό σας.",
+	"ep_webrtc_error_permission_screen": "Αποτυχία λήψης άδειας πρόσβασης στην οθόνη σας.",
+	"ep_webrtc_error_notFound_cam": "Αποτυχία πρόσβασης στην κάμερά σας.",
+	"ep_webrtc_error_notFound_mic": "Αποτυχία πρόσβασης στο μικρόφωνό σας.",
+	"ep_webrtc_error_notFound_cammic": "Αποτυχία πρόσβασης στην κάμερα και το μικρόφωνό σας.",
+	"ep_webrtc_error_notFound_screen": "Αποτυχία πρόσβασης στην οθόνη σας."
+}
