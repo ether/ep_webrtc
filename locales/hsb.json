@@ -1,0 +1,21 @@
+{
+	"@metadata": {
+		"authors": [
+			"Michawiki"
+		]
+	},
+	"ep_webrtc_settings_enablertc": "Chat Awdijo/Widejo zmóžnić",
+	"ep_webrtc_error_ssl": "Za wužiwanje WebRTC je TLS (https) trěbny.",
+	"ep_webrtc_error_permission_cam": "Njeje so poradźiło, prawo za přistup k wašej kamerje dóstać.",
+	"ep_webrtc_error_permission_mic": "Njeje so poradźiło, prawo za přistup k wašemu mikrofonej dóstać",
+	"ep_webrtc_error_permission_cammic": "Njeje so poradźiło, prawo za přistup k swojej kamerje a swojemu mikrofonej dóstać",
+	"ep_webrtc_error_permission_screen": "Njeje so poradźiło, prawo za přistup k wašej wobrazowce dóstać.",
+	"ep_webrtc_error_notFound_cam": "Přistup k wašej kamerje je so nimokulił.",
+	"ep_webrtc_error_notFound_mic": "Přistup k wašemu mikrofonej je so nimokulił.",
+	"ep_webrtc_error_notFound_cammic": "Přistup k wašej kamerje a wašemu mikrofonej je so nimokulił.",
+	"ep_webrtc_error_notFound_screen": "Přistup k wašej wobrazowce je so nimokulił.",
+	"ep_webrtc_error_notReadable": "Bohužel je so hardwarowy zmylk stał, kotryž je přistupej k wašej kamerje a/abo k wašemu mikrofonej zadźěwał:",
+	"ep_webrtc_error_otherCantAccess": "Bohužel wobhladowak přistup k wašej kamerje a/abo wašemu mikrofonej nima. Prošu přepruwujće prawa w nastajenjach swojeho wobhladowaka. To najskerje hardwarowy zmylk njeje:",
+	"ep_webrtc_settings_audioenabledonstart": "Awdijo ZAPINJENY při starće",
+	"ep_webrtc_settings_videoenabledonstart": "Widejo ZAPINJENY při starće"
+}

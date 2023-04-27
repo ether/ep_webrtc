@@ -1,0 +1,21 @@
+{
+	"@metadata": {
+		"authors": [
+			"Michawiki"
+		]
+	},
+	"ep_webrtc_settings_enablertc": "Chat Awdio/Wideo zmóžniś",
+	"ep_webrtc_error_ssl": "Za wužywanje WebRTC jo TLS (https) trjebny.",
+	"ep_webrtc_error_permission_cam": "Njejo se raźiło, pšawo za pśistup k wašej kamerje dostaś.",
+	"ep_webrtc_error_permission_mic": "Njejo se raźiło, pšawo za pśistup k wašomu mikrofonoju dostaś.",
+	"ep_webrtc_error_permission_cammic": "Njejo se raźiło, pšawo za pśistup k wašej kamerje a wašomu mikrofonoju dostaś.",
+	"ep_webrtc_error_permission_screen": "Njejo se raźiło, pšawo za pśistup k wašej wobrazowce dostaś.",
+	"ep_webrtc_error_notFound_cam": "Pśistup k wašej kamerje njejo se raźił.",
+	"ep_webrtc_error_notFound_mic": "Pśistup k wašomu mikrofonoju njejo se raźił.",
+	"ep_webrtc_error_notFound_cammic": "Pśistup k wašej kamerje a wašomu mikrofonoju njejo se raźił.",
+	"ep_webrtc_error_notFound_screen": "Pśistup k wašej wobrazowce njejo se raźił.",
+	"ep_webrtc_error_notReadable": "Bóžko jo nastała hardwarowa zmólka, kótaraž jo zajźowała pśistupoju k wašej kamerje a/abo k wašomu mikrofonoju:",
+	"ep_webrtc_error_otherCantAccess": "Bóžko wobglědowak pśistup k wašej kamerje a/abo wašomu mikrofonoju njama. Pšosym pśeglědajśo pšawa w nastajenjach swójogo wobglědowaka. To nejskerjej hardwarowa zmólka njejo:",
+	"ep_webrtc_settings_audioenabledonstart": "Awdio ZAŠALTOWANY pśi starśe",
+	"ep_webrtc_settings_videoenabledonstart": "Wideo ZAŠALTOWANY pśi starśe"
+}
