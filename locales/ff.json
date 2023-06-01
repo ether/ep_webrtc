@@ -1,0 +1,21 @@
+{
+	"@metadata": {
+		"authors": [
+			"Ibrahima Malal Sarr"
+		]
+	},
+	"ep_webrtc_settings_enablertc": "Hurmin Yeewtere Ojoo/Widewoo",
+	"ep_webrtc_error_ssl": "TLS (https) ena waɗɗii ngam huutoraade WebRTC.",
+	"ep_webrtc_error_permission_cam": "Horiima heɓde yamiroore ngam heɓde kameraa maa.",
+	"ep_webrtc_error_permission_mic": "Horiima heɓde yamiroore ngam heɓde mikkoroo maa.",
+	"ep_webrtc_error_permission_cammic": "Horiima heɓde yamiroore ngam heɓde kameraa e mikkoroo maa.",
+	"ep_webrtc_error_permission_screen": "Horiima heɓde yamiroore ngam heɓde yaynirde maa.",
+	"ep_webrtc_error_notFound_cam": "Horiima heɓde kameraa maa.",
+	"ep_webrtc_error_notFound_mic": "Horiima heɓde mikkoroo maa.",
+	"ep_webrtc_error_notFound_cammic": "Horiima heɓde kameraa e mikkoroo maa.",
+	"ep_webrtc_error_notFound_screen": "Horiima heɓde yaynirde maa.",
+	"ep_webrtc_error_notReadable": "Ɗaccu hakke, juumre masiŋeeri waɗii haa haɗi kameraa e/walla mikkoroo maa heɓaade:",
+	"ep_webrtc_error_otherCantAccess": "Ɗaccu hakke, wanngorde maa heɓataa kameraa e/walla mikkoroo maa. Tiiɗno ƴeewto jamirooje to teelte wanngorde maa. Ɗuum nanndaani e juumre masiŋeeri:",
+	"ep_webrtc_settings_audioenabledonstart": "Ojoo ena HUƁƁI tu Kurmal",
+	"ep_webrtc_settings_videoenabledonstart": "Widewoo ena HUƁƁI tu Kurmal"
+}
