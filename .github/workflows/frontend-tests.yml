@@ -7,19 +7,8 @@ on: [push]
 jobs:
   test:
     runs-on: ubuntu-latest
-
+    if: ${{ github.actor != 'dependabot[bot]' }}
     steps:
-      -
-        name: Fail if Dependabot
-        if: github.actor == 'dependabot[bot]'
-        run: |
-          cat <<EOF >&2
-          Frontend tests skipped because Dependabot can't access secrets.
-          Manually re-run the jobs to run the frontend tests.
-          For more information, see:
-          https://github.blog/changelog/2021-02-19-github-actions-workflows-triggered-by-dependabot-prs-will-run-with-read-only-permissions/
-          EOF
-          exit 1
       -
         name: Generate Sauce Labs strings
         id: sauce_strings
@@ -34,11 +23,13 @@ jobs:
       -
         uses: actions/setup-node@v3
         with:
-          node-version: 12
+          node-version: 20
           cache: 'npm'
           cache-dependency-path: |
             src/package-lock.json
             src/bin/doc/package-lock.json
+      - run: npm install npm@6.14.18 -g
+        name: Install legacy npm for correct dependency resolution
       -
         name: Check out the plugin
         uses: actions/checkout@v3
