@@ -1,0 +1,21 @@
+{
+	"@metadata": {
+		"authors": [
+			"Nokeoo"
+		]
+	},
+	"ep_webrtc_settings_enablertc": "Įgalinti garso / vaizdo pokalbius",
+	"ep_webrtc_error_ssl": "Norint naudoti WebRTC, reikalingas TLS (https).",
+	"ep_webrtc_error_permission_cam": "Nepavyko gauti leidimo pasiekti jūsų kamerą.",
+	"ep_webrtc_error_permission_mic": "Nepavyko gauti leidimo pasiekti jūsų mikrofoną.",
+	"ep_webrtc_error_permission_cammic": "Nepavyko gauti leidimo pasiekti jūsų kamerą ir mikrofoną.",
+	"ep_webrtc_error_permission_screen": "Nepavyko gauti leidimo pasiekti jūsų ekraną.",
+	"ep_webrtc_error_notFound_cam": "Nepavyko pasiekti jūsų kameros.",
+	"ep_webrtc_error_notFound_mic": "Nepavyko pasiekti jūsų mikrofono.",
+	"ep_webrtc_error_notFound_cammic": "Nepavyko pasiekti jūsų kameros ir mikrofono.",
+	"ep_webrtc_error_notFound_screen": "Nepavyko pasiekti jūsų ekrano.",
+	"ep_webrtc_error_notReadable": "Atsiprašau, įvyko techninė klaida, dėl kurios nepavyko pasiekti jūsų kameros ir (ar) mikrofono:",
+	"ep_webrtc_error_otherCantAccess": "Atsiprašome, naršyklė neturi prieigos prie jūsų kameros ir (ar) mikrofono. Patikrinkite leidimus naršyklės nustatymuose. Greičiausiai tai nėra įrangos klaida:",
+	"ep_webrtc_settings_audioenabledonstart": "Garsas ĮJUNGTAS pradžioje",
+	"ep_webrtc_settings_videoenabledonstart": "Vaizdas ĮJUNGTAS pradžioje"
+}
