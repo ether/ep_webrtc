@@ -17,7 +17,7 @@ jobs:
           printf %s\\n '::set-output name=tunnel_id::${{ github.run_id }}-${{ github.run_number }}-${{ github.job }}'
       -
         name: Check out Etherpad core
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           repository: ether/etherpad-lite
       -
@@ -32,7 +32,7 @@ jobs:
         name: Install legacy npm for correct dependency resolution
       -
         name: Check out the plugin
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           path: ./node_modules/__tmp
       -
