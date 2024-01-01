@@ -3,11 +3,12 @@
 		"authors": [
 			"Crowley666",
 			"GuoPC",
+			"HellojoeAoPS",
 			"Zhang8569"
 		]
 	},
 	"ep_webrtc_settings_enablertc": "启用音频/视频聊天",
-	"ep_webrtc_error_ssl": "TLS（https）要求使用WebRTC。",
+	"ep_webrtc_error_ssl": "使用 WebRTC 需要 TLS (https)。",
 	"ep_webrtc_error_permission_cam": "无法获取访问摄像头的权限。",
 	"ep_webrtc_error_permission_mic": "无法获取访问麦克风的权限。",
 	"ep_webrtc_error_permission_cammic": "无法获取访问摄像头和麦克风的权限。",
