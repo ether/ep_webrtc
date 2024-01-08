@@ -1,13 +1,14 @@
 {
 	"@metadata": {
 		"authors": [
-			"Guilha"
+			"Guilha",
+			"Hamilton Abreu"
 		]
 	},
 	"ep_webrtc_settings_enablertc": "Ativar videochamada",
 	"ep_webrtc_error_ssl": "Aviso, é necessária a instalação de certificados SSL para o Etherpad usar o WebRTC.",
 	"ep_webrtc_error_notReadable": "Lamentamos, mas ocorreu um erro de hardware que impediu o acesso à câmara e/ou microfone:",
-	"ep_webrtc_error_otherCantAccess": "O navegador não tem acesso à câmera e/ou microfone. Verifica as permissões nas configurações do teu navegador. Provavelmente não é um erro de hardware:",
+	"ep_webrtc_error_otherCantAccess": "O navegador não tem acesso à câmara e/ou microfone. Verifica as permissões nas configurações do teu navegador. Provavelmente não é um erro de hardware:",
 	"ep_webrtc_settings_audioenabledonstart": "Ligar áudio ao iníciar",
 	"ep_webrtc_settings_videoenabledonstart": "Ligar vídeo ao iníciar"
 }
