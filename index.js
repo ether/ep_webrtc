@@ -66,15 +66,18 @@ const addContextToError = (err, pfx) => {
 
 // Copied from:
 // https://github.com/ether/etherpad-lite/blob/f95b09e0b6752a0d226d58d8b246831164dc9533/src/node/handler/PadMessageHandler.js#L1411-L1420
-const _getRoomSockets = (padId) => {
+const _getRoomSockets = (padID) => {
   const ns = socketio.sockets; // Default namespace.
-  const adapter = ns.adapter;
   // We could call adapter.clients(), but that method is unnecessarily asynchronous. Replicate what
   // it does here, but synchronously to avoid a race condition. This code will have to change when
   // we update to socket.io v3.
-  const room = adapter.rooms[padId];
+  const room = ns.adapter.rooms?.get(padID);
+
   if (!room) return [];
-  return Object.keys(room.sockets).map((id) => ns.connected[id]).filter((s) => s);
+
+  return Array.from(room)
+      .map(socketId => ns.sockets.get(socketId))
+      .filter(socket => socket);
 };
 
 /**
@@ -98,12 +101,12 @@ const handleRTCMessage = (socket, payload) => {
     },
   };
   if (payload.to == null) {
-    socket.to(padId).json.send(msg);
+    socket.to(padId).emit('message',msg);
   } else {
     for (const socket of _getRoomSockets(padId)) {
       const session = sessioninfos[socket.id];
       if (session && session.author === payload.to) {
-        socket.json.send(msg);
+        socket.emit('message',msg);
         break;
       }
     }
