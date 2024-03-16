@@ -76,8 +76,8 @@ const _getRoomSockets = (padID) => {
   if (!room) return [];
 
   return Array.from(room)
-      .map(socketId => ns.sockets.get(socketId))
-      .filter(socket => socket);
+      .map((socketId) => ns.sockets.get(socketId))
+      .filter((socket) => socket);
 };
 
 /**
@@ -101,12 +101,12 @@ const handleRTCMessage = (socket, payload) => {
     },
   };
   if (payload.to == null) {
-    socket.to(padId).emit('message',msg);
+    socket.to(padId).emit('message', msg);
   } else {
     for (const socket of _getRoomSockets(padId)) {
       const session = sessioninfos[socket.id];
       if (session && session.author === payload.to) {
-        socket.emit('message',msg);
+        socket.emit('message', msg);
         break;
       }
     }
