@@ -26,7 +26,7 @@ jobs:
         with:
           repository: ether/etherpad-lite
           path: etherpad-lite
-      - uses: pnpm/action-setup@v3
+      - uses: pnpm/action-setup@v4
         name: Install pnpm
         with:
           version: 8
