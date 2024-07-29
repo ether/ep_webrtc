@@ -1,0 +1,21 @@
+{
+	"@metadata": {
+		"authors": [
+			"Atriwidada"
+		]
+	},
+	"ep_webrtc_settings_enablertc": "Fungsikan Obrolan Audio/Video",
+	"ep_webrtc_error_ssl": "TLS (https) diperlukan untuk memakai WebRTC.",
+	"ep_webrtc_error_permission_cam": "Gagal mendapatkan izin untuk mengakses kamera Anda.",
+	"ep_webrtc_error_permission_mic": "Gagal mendapatkan izin untuk mengakses mikrofon Anda.",
+	"ep_webrtc_error_permission_cammic": "Gagal mendapat izin untuk mengakses kamera dan mikrofon Anda.",
+	"ep_webrtc_error_permission_screen": "Gagal mendapatkan izin untuk mengakses layar Anda.",
+	"ep_webrtc_error_notFound_cam": "Gagal mengakses kamera Anda.",
+	"ep_webrtc_error_notFound_mic": "Gagal mengakses mikrofon Anda.",
+	"ep_webrtc_error_notFound_cammic": "Gagal mengakses kamera dan mikrofon Anda.",
+	"ep_webrtc_error_notFound_screen": "Gagal mengakses layar Anda.",
+	"ep_webrtc_error_notReadable": "Maaf, suatu galat perangkat keras terjadi yang mencegah akses ke kamera dan/atau mikrofon Anda.",
+	"ep_webrtc_error_otherCantAccess": "Maaf, peramban tidak memiliki akses ke kamera dan/atau mikrofon Anda. Harap periksa izin dalam pengaturan peramban Anda. Ini sangat boleh jadi bukan suatu galat perangkat keras.",
+	"ep_webrtc_settings_audioenabledonstart": "Audio HIDUP saat Start",
+	"ep_webrtc_settings_videoenabledonstart": "Video HIDUP saat Start"
+}
