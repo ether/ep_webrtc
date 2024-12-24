@@ -1208,7 +1208,7 @@ exports.rtc = new class {
       type: 'STATS',
       data: {statName, type: 'RTC_MESSAGE'},
     };
-    this._pad.socket.json.send(msg);
+    this._pad.socket.emit('message', msg);
   }
 
   sendMessage(to, data) {
