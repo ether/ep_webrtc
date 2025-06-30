@@ -2,10 +2,22 @@
 	"@metadata": {
 		"authors": [
 			"Fewasser Traduce",
-			"Jackiezelaya"
+			"Jackiezelaya",
+			"Ovruni"
 		]
 	},
+	"ep_webrtc_settings_enablertc": "Habilitar chat de audio/video",
 	"ep_webrtc_error_ssl": "TLS (https) es necesario para utilizar WebRTC.",
+	"ep_webrtc_error_permission_cam": "No se pudo obtener permiso para acceder a su cámara.",
+	"ep_webrtc_error_permission_mic": "No se pudo obtener permiso para acceder a su micrófono.",
+	"ep_webrtc_error_permission_cammic": "No se pudo obtener permiso para acceder a su cámara y micrófono.",
 	"ep_webrtc_error_permission_screen": "Error al conseguir permiso para acceder a tu pantalla.",
-	"ep_webrtc_error_notFound_screen": "Error al acceder a tu pantalla."
+	"ep_webrtc_error_notFound_cam": "No se pudo acceder a su cámara.",
+	"ep_webrtc_error_notFound_mic": "No se pudo acceder a su micrófono.",
+	"ep_webrtc_error_notFound_cammic": "No se pudo acceder a su cámara ni al micrófono.",
+	"ep_webrtc_error_notFound_screen": "Error al acceder a tu pantalla.",
+	"ep_webrtc_error_notReadable": "Lo sentimos, se produjo un error de hardware que impidió el acceso a su cámara y/o micrófono:",
+	"ep_webrtc_error_otherCantAccess": "Lo sentimos, el navegador no tiene acceso a tu cámara ni a tu micrófono. Revisa los permisos en la configuración de tu navegador. Probablemente no se trate de un error de hardware.",
+	"ep_webrtc_settings_audioenabledonstart": "Audio encendido al inicio",
+	"ep_webrtc_settings_videoenabledonstart": "Vídeo encendido al inicio"
 }
