@@ -1,0 +1,21 @@
+{
+	"@metadata": {
+		"authors": [
+			"Inabat Allanova"
+		]
+	},
+	"ep_webrtc_settings_enablertc": "Audio/Video sáwbetti jaǵıw",
+	"ep_webrtc_error_ssl": "WebRTC dan paydalanıw ushın TLS (https) talap etiledi.",
+	"ep_webrtc_error_permission_cam": "Kamerańızdı qosıwǵa ruxsat berilmedi.",
+	"ep_webrtc_error_permission_mic": "Mikrofonıńızdı qosıwǵa ruxsat berilmedi.",
+	"ep_webrtc_error_permission_cammic": "Kamera hám mikrofonıńızdı qosıwǵa ruxsat berilmedi.",
+	"ep_webrtc_error_permission_screen": "Ekranıńızdı qosıwǵa ruxsat berilmedi.",
+	"ep_webrtc_error_notFound_cam": "Kamerańızdı qosıwda qátelik júz berdi.",
+	"ep_webrtc_error_notFound_mic": "Mikrofonıńızdı qosıwda qátelik júz berdi.",
+	"ep_webrtc_error_notFound_cammic": "Kamera hám mikrofonıńızdı qosıwda qátelik júz berdi.",
+	"ep_webrtc_error_notFound_screen": "Ekranıńızdı qosıwda qátelik júz berdi.",
+	"ep_webrtc_error_notReadable": "Keshirińiz, kamerańız yamasa mikrofonıńızdı qosıwda apparat qátesi júz berdi:",
+	"ep_webrtc_error_otherCantAccess": "Keshirińiz, brauzerińiz kamerańız yamasa mikrofonıńızǵa kire almay atır. Ótinish, brauzerińiz sazlamalarında ruqsatlardı tekseriń. Bul, itimal, apparat qátesi bolmawı múmkin.",
+	"ep_webrtc_settings_audioenabledonstart": "Audio qosıldı",
+	"ep_webrtc_settings_videoenabledonstart": "Video qosıldı"
+}
