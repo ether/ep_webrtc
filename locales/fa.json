@@ -1,0 +1,21 @@
+{
+	"@metadata": {
+		"authors": [
+			"Darafsh"
+		]
+	},
+	"ep_webrtc_settings_enablertc": "فعال‌سازی چت صوتی/تصویری",
+	"ep_webrtc_error_ssl": "برای استفاده از WebRTC نیاز به TLS (https) است.",
+	"ep_webrtc_error_permission_cam": "دریافت اجازه برای دسترسی به دوربین شما ناموفق بود.",
+	"ep_webrtc_error_permission_mic": "دریافت اجازه برای دسترسی به میکروفون شما ناموفق بود.",
+	"ep_webrtc_error_permission_cammic": "دریافت اجازه برای دسترسی به دوربین و میکروفون شما ناموفق بود.",
+	"ep_webrtc_error_permission_screen": "دریافت اجازه برای دسترسی به صفحه‌نمایش شما ناموفق بود.",
+	"ep_webrtc_error_notFound_cam": "دسترسی به دوربین شما ناموفق بود.",
+	"ep_webrtc_error_notFound_mic": "دسترسی به میکروفون شما ناموفق بود.",
+	"ep_webrtc_error_notFound_cammic": "دسترسی به دوربین و میکروفون شما ناموفق بود.",
+	"ep_webrtc_error_notFound_screen": "دسترسی به صفحه‌نمایش شما ناموفق بود.",
+	"ep_webrtc_error_notReadable": "متأسفیم، خطای سخت‌افزاری‌ای رخ داد که مانع دسترسی به دوربین و/یا میکروفون شما شد:",
+	"ep_webrtc_error_otherCantAccess": "متأسفیم، مرورگر به دوربین و/یا میکروفون شما دسترسی ندارد. لطفاً مجوزها را در تنظیمات مرورگر خود بررسی کنید. این مشکل به‌احتمال زیاد خطای سخت‌افزاری نیست:",
+	"ep_webrtc_settings_audioenabledonstart": "روشن بودن صدا در شروع",
+	"ep_webrtc_settings_videoenabledonstart": "روشن بودن ویدئو در شروع"
+}
