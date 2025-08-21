@@ -1,21 +1,22 @@
 {
 	"@metadata": {
 		"authors": [
+			"McDutchie",
 			"Spinster"
 		]
 	},
 	"ep_webrtc_settings_enablertc": "Audio-/videochat inschakelen",
 	"ep_webrtc_error_ssl": "TLS (https) is vereist om WebRTC te gebruiken.",
-	"ep_webrtc_error_permission_cam": "Kan geen toestemming krijgen om toegang te krijgen tot je camera.",
-	"ep_webrtc_error_permission_mic": "Kan geen toestemming krijgen om toegang te krijgen tot je microfoon.",
-	"ep_webrtc_error_permission_cammic": "Kan geen toestemming krijgen voor toegang tot je camera en microfoon.",
-	"ep_webrtc_error_permission_screen": "Kan geen toestemming krijgen om toegang te krijgen tot je scherm.",
-	"ep_webrtc_error_notFound_cam": "Kan geen toegang krijgen tot je camera.",
-	"ep_webrtc_error_notFound_mic": "Kan geen toegang krijgen tot je microfoon.",
-	"ep_webrtc_error_notFound_cammic": "Kan geen toegang krijgen tot je camera en microfoon.",
-	"ep_webrtc_error_notFound_screen": "Kan geen toegang krijgen tot je scherm.",
-	"ep_webrtc_error_notReadable": "Sorry, er is een hardwarefout opgetreden waardoor de toegang tot je camera en/of microfoon is verhinderd:",
-	"ep_webrtc_error_otherCantAccess": "Sorry, de browser heeft geen toegang tot je camera en/of microfoon. Controleer de permissies in de instellingen van je browser. Dit is hoogstwaarschijnlijk geen hardwarefout:",
-	"ep_webrtc_settings_audioenabledonstart": "Audio AAN bij Start",
-	"ep_webrtc_settings_videoenabledonstart": "Video AAN bij Start"
+	"ep_webrtc_error_permission_cam": "De toegang tot uw camera is geweigerd.",
+	"ep_webrtc_error_permission_mic": "De toegang tot uw microfoon is geweigerd.",
+	"ep_webrtc_error_permission_cammic": "De toegang tot uw camera en microfoon is geweigerd.",
+	"ep_webrtc_error_permission_screen": "De toegang tot uw scherm is geweigerd.",
+	"ep_webrtc_error_notFound_cam": "De toegang tot uw camera is mislukt.",
+	"ep_webrtc_error_notFound_mic": "De toegang tot uw microfoon is mislukt.",
+	"ep_webrtc_error_notFound_cammic": "De toegang tot uw camera en microfoon is mislukt.",
+	"ep_webrtc_error_notFound_screen": "De toegang tot uw scherm is mislukt.",
+	"ep_webrtc_error_notReadable": "Helaas is er een hardwarefout opgetreden waardoor de toegang tot uw camera en/of microfoon is verhinderd:",
+	"ep_webrtc_error_otherCantAccess": "De browser heeft geen toegang tot uw camera en/of microfoon. Controleer de toestemmingen in de instellingen van uw browser. Dit is hoogstwaarschijnlijk geen hardwarefout:",
+	"ep_webrtc_settings_audioenabledonstart": "Audio AAN bij opstarten",
+	"ep_webrtc_settings_videoenabledonstart": "Video AAN bij opstarten"
 }
