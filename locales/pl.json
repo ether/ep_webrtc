@@ -1,0 +1,21 @@
+{
+	"@metadata": {
+		"authors": [
+			"Usagi.02808"
+		]
+	},
+	"ep_webrtc_settings_enablertc": "Włącz czat audio/wideo",
+	"ep_webrtc_error_ssl": "TLS (https) jest wymagany do korzystania z WebRTC.",
+	"ep_webrtc_error_permission_cam": "Nie udało się uzyskać pozwolenia na dostęp do kamery.",
+	"ep_webrtc_error_permission_mic": "Nie udało się uzyskać pozwolenia na dostęp do mikrofonu.",
+	"ep_webrtc_error_permission_cammic": "Nie udało się uzyskać pozwolenia na dostęp do kamery i mikrofonu.",
+	"ep_webrtc_error_permission_screen": "Nie udało się uzyskać pozwolenia na dostęp do ekranu.",
+	"ep_webrtc_error_notFound_cam": "Nie udało się uzyskać dostępu do aparatu.",
+	"ep_webrtc_error_notFound_mic": "Nie udało się uzyskać dostępu do mikrofonu.",
+	"ep_webrtc_error_notFound_cammic": "Nie udało się uzyskać dostępu do kamery i mikrofonu.",
+	"ep_webrtc_error_notFound_screen": "Nie udało się uzyskać dostępu do ekranu.",
+	"ep_webrtc_error_notReadable": "Przepraszamy, wystąpił błąd sprzętowy, który uniemożliwił dostęp do kamery i/lub mikrofonu:",
+	"ep_webrtc_error_otherCantAccess": "Przeglądarka nie ma dostępu do kamery i/lub mikrofonu. Sprawdź uprawnienia w ustawieniach przeglądarki. Najprawdopodobniej nie jest to błąd sprzętowy:",
+	"ep_webrtc_settings_audioenabledonstart": "Dźwięk włączony na początku",
+	"ep_webrtc_settings_videoenabledonstart": "Wideo włączone na początku"
+}
