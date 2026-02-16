@@ -1,0 +1,16 @@
+{
+	"@metadata": {
+		"authors": [
+			"Peterleth"
+		]
+	},
+	"ep_webrtc_settings_enablertc": "Aktivér lyd-/videochat",
+	"ep_webrtc_error_ssl": "TLS (https) er påkrævet for at bruge WebRTC.",
+	"ep_webrtc_error_permission_cam": "Kunne ikke få adgang til dit kamera.",
+	"ep_webrtc_error_permission_mic": "Kunne ikke få adgang til din mikrofon.",
+	"ep_webrtc_error_permission_cammic": "Kunne ikke få adgang til dit kamera og din mikrofon.",
+	"ep_webrtc_error_permission_screen": "Kunne ikke få adgang til din skærm.",
+	"ep_webrtc_error_notFound_cam": "Kunne ikke få adgang til dit kamera.",
+	"ep_webrtc_error_notFound_mic": "Kunne ikke få adgang til din mikrofon.",
+	"ep_webrtc_error_notFound_cammic": "Kunne ikke få adgang til dit kamera og din mikrofon."
+}
