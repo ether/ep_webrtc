@@ -1,0 +1,21 @@
+{
+	"@metadata": {
+		"authors": [
+			"Aindriu80"
+		]
+	},
+	"ep_webrtc_settings_enablertc": "Cumasaigh Comhrá Fuaime/Físe",
+	"ep_webrtc_error_ssl": "Tá TLS (https) ag teastáil chun WebRTC a úsáid.",
+	"ep_webrtc_error_permission_cam": "Theip ar chead a fháil chun rochtain a fháil ar do cheamara.",
+	"ep_webrtc_error_permission_mic": "Theip ar chead a fháil chun rochtain a fháil ar do mhicreafón.",
+	"ep_webrtc_error_permission_cammic": "Theip ar chead a fháil chun rochtain a fháil ar do cheamara agus do mhicreafón.",
+	"ep_webrtc_error_permission_screen": "Theip ar chead a fháil chun rochtain a fháil ar do scáileán.",
+	"ep_webrtc_error_notFound_cam": "Theip ar rochtain a fháil ar do cheamara.",
+	"ep_webrtc_error_notFound_mic": "Theip ar rochtain a fháil ar do mhicreafón.",
+	"ep_webrtc_error_notFound_cammic": "Theip ar rochtain a fháil ar do cheamara agus do mhicreafón.",
+	"ep_webrtc_error_notFound_screen": "Theip ar rochtain a fháil ar do scáileán.",
+	"ep_webrtc_error_notReadable": "Ár leithscéal, tharla earráid crua-earraí a chuir cosc ​​ar rochtain ar do cheamara agus/nó micreafón:",
+	"ep_webrtc_error_otherCantAccess": "Ár leithscéal, níl rochtain ag an mbrabhsálaí ar do cheamara agus/nó micreafón. Seiceáil ceadanna i socruithe do bhrabhsálaí le do thoil. Is dócha nach earráid crua-earraí atá ann:",
+	"ep_webrtc_settings_audioenabledonstart": "Fuaim AR SIÚL ag an Tosach",
+	"ep_webrtc_settings_videoenabledonstart": "Físeán AR SIÚL ag an Tosach"
+}
