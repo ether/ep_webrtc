@@ -8,7 +8,7 @@ const settings = require('ep_etherpad-lite/node/utils/Settings');
 
 describe(__filename, function () {
   let agent;
-  const backup = {settings: {...settings}};
+  const backup = {settings: {requireAuthentication: settings.requireAuthentication}};
   const iceServers = [...Array(1000).keys()].map((i) => ({urls: [`turn:turn${i}.example.com`]}));
 
   const reload = async (settings = {}) => {
@@ -49,7 +49,7 @@ describe(__filename, function () {
   });
 
   after(async function () {
-    Object.assign(settings, backup.settings);
+    settings.requireAuthentication = backup.settings.requireAuthentication;
     await plugin.loadSettings('loadSettings', {settings});
   });
 
