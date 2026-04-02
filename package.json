@@ -14,7 +14,7 @@
   },
   "dependencies": {
     "abort-controller": "^3.0.0",
-    "lodash": "^4.17.23",
+    "lodash": "^4.18.1",
     "node-fetch": "^3.3.2"
   },
   "funding": {
