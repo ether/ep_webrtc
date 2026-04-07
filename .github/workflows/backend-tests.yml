@@ -22,7 +22,7 @@ jobs:
           version: 1.0
       -
         name: Install etherpad core
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           repository: ether/etherpad-lite
           path: etherpad-lite
@@ -44,7 +44,7 @@ jobs:
             ${{ runner.os }}-pnpm-store-
       -
         name: Checkout plugin repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           path: plugin
       - name: Remove tests
