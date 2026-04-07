@@ -17,7 +17,7 @@ or everyone has fast Internet connections) but not for large groups.
 * Option 2:
   ```shell
   cd /path/to/etherpad
-  npm install --no-save --legacy-peer-deps ep_webrtc
+  pnpm run plugins install ep_webrtc
   ```
 * Option 3:
   ```shell
