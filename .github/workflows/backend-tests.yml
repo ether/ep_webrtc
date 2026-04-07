@@ -22,11 +22,11 @@ jobs:
           version: 1.0
       -
         name: Install etherpad core
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4
         with:
           repository: ether/etherpad-lite
           path: etherpad-lite
-      - uses: pnpm/action-setup@v5
+      - uses: pnpm/action-setup@v3
         name: Install pnpm
         with:
           version: 10
@@ -35,7 +35,7 @@ jobs:
         shell: bash
         run: |
           echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
-      - uses: actions/cache@v5
+      - uses: actions/cache@v4
         name: Setup pnpm cache
         with:
           path: ${{ env.STORE_PATH }}
@@ -44,7 +44,7 @@ jobs:
             ${{ runner.os }}-pnpm-store-
       -
         name: Checkout plugin repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4
         with:
           path: plugin
       - name: Remove tests
@@ -62,6 +62,7 @@ jobs:
         name: Run the backend tests
         working-directory: ./etherpad-lite/src
         run: |
+          shopt -s globstar
           res=$(find ./plugin_packages -path "*/static/tests/backend/specs/*" 2>/dev/null | wc -l)
           if [ $res -eq 0 ]; then
           echo "No backend tests found"
