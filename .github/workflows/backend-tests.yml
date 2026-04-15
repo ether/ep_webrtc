@@ -51,6 +51,9 @@ jobs:
         working-directory: ./etherpad-lite
         run: rm -rf ./src/tests/backend/specs
       -
+      - name: Configure pnpm to allow build scripts
+        working-directory: ./etherpad-lite
+        run: pnpm config --location=project set onlyBuiltDependencies '*'
         name: Install Etherpad core dependencies
         working-directory: ./etherpad-lite
         run: bin/installDeps.sh
