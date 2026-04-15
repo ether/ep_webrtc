@@ -55,8 +55,6 @@ jobs:
         run: |
           mv ./node_modules/__tmp ./node_modules/"${PLUGIN_NAME}"
       -
-      - name: Configure pnpm to allow build scripts
-        run: pnpm config --location=project set onlyBuiltDependencies '*'
         name: Install plugin dependencies
         env:
           PLUGIN_NAME: ${{ steps.plugin_name.outputs.plugin_name }}
