@@ -59,7 +59,7 @@ jobs:
           [ "${NEW_COMMITS}" -gt 0 ] || exit 0
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          pnpm i
+          pnpm i --frozen-lockfile
           # `pnpm version patch` bumps package.json, makes a commit, and creates
           # a `v<new-version>` tag. Capture the new tag name from package.json
           # rather than parsing pnpm's output, which has historically varied.
