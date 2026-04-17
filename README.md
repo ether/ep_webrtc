@@ -1,6 +1,6 @@
 ![Publish Status](https://github.com/ether/ep_webrtc/workflows/Node.js%20Package/badge.svg) [![Backend Tests Status](https://github.com/ether/ep_webrtc/actions/workflows/test-and-release.yml/badge.svg)](https://github.com/ether/ep_webrtc/actions/workflows/test-and-release.yml)
 
-# ep_webrtc
+# WebRTC Audio / Video for Etherpad
 
 WebRTC-based audio/video chat and screen sharing with other users visiting the
 same pad.
