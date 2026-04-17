@@ -63,8 +63,16 @@ jobs:
           # `pnpm version patch` bumps package.json, makes a commit, and creates
           # a `v<new-version>` tag. Capture the new tag name from package.json
           # rather than parsing pnpm's output, which has historically varied.
-          pnpm version patch
-          NEW_TAG="v$(node -p "require('./package.json').version")"
+          # Bump the patch component directly with Node. pnpm/action-setup@v6
+          # sometimes installs pnpm 11 pre-releases even when version: 10.x is
+          # requested (pnpm/action-setup#225); those pre-releases either skip
+          # the git commit/tag or reject --no-git-tag-version as unknown.
+          # Doing the bump in Node sidesteps both failure modes.
+          NEW_VERSION=$(node -e "const fs=require('fs');const p=require('./package.json');const v=p.version.split('.');v[2]=String(Number(v[2])+1);p.version=v.join('.');fs.writeFileSync('./package.json',JSON.stringify(p,null,2)+'\n');console.log(p.version);")
+          NEW_TAG="v${NEW_VERSION}"
+          git add package.json
+          git commit -m "${NEW_TAG}"
+          git tag -a "${NEW_TAG}" -m "${NEW_TAG}"
           # CRITICAL: use --atomic so the branch update and the tag update
           # succeed (or fail) as a single transaction on the server. The old
           # `git push --follow-tags` was non-atomic per ref: if a concurrent
