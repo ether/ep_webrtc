@@ -17,6 +17,11 @@ jobs:
     permissions:
       contents: write   # for the atomic version-bump push (branch + tag)
       id-token: write   # for npm OIDC trusted publishing
+    env:
+      # pnpm 10.7+ treats ignored postinstalls as hard errors. Demote
+      # to warning so new transitive deps (e.g. unrs-resolver) don\'t break
+      # the release step.
+      npm_config_strict_dep_builds: "false"
     steps:
       - uses: actions/setup-node@v6
         with:
