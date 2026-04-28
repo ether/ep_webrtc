@@ -52,8 +52,17 @@ test.describe('error handling', () => {
     // #gritter-container hidden.
     await sharedPage.evaluate(() => {
       const w = window as any;
-      w.gritter.removeAll({fade: false});
-      w.gritter.removeAll({fade: false});
+      // gritter is exposed via jQuery in modern Etherpad rather than as
+      // a bare window.gritter global. Fall back to manual DOM cleanup if
+      // neither is present so the beforeEach never throws.
+      const gritter = w.gritter || (w.$ && w.$.gritter);
+      if (gritter && typeof gritter.removeAll === 'function') {
+        gritter.removeAll({fade: false});
+        gritter.removeAll({fade: false});
+      } else {
+        document.querySelectorAll('#gritter-notice-wrapper .gritter-item-wrapper')
+            .forEach((el) => el.remove());
+      }
     });
     const off = await sharedPage.locator(videoBtnSelector).evaluate(
         (el) => el.classList.contains('off'));

@@ -80,6 +80,28 @@ export const setPadPrefsCookie = async (page: Page, padPrefs: Record<string, any
   }]);
 };
 
+// Reads a single key out of the live prefsHttp cookie. Replaces the
+// legacy `padcookie.getPref(key)` calls that depended on Etherpad's
+// CommonJS `require` being exposed on window — modern Etherpad bundles
+// via esbuild and no longer exposes require to page scripts.
+export const readPrefCookie = (page: Page, key: string) => page.evaluate((key) => {
+  const cookies: Record<string, string> = {};
+  for (const c of document.cookie.split('; ')) {
+    if (!c) continue;
+    const eq = c.indexOf('=');
+    if (eq < 0) continue;
+    cookies[c.slice(0, eq)] = c.slice(eq + 1);
+  }
+  const raw = cookies.prefsHttp;
+  if (!raw) return null;
+  try {
+    const prefs = JSON.parse(decodeURIComponent(raw));
+    return prefs[key] != null ? prefs[key] : null;
+  } catch {
+    return null;
+  }
+}, key);
+
 // Navigates to a fresh pad with optional URL query params (mirrors
 // helper.aNewPad({params}) from the legacy harness). Does not clear
 // cookies – call setPadPrefsCookie first if you need padPrefs.

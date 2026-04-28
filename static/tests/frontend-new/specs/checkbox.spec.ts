@@ -1,5 +1,6 @@
 import {expect, test} from '@playwright/test';
-import {cartesian, goToNewPadWithParams, setPadPrefsCookie} from '../helper/utils';
+import {cartesian, goToNewPadWithParams, readPrefCookie, setPadPrefsCookie}
+  from '../helper/utils';
 
 type Tc = {
   name: string;
@@ -91,11 +92,7 @@ test.describe('settingToCheckbox', () => {
   test.describe('query parameter sets cookie', () => {
     for (const {name, queryVal, i} of testCases.filter((t) => t.queryVal != null)) {
       test(name, async () => {
-        const v = await sharedPage.evaluate((i) => {
-          const w = window as any;
-          const padcookie = w.require('ep_etherpad-lite/static/js/pad_cookie').padcookie;
-          return padcookie.getPref(`cookie${i}`);
-        }, i);
+        const v = await readPrefCookie(sharedPage, `cookie${i}`);
         expect(v).toBe(queryVal);
       });
     }
@@ -105,11 +102,7 @@ test.describe('settingToCheckbox', () => {
     for (const {name, queryVal, cookieVal, i} of testCases) {
       if (queryVal != null || cookieVal != null) continue;
       test(name, async () => {
-        const v = await sharedPage.evaluate((i) => {
-          const w = window as any;
-          const padcookie = w.require('ep_etherpad-lite/static/js/pad_cookie').padcookie;
-          return padcookie.getPref(`cookie${i}`);
-        }, i);
+        const v = await readPrefCookie(sharedPage, `cookie${i}`);
         expect(v == null).toBe(true);
       });
     }
@@ -126,11 +119,7 @@ test.describe('settingToCheckbox', () => {
           const cb = document.querySelector(`#${id}`) as HTMLInputElement | null;
           return cb != null && cb.checked === !want;
         }, {id, want});
-        const v = await sharedPage.evaluate((i) => {
-          const w = window as any;
-          const padcookie = w.require('ep_etherpad-lite/static/js/pad_cookie').padcookie;
-          return padcookie.getPref(`cookie${i}`);
-        }, i);
+        const v = await readPrefCookie(sharedPage, `cookie${i}`);
         expect(v).toBe(!want);
       });
     }
