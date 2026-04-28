@@ -72,8 +72,10 @@ export const installFakeGetUserMedia = async (page: Page, opts: {track?: boolean
 // padPrefs. Mirrors helper.aNewPad({padPrefs}) from the legacy harness.
 export const setPadPrefsCookie = async (page: Page, padPrefs: Record<string, any>) => {
   await page.context().addCookies([{
-    name: 'prefs',
-    value: encodeURIComponent(JSON.stringify({prefs: padPrefs})),
+    name: 'prefsHttp',
+    // Newer Etherpad stores the prefs cookie as `prefsHttp` and the
+    // value is the prefs object itself (no `{prefs: ...}` wrapper).
+    value: encodeURIComponent(JSON.stringify(padPrefs)),
     url: 'http://localhost:9001',
   }]);
 };
