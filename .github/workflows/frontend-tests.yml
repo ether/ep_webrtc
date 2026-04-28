@@ -15,6 +15,7 @@ jobs:
         uses: actions/checkout@v6
         with:
           repository: ether/etherpad-lite
+          path: etherpad-lite
       - uses: pnpm/action-setup@v6
         name: Install pnpm
         with:
@@ -32,63 +33,36 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-pnpm-store-
       -
-        name: Check out the plugin
+        name: Checkout plugin repository
         uses: actions/checkout@v6
         with:
-          path: ./node_modules/__tmp
-      -
-        name: export GIT_HASH to env
-        id: environment
-        run: |
-          cd ./node_modules/__tmp
-          echo "::set-output name=sha_short::$(git rev-parse --short ${{ github.sha }})"
-      -
-        name: Determine plugin name
-        id: plugin_name
-        run: |
-          cd ./node_modules/__tmp
-          npx -c 'printf %s\\n "::set-output name=plugin_name::${npm_package_name}"'
-      -
-        name: Rename plugin directory
-        env:
-          PLUGIN_NAME: ${{ steps.plugin_name.outputs.plugin_name }}
-        run: |
-          mv ./node_modules/__tmp ./node_modules/"${PLUGIN_NAME}"
-      -
-        name: Install plugin dependencies
-        env:
-          PLUGIN_NAME: ${{ steps.plugin_name.outputs.plugin_name }}
-        run: |
-          cd ./node_modules/"${PLUGIN_NAME}"
-          pnpm i
-      # Etherpad core dependencies must be installed after installing the
-      # plugin's dependencies, otherwise npm will try to hoist common
-      # dependencies by removing them from src/node_modules and installing them
-      # in the top-level node_modules. As of v6.14.10, npm's hoist logic appears
-      # to be buggy, because it sometimes removes dependencies from
-      # src/node_modules but fails to add them to the top-level node_modules.
-      # Even if npm correctly hoists the dependencies, the hoisting seems to
-      # confuse tools such as `npm outdated`, `npm update`, and some ESLint
-      # rules.
+          path: plugin
       -
         name: Install Etherpad core dependencies
+        working-directory: ./etherpad-lite
         run: bin/installDeps.sh
+      - name: Install plugin
+        working-directory: ./etherpad-lite
+        run: |
+          pnpm run plugins i --path ../../plugin
       - name: Create settings.json
+        working-directory: ./etherpad-lite
         run: cp ./src/tests/settings.json settings.json
       - name: Run the frontend tests
+        working-directory: ./etherpad-lite
         shell: bash
         run: |
           pnpm run dev &
           connected=false
           can_connect() {
-          curl -sSfo /dev/null http://localhost:9001/ || return 1
-          connected=true
+            curl -sSfo /dev/null http://localhost:9001/ || return 1
+            connected=true
           }
           now() { date +%s; }
           start=$(now)
-          while [ $(($(now) - $start)) -le 15 ] && ! can_connect; do
-          sleep 1
+          while [ $(($(now) - $start)) -le 30 ] && ! can_connect; do
+            sleep 1
           done
           cd src
-          pnpm exec playwright install chromium  --with-deps
+          pnpm exec playwright install chromium --with-deps
           pnpm run test-ui --project=chromium
