@@ -16,6 +16,10 @@ jobs:
         with:
           repository: ether/etherpad-lite
           path: etherpad-lite
+      - uses: actions/setup-node@v4
+        name: Install Node.js
+        with:
+          node-version: 22
       - uses: pnpm/action-setup@v6
         name: Install pnpm
         with:
