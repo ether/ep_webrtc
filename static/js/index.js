@@ -507,35 +507,33 @@ exports.rtc = new class {
     });
     $(window).on('beforeunload', () => { this.hangupAll(); });
     $(window).on('unload', () => { this.hangupAll(); });
-    // When the pad is loaded inside a third-party iframe (the standard
-    // embed flow exposed via the share button), don't auto-activate
-    // WebRTC. Embeds are passive read-mostly views, and auto-activation
-    // there pulls in getUserMedia + adds an autoplay <video>, which:
-    //   - keeps the iframe's `load` event from firing in environments
-    //     without a camera (this broke embed_value.spec.ts), and
-    //   - is a UX surprise — users don't expect an embed to ask for
-    //     mic/camera permission. They can still toggle the checkbox.
-    const embedded = window.top !== window;
-    // TEMP: surface this in CI so we can confirm the detection works inside
-    // the embed iframe. Will be removed once we confirm.
-    console.log(`ep_webrtc: embedded=${embedded} top===window=${window.top === window} location=${window.location.href}`);
-    // Suppress the sticky "Failed to access camera/microphone" gritter when
-    // ep_webrtc auto-activates from the cookie/default. Otherwise unrelated
-    // tests that read gritter content (e.g. error_sanitization) get
-    // polluted by our error toast every time a CI runner without a camera
-    // loads a pad. Errors surfaced after the user explicitly re-clicks the
-    // checkbox / mic / video button still show the toast as before.
-    if (!embedded && $('#options-enablertc').prop('checked')) {
+    // Suppress the sticky "Failed to access camera/microphone" gritter
+    // during the initial auto-activation. Without this, CI runners (and
+    // anyone loading a pad without granting camera/mic permission) would
+    // see an unsolicited error toast on every pad load, which also
+    // contaminated unrelated tests that read gritter content.
+    // Don't AWAIT the activate() call here either: postAceInit is awaited
+    // by etherpad core before the pad's `load` event fires, and inside an
+    // embed iframe the activate chain (getUserMedia + autoplay <video>)
+    // can hold the iframe's load past the 90s test timeout (broke
+    // embed_value.spec.ts). Kick off activation in the background and
+    // let postAceInit resolve immediately. The buttons reflect state as
+    // tracks come in; existing tests that depend on initialization
+    // synchronously check `$rtcbox.data('initialized')` which still flips
+    // at the end of activate (see below).
+    if ($('#options-enablertc').prop('checked')) {
       this._suppressMediaErrorToast = true;
-      try {
-        await this.activate();
-      } finally {
+      // eslint-disable-next-line @typescript-eslint/no-floating-promises
+      this.activate().finally(() => {
         this._suppressMediaErrorToast = false;
-      }
+        $rtcbox.data('initialized', true);
+      });
     } else {
-      await this.deactivate();
+      // eslint-disable-next-line @typescript-eslint/no-floating-promises
+      this.deactivate().finally(() => {
+        $rtcbox.data('initialized', true);
+      });
     }
-    $rtcbox.data('initialized', true); // Help tests determine when initialization is done.
   }
 
   userJoinOrUpdate(hookName, {userInfo}) {
