@@ -100,4 +100,51 @@ test.describe('error handling', () => {
       expect(contentHtml).toContain(checkString);
     });
   }
+
+  test('gritter container does not intercept editor clicks', async () => {
+    // Regression: a sticky "Failed to access camera/microphone" toast used
+    // to span the top of the page and block all pointer events on the
+    // editor underneath, which made the pad unusable in production and
+    // broke every Playwright test that clicked into the editor.
+    await sharedPage.evaluate(() => {
+      const w = window as any;
+      w.navigator.mediaDevices.getUserMedia = async () => {
+        const err: any = new Error();
+        err.name = 'NotFoundError';
+        throw err;
+      };
+    });
+    await sharedPage.locator(videoBtnSelector).evaluate((el) => {
+      (window as any).$(el).click();
+    });
+    await sharedPage.waitForFunction(() => {
+      const w = window as any;
+      return w.$('#gritter-container:visible').length === 1;
+    }, undefined, {timeout: 1000});
+    // Verify pointer-events is none on the container AND on the toast
+    // subtree (.gritter-item, .gritter-content, the <p> with the error
+    // text). The previous fix only set the container itself to none and
+    // restored auto on .gritter-item — that left the actual toast
+    // subtree intercepting pointer events, which is what made
+    // Playwright report `<p>Failed to access...</p> from <#gritter-container>
+    // subtree intercepts pointer events` in CI.
+    const subtreePointerEvents = await sharedPage.evaluate(() => ({
+      container: getComputedStyle(document.querySelector('#gritter-container')!).pointerEvents,
+      item: getComputedStyle(document.querySelector('#gritter-container .gritter-item')!).pointerEvents,
+      content: getComputedStyle(document.querySelector('#gritter-container .gritter-content')!).pointerEvents,
+      close: getComputedStyle(document.querySelector('#gritter-container .gritter-close')!).pointerEvents,
+    }));
+    expect(subtreePointerEvents).toMatchObject({
+      container: 'none',
+      item: 'none',
+      content: 'none',
+      close: 'auto',
+    });
+    // Click the editor at the location overlaid by the gritter toast.
+    // Without the fix Playwright's stability check sees the toast
+    // subtree intercepting and times out at 90s.
+    const innerFrame = sharedPage.frame('ace_inner');
+    if (!innerFrame) throw new Error('ace_inner frame missing');
+    await innerFrame.locator('#innerdocbody').first().click({timeout: 5000});
+  });
 });
