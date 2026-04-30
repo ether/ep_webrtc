@@ -441,6 +441,22 @@ exports.rtc = new class {
   // API HOOKS
 
   async postAceInit(hookName, {pad}) {
+    // BISECT-1: maximum-disable. If this makes embed_value.spec.ts pass in
+    // CI, the cause is somewhere in this method's body below. Diag POST so
+    // we can see in the server log that this branch is being taken (and
+    // confirm location.href shows the embed iframe URL when it fires from
+    // inside the embed).
+    try {
+      $.post('../jserror', {errorInfo: JSON.stringify({
+        type: 'Plugin ep_webrtc',
+        msg: `ep_webrtc DIAG bisect-1 (postAceInit early return) top===window=${window.top === window} href=${window.location.href}`,
+        url: window.location.href,
+        source: 'ep_webrtc-diag',
+        linenumber: -1,
+        userAgent: navigator.userAgent,
+      })}).catch(() => {});
+    } catch (e) {}
+    return;
     const outerWin = document.querySelector('iframe[name="ace_outer"]').contentWindow;
     const innerWin = outerWin.document.querySelector('iframe[name="ace_inner"]').contentWindow;
     this._windows = [window, outerWin, innerWin];
