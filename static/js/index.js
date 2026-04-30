@@ -516,6 +516,9 @@ exports.rtc = new class {
     //   - is a UX surprise — users don't expect an embed to ask for
     //     mic/camera permission. They can still toggle the checkbox.
     const embedded = window.top !== window;
+    // TEMP: surface this in CI so we can confirm the detection works inside
+    // the embed iframe. Will be removed once we confirm.
+    console.log(`ep_webrtc: embedded=${embedded} top===window=${window.top === window} location=${window.location.href}`);
     // Suppress the sticky "Failed to access camera/microphone" gritter when
     // ep_webrtc auto-activates from the cookie/default. Otherwise unrelated
     // tests that read gritter content (e.g. error_sanitization) get
