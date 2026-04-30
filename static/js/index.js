@@ -507,14 +507,22 @@ exports.rtc = new class {
     });
     $(window).on('beforeunload', () => { this.hangupAll(); });
     $(window).on('unload', () => { this.hangupAll(); });
+    // When the pad is loaded inside a third-party iframe (the standard
+    // embed flow exposed via the share button), don't auto-activate
+    // WebRTC. Embeds are passive read-mostly views, and auto-activation
+    // there pulls in getUserMedia + adds an autoplay <video>, which:
+    //   - keeps the iframe's `load` event from firing in environments
+    //     without a camera (this broke embed_value.spec.ts), and
+    //   - is a UX surprise — users don't expect an embed to ask for
+    //     mic/camera permission. They can still toggle the checkbox.
+    const embedded = window.top !== window;
     // Suppress the sticky "Failed to access camera/microphone" gritter when
     // ep_webrtc auto-activates from the cookie/default. Otherwise unrelated
-    // tests that read gritter content (e.g. error_sanitization), or load a
-    // pad inside an iframe (e.g. embed_value), get polluted by our error
-    // toast every time a CI runner without a camera loads a pad. Errors
-    // surfaced after the user explicitly re-clicks the checkbox / mic /
-    // video button still show the toast as before.
-    if ($('#options-enablertc').prop('checked')) {
+    // tests that read gritter content (e.g. error_sanitization) get
+    // polluted by our error toast every time a CI runner without a camera
+    // loads a pad. Errors surfaced after the user explicitly re-clicks the
+    // checkbox / mic / video button still show the toast as before.
+    if (!embedded && $('#options-enablertc').prop('checked')) {
       this._suppressMediaErrorToast = true;
       try {
         await this.activate();
