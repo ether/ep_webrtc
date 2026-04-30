@@ -121,14 +121,28 @@ test.describe('error handling', () => {
       const w = window as any;
       return w.$('#gritter-container:visible').length === 1;
     }, undefined, {timeout: 1000});
-    const intercepts = await sharedPage.evaluate(() => {
-      const styles = window.getComputedStyle(document.querySelector('#gritter-container')!);
-      return styles.pointerEvents;
+    // Verify pointer-events is none on the container AND on the toast
+    // subtree (.gritter-item, .gritter-content, the <p> with the error
+    // text). The previous fix only set the container itself to none and
+    // restored auto on .gritter-item — that left the actual toast
+    // subtree intercepting pointer events, which is what made
+    // Playwright report `<p>Failed to access...</p> from <#gritter-container>
+    // subtree intercepts pointer events` in CI.
+    const subtreePointerEvents = await sharedPage.evaluate(() => ({
+      container: getComputedStyle(document.querySelector('#gritter-container')!).pointerEvents,
+      item: getComputedStyle(document.querySelector('#gritter-container .gritter-item')!).pointerEvents,
+      content: getComputedStyle(document.querySelector('#gritter-container .gritter-content')!).pointerEvents,
+      close: getComputedStyle(document.querySelector('#gritter-container .gritter-close')!).pointerEvents,
+    }));
+    expect(subtreePointerEvents).toMatchObject({
+      container: 'none',
+      item: 'none',
+      content: 'none',
+      close: 'auto',
     });
-    expect(intercepts).toBe('none');
-    // Click the editor underneath. This would time out before the fix
-    // because Playwright's stability check sees the gritter subtree
-    // intercepting pointer events.
+    // Click the editor at the location overlaid by the gritter toast.
+    // Without the fix Playwright's stability check sees the toast
+    // subtree intercepting and times out at 90s.
     const innerFrame = sharedPage.frame('ace_inner');
     if (!innerFrame) throw new Error('ace_inner frame missing');
     await innerFrame.locator('#innerdocbody').first().click({timeout: 5000});

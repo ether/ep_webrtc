@@ -8,15 +8,22 @@
 
 /*
  * The "Failed to access camera/microphone" gritter notifications spawned by
- * showUserMediaError() are sticky and span the top of the page. Without this
- * rule, the empty area of #gritter-container intercepts pointer events for
- * the editor underneath, making the pad unusable until the user dismisses
- * each toast. Restore pointer events on the toast items themselves so the
- * close button still works.
+ * showUserMediaError() are sticky and span the top of the editor. Without
+ * this rule, the gritter's container/items intercept pointer events on the
+ * editor underneath (Playwright's stability check fails with "subtree
+ * intercepts pointer events"), making the pad unusable until the user
+ * dismisses each toast. Pass clicks through everything except the close
+ * button so the toast stays visible and dismissible without blocking
+ * the editor.
  */
-#gritter-container { pointer-events: none; }
+#gritter-container,
 #gritter-container .gritter-item-wrapper,
-#gritter-container .gritter-item { pointer-events: auto; }
+#gritter-container .gritter-item,
+#gritter-container .popup-content,
+#gritter-container .gritter-content,
+#gritter-container .gritter-title,
+#gritter-container .gritter-image { pointer-events: none; }
+#gritter-container .gritter-close { pointer-events: auto; }
 
 #rtcbox {
   align-items: start;
