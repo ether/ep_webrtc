@@ -507,8 +507,20 @@ exports.rtc = new class {
     });
     $(window).on('beforeunload', () => { this.hangupAll(); });
     $(window).on('unload', () => { this.hangupAll(); });
+    // Suppress the sticky "Failed to access camera/microphone" gritter when
+    // ep_webrtc auto-activates from the cookie/default. Otherwise unrelated
+    // tests that read gritter content (e.g. error_sanitization), or load a
+    // pad inside an iframe (e.g. embed_value), get polluted by our error
+    // toast every time a CI runner without a camera loads a pad. Errors
+    // surfaced after the user explicitly re-clicks the checkbox / mic /
+    // video button still show the toast as before.
     if ($('#options-enablertc').prop('checked')) {
-      await this.activate();
+      this._suppressMediaErrorToast = true;
+      try {
+        await this.activate();
+      } finally {
+        this._suppressMediaErrorToast = false;
+      }
     } else {
       await this.deactivate();
     }
@@ -551,6 +563,16 @@ exports.rtc = new class {
   }
 
   showUserMediaError(err) { // show an error returned from getUserMedia
+    if (this._suppressMediaErrorToast) {
+      // Auto-activation from cookie/default failed (e.g. no camera in CI or
+      // the user hasn't granted permission yet). Log it but don't pop a
+      // sticky gritter — the buttons already reflect the failed state and
+      // the user can re-click to retry, at which point a real error toast
+      // will appear.
+      debug('suppressing user-media error toast during auto-activation:', err);
+      logErrorToServer(err);
+      return;
+    }
     err.devices.sort();
     const devices = err.devices.join('');
     let msgId = null;
