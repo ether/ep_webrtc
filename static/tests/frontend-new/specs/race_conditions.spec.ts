@@ -172,26 +172,45 @@ test.describe('Race conditions that leave audio/video track enabled', () => {
             const stream = v2.srcObject as MediaStream;
             const audio = stream.getAudioTracks()[0];
             const video = stream.getVideoTracks()[0];
+            const snapshot = {
+              i,
+              expectEnabled: !enabledOnStart,
+              trackCount: stream.getTracks().length,
+              audioEnabled: audio != null && audio.enabled,
+              videoEnabled: video != null && video.enabled,
+              audioReadyState: audio != null ? audio.readyState : 'absent',
+              videoReadyState: video != null ? video.readyState : 'absent',
+              audioBtnMuted: w.$('.audio-btn').hasClass('muted'),
+              videoBtnOff: w.$('.video-btn').hasClass('off'),
+              oldAEnded: oldA != null ? oldA.readyState === 'ended' : 'absent',
+              oldVEnded: oldV != null ? oldV.readyState === 'ended' : 'absent',
+              newASameAsOld: audio === oldA,
+              newVSameAsOld: video === oldV,
+            };
             const expectEnabled = !enabledOnStart;
             if (expectEnabled) {
-              if (stream.getTracks().length !== 2) return {ok: false};
-              if (!stream.getTracks().every((t) => t.enabled)) return {ok: false};
+              if (stream.getTracks().length !== 2) return {ok: false, reason: 'expected 2 tracks', snapshot};
+              if (!stream.getTracks().every((t) => t.enabled)) return {ok: false, reason: 'expected all tracks enabled', snapshot};
             } else if (stream.getTracks().some((t) => t.enabled)) {
-              return {ok: false};
+              return {ok: false, reason: 'expected no enabled tracks', snapshot};
             }
-            if (w.$('.audio-btn').hasClass('muted') !== (audio == null || !audio.enabled)) return {ok: false};
-            if (w.$('.video-btn').hasClass('off') !== (video == null || !video.enabled)) return {ok: false};
+            if (w.$('.audio-btn').hasClass('muted') !== (audio == null || !audio.enabled)) {
+              return {ok: false, reason: 'audio button does not match track state', snapshot};
+            }
+            if (w.$('.video-btn').hasClass('off') !== (video == null || !video.enabled)) {
+              return {ok: false, reason: 'video button does not match track state', snapshot};
+            }
             const [newA] = stream.getAudioTracks();
             const [newV] = stream.getVideoTracks();
-            if (newA === oldA) return {ok: false};
-            if (oldA != null && oldA.readyState !== 'ended') return {ok: false};
-            if (newA != null && newA.readyState !== 'live') return {ok: false};
-            if (newV === oldV) return {ok: false};
-            if (oldV != null && oldV.readyState !== 'ended') return {ok: false};
-            if (newV != null && newV.readyState !== 'live') return {ok: false};
+            if (newA === oldA) return {ok: false, reason: 'newA is the old audio track', snapshot};
+            if (oldA != null && oldA.readyState !== 'ended') return {ok: false, reason: 'oldA not ended', snapshot};
+            if (newA != null && newA.readyState !== 'live') return {ok: false, reason: 'newA not live', snapshot};
+            if (newV === oldV) return {ok: false, reason: 'newV is the old video track', snapshot};
+            if (oldV != null && oldV.readyState !== 'ended') return {ok: false, reason: 'oldV not ended', snapshot};
+            if (newV != null && newV.readyState !== 'live') return {ok: false, reason: 'newV not live', snapshot};
             return {ok: true};
           }, enabledOnStart);
-          expect(ok.ok).toBe(true);
+          expect(ok, JSON.stringify(ok)).toMatchObject({ok: true});
         }
       });
 

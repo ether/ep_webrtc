@@ -6,6 +6,18 @@
   font-style: normal;
 }
 
+/*
+ * The "Failed to access camera/microphone" gritter notifications spawned by
+ * showUserMediaError() are sticky and span the top of the page. Without this
+ * rule, the empty area of #gritter-container intercepts pointer events for
+ * the editor underneath, making the pad unusable until the user dismisses
+ * each toast. Restore pointer events on the toast items themselves so the
+ * close button still works.
+ */
+#gritter-container { pointer-events: none; }
+#gritter-container .gritter-item-wrapper,
+#gritter-container .gritter-item { pointer-events: auto; }
+
 #rtcbox {
   align-items: start;
   display: none;

@@ -100,4 +100,37 @@ test.describe('error handling', () => {
       expect(contentHtml).toContain(checkString);
     });
   }
+
+  test('gritter container does not intercept editor clicks', async () => {
+    // Regression: a sticky "Failed to access camera/microphone" toast used
+    // to span the top of the page and block all pointer events on the
+    // editor underneath, which made the pad unusable in production and
+    // broke every Playwright test that clicked into the editor.
+    await sharedPage.evaluate(() => {
+      const w = window as any;
+      w.navigator.mediaDevices.getUserMedia = async () => {
+        const err: any = new Error();
+        err.name = 'NotFoundError';
+        throw err;
+      };
+    });
+    await sharedPage.locator(videoBtnSelector).evaluate((el) => {
+      (window as any).$(el).click();
+    });
+    await sharedPage.waitForFunction(() => {
+      const w = window as any;
+      return w.$('#gritter-container:visible').length === 1;
+    }, undefined, {timeout: 1000});
+    const intercepts = await sharedPage.evaluate(() => {
+      const styles = window.getComputedStyle(document.querySelector('#gritter-container')!);
+      return styles.pointerEvents;
+    });
+    expect(intercepts).toBe('none');
+    // Click the editor underneath. This would time out before the fix
+    // because Playwright's stability check sees the gritter subtree
+    // intercepting pointer events.
+    const innerFrame = sharedPage.frame('ace_inner');
+    if (!innerFrame) throw new Error('ace_inner frame missing');
+    await innerFrame.locator('#innerdocbody').first().click({timeout: 5000});
+  });
 });
