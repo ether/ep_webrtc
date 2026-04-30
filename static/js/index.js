@@ -511,29 +511,21 @@ exports.rtc = new class {
     // during the initial auto-activation. Without this, CI runners (and
     // anyone loading a pad without granting camera/mic permission) would
     // see an unsolicited error toast on every pad load, which also
-    // contaminated unrelated tests that read gritter content.
-    // Don't AWAIT the activate() call here either: postAceInit is awaited
-    // by etherpad core before the pad's `load` event fires, and inside an
-    // embed iframe the activate chain (getUserMedia + autoplay <video>)
-    // can hold the iframe's load past the 90s test timeout (broke
-    // embed_value.spec.ts). Kick off activation in the background and
-    // let postAceInit resolve immediately. The buttons reflect state as
-    // tracks come in; existing tests that depend on initialization
-    // synchronously check `$rtcbox.data('initialized')` which still flips
-    // at the end of activate (see below).
+    // contaminated unrelated tests that read gritter content (e.g.
+    // error_sanitization). Errors surfaced AFTER the user explicitly
+    // re-clicks the checkbox / mic / video button still show the toast
+    // as before — see the change-handler above.
     if ($('#options-enablertc').prop('checked')) {
       this._suppressMediaErrorToast = true;
-      // eslint-disable-next-line @typescript-eslint/no-floating-promises
-      this.activate().finally(() => {
+      try {
+        await this.activate();
+      } finally {
         this._suppressMediaErrorToast = false;
-        $rtcbox.data('initialized', true);
-      });
+      }
     } else {
-      // eslint-disable-next-line @typescript-eslint/no-floating-promises
-      this.deactivate().finally(() => {
-        $rtcbox.data('initialized', true);
-      });
+      await this.deactivate();
     }
+    $rtcbox.data('initialized', true); // Help tests determine when initialization is done.
   }
 
   userJoinOrUpdate(hookName, {userInfo}) {
