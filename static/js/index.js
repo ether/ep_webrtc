@@ -507,25 +507,44 @@ exports.rtc = new class {
     });
     $(window).on('beforeunload', () => { this.hangupAll(); });
     $(window).on('unload', () => { this.hangupAll(); });
-    // Suppress the sticky "Failed to access camera/microphone" gritter
-    // during the initial auto-activation. Without this, CI runners (and
-    // anyone loading a pad without granting camera/mic permission) would
-    // see an unsolicited error toast on every pad load, which also
-    // contaminated unrelated tests that read gritter content (e.g.
-    // error_sanitization). Errors surfaced AFTER the user explicitly
-    // re-clicks the checkbox / mic / video button still show the toast
-    // as before — see the change-handler above.
-    if ($('#options-enablertc').prop('checked')) {
-      this._suppressMediaErrorToast = true;
-      try {
-        await this.activate();
-      } finally {
-        this._suppressMediaErrorToast = false;
+    // Schedule auto-activation/deactivation on the next tick instead of
+    // awaiting it inline. Awaiting `activate()` here used to block the
+    // pad's `load` event — and when that pad was loaded inside a
+    // third-party embed iframe (the share-button flow) on a CI runner
+    // without a camera, the iframe's `load` never fired within
+    // Playwright's 90s timeout in
+    // tests/frontend-new/specs/embed_value.spec.ts. Bisecting confirmed
+    // that the OUTER pad's activate() chain — specifically when
+    // getUserMedia rejects with NotFoundError — is what holds the
+    // subsequent embed iframe's load. Deferring with setTimeout(0)
+    // lets postAceInit return synchronously so the pad's load fires
+    // promptly; the activate work then runs in the next tick.
+    //
+    // For real users with a camera/mic this is identical: activate()
+    // still awaits getUserMedia, the video appears as soon as the
+    // permission prompt resolves, and `$rtcbox.data('initialized')` is
+    // still flipped to true once activate completes (just one tick
+    // later). For tests that depend on initialized being set, they
+    // already wait via `waitForFunction(() => ...$rtcbox...initialized)`.
+    //
+    // _suppressMediaErrorToast still suppresses the sticky error
+    // gritter during this initial auto-activation so an unsolicited
+    // toast doesn't pollute unrelated tests that read gritter content.
+    const enableRtc = $('#options-enablertc').prop('checked');
+    setTimeout(async () => {
+      if (enableRtc) {
+        this._suppressMediaErrorToast = true;
+        try {
+          await this.activate();
+        } finally {
+          this._suppressMediaErrorToast = false;
+          $rtcbox.data('initialized', true);
+        }
+      } else {
+        await this.deactivate();
+        $rtcbox.data('initialized', true);
       }
-    } else {
-      await this.deactivate();
-    }
-    $rtcbox.data('initialized', true); // Help tests determine when initialization is done.
+    }, 0);
   }
 
   userJoinOrUpdate(hookName, {userInfo}) {
@@ -871,13 +890,11 @@ exports.rtc = new class {
     const $video = $('<video>')
         .attr({
           id: videoId,
-          // BISECT: removing `autoplay` to test whether the autoplay
-          // attribute on a <video> with empty srcObject is what holds
-          // the embed iframe's `load` event. playVideo() explicitly
-          // calls $video[0].play() so this shouldn't change runtime
-          // playback behavior on desktop. iOS may regress (per the
-          // original comment) — if so, restore conditionally.
+          // `playsinline` seems to be required on iOS (both Chrome and Safari), but not on any
+          // other platform. `autoplay` might also be needed on iOS, or maybe it's superfluous (it
+          // doesn't hurt to add it).
           playsinline: '',
+          autoplay: '',
           muted: isLocal ? '' : null,
         })
         .prop({
