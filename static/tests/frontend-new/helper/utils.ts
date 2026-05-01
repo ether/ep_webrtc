@@ -65,7 +65,32 @@ export const installFakeGetUserMedia = async (page: Page, opts: {track?: boolean
     };
     w.__fakeGetUserMedia = fakeGetUserMedia;
     w.navigator.mediaDevices.getUserMedia = fakeGetUserMedia;
+    // ep_webrtc's postAceInit checks enumerateDevices() and skips
+    // auto-activation when no audio/video device is visible (this is
+    // what lets embed_value.spec.ts pass on CI runners without a
+    // camera). Tests that rely on auto-activate must therefore expose
+    // fake devices too — fake them here in the same helper so callers
+    // get the full activation flow without extra wiring.
+    w.navigator.mediaDevices.enumerateDevices = async () => [
+      {kind: 'audioinput', deviceId: 'fake-audio', groupId: 'fake', label: 'fake mic'},
+      {kind: 'videoinput', deviceId: 'fake-video', groupId: 'fake', label: 'fake cam'},
+    ];
   }, track);
+};
+
+// Fakes navigator.mediaDevices.enumerateDevices to expose one
+// audioinput + one videoinput device, without touching getUserMedia.
+// Use this in tests that need ep_webrtc to auto-activate but still
+// want to control getUserMedia separately (e.g. errors.spec patches
+// getUserMedia to throw specific DOMExceptions).
+export const installFakeMediaDevices = async (page: Page) => {
+  await page.evaluate(() => {
+    const w = window as any;
+    w.navigator.mediaDevices.enumerateDevices = async () => [
+      {kind: 'audioinput', deviceId: 'fake-audio', groupId: 'fake', label: 'fake mic'},
+      {kind: 'videoinput', deviceId: 'fake-video', groupId: 'fake', label: 'fake cam'},
+    ];
+  });
 };
 
 // Sets the `prefs` cookie so the next pad load picks up the supplied

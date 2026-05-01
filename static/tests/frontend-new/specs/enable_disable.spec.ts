@@ -18,6 +18,18 @@ test.describe('enable/disable', () => {
         sharedPage = await browser.newPage();
         test.setTimeout(60_000);
         const padPrefs = cookieVal == null ? {} : {rtcEnabled: cookieVal};
+        // Make ep_webrtc's enumerateDevices()-based auto-activate skip
+        // happy: pretend a camera/mic is present (and supply a fake
+        // getUserMedia) BEFORE navigation so postAceInit sees devices.
+        await sharedPage.addInitScript(() => {
+          const w = window as any;
+          const fakeStream = () => new MediaStream();
+          w.navigator.mediaDevices.enumerateDevices = async () => [
+            {kind: 'audioinput', deviceId: 'fake-audio', groupId: 'fake', label: 'fake mic'},
+            {kind: 'videoinput', deviceId: 'fake-video', groupId: 'fake', label: 'fake cam'},
+          ];
+          w.navigator.mediaDevices.getUserMedia = async () => fakeStream();
+        });
         await setPadPrefsCookie(sharedPage, padPrefs);
         const params: Record<string, any> = {};
         if (queryVal != null) params.av = queryVal;
