@@ -1061,12 +1061,28 @@ exports.rtc = new class {
         click: async () => {
           const screenshareEnabled = !this._selfViewButtons.screenshare.enabled;
           _debug(`button clicked to ${screenshareEnabled ? 'en' : 'dis'}able screen sharing`);
+          // Capture the previous camera state so we can restore it if
+          // the screen-picker is canceled (getDisplayMedia rejects).
+          // Without this, clicking screenshare → cancel turns the
+          // camera off permanently from the user's perspective and
+          // leaves a stale disabled camera track in the local stream.
+          const wasCameraOn = this._selfViewButtons.video.enabled;
           // Unconditionally disable the camera. Either screen sharing was previously disabled in
           // which case the user now wants to share the screen, or screen sharing was previously
           // enabled in which case the user wants to shut off all video.
           this._selfViewButtons.video.enabled = false;
           this._selfViewButtons.screenshare.enabled = screenshareEnabled;
           await this.updateLocalTracks({updateVideo: true});
+          // If the user wanted to start screensharing but the picker
+          // was canceled or denied, updateLocalTracks has flipped
+          // screenshare.enabled back to false. Bring the camera back
+          // to the state it was in before the click so the user isn't
+          // left with no video at all.
+          if (screenshareEnabled && wasCameraOn &&
+              !this._selfViewButtons.screenshare.enabled) {
+            this._selfViewButtons.video.enabled = true;
+            await this.updateLocalTracks({updateVideo: true});
+          }
           // Don't use `await` here -- see the comment for the audio button click handler above.
           this.unmuteAndPlayAll();
         },
