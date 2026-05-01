@@ -18,6 +18,21 @@ test.describe('error handling', () => {
   test.beforeAll(async ({browser}) => {
     sharedPage = await browser.newPage();
     test.setTimeout(60_000);
+    // ep_webrtc's postAceInit checks enumerateDevices() and skips auto-
+    // activation when no audio/video device is visible. This test
+    // exercises the error-toast flow which needs the .video-btn button
+    // (created by activate → addInterface) to exist, so install a fake
+    // mediaDevices BEFORE the pad loads so auto-activation runs.
+    // Each test below patches getUserMedia separately to throw the
+    // specific DOMException it wants to verify.
+    await sharedPage.addInitScript(() => {
+      const w = window as any;
+      w.navigator.mediaDevices.enumerateDevices = async () => [
+        {kind: 'audioinput', deviceId: 'fake-audio', groupId: 'fake', label: 'fake mic'},
+        {kind: 'videoinput', deviceId: 'fake-video', groupId: 'fake', label: 'fake cam'},
+      ];
+      w.navigator.mediaDevices.getUserMedia = async () => new MediaStream();
+    });
     await goToNewPadWithParams(sharedPage, {
       av: true,
       webrtcaudioenabled: false,

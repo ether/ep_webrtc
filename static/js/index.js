@@ -507,6 +507,29 @@ exports.rtc = new class {
     });
     $(window).on('beforeunload', () => { this.hangupAll(); });
     $(window).on('unload', () => { this.hangupAll(); });
+    // Skip auto-activation when the host has no audio/video device the
+    // browser can see. Bisecting against ether/ep_webrtc CI proved that
+    // the OUTER pad's activate() chain — specifically when getUserMedia
+    // rejects with NotFoundError on a runner without a camera — leaves
+    // browser-internal media state that holds the embedded pad iframe's
+    // `load` event past Playwright's 90s timeout in
+    // tests/frontend-new/specs/embed_value.spec.ts. Real users with a
+    // camera/mic still see the same auto-activate flow: enumerateDevices
+    // returns at least one device, hasMediaDevice is true, activate
+    // runs as before. ep_webrtc's own tests that exercise activation
+    // install a fake enumerateDevices via the test helper so they still
+    // hit the activate path with the fake getUserMedia.
+    let hasMediaDevice = true;
+    try {
+      const wantAudio = this._settings.audio.disabled !== 'hard';
+      const wantVideo = this._settings.video.disabled !== 'hard';
+      const devices = await navigator.mediaDevices.enumerateDevices();
+      const hasAudio = devices.some((d) => d.kind === 'audioinput');
+      const hasVideo = devices.some((d) => d.kind === 'videoinput');
+      hasMediaDevice = (wantAudio && hasAudio) || (wantVideo && hasVideo);
+    } catch (err) {
+      debug('enumerateDevices() failed; falling back to auto-activate:', err);
+    }
     // Suppress the sticky "Failed to access camera/microphone" gritter
     // during the initial auto-activation. Without this, CI runners (and
     // anyone loading a pad without granting camera/mic permission) would
@@ -515,13 +538,21 @@ exports.rtc = new class {
     // error_sanitization). Errors surfaced AFTER the user explicitly
     // re-clicks the checkbox / mic / video button still show the toast
     // as before — see the change-handler above.
-    if ($('#options-enablertc').prop('checked')) {
+    if (hasMediaDevice && $('#options-enablertc').prop('checked')) {
       this._suppressMediaErrorToast = true;
       try {
         await this.activate();
       } finally {
         this._suppressMediaErrorToast = false;
       }
+    } else if (!hasMediaDevice) {
+      // No camera/mic visible. Don't auto-activate — the activate chain
+      // creates a <video autoplay> element and a getUserMedia request
+      // that hangs the browser's media subsystem when there's no
+      // device. The checkbox keeps whatever state settingToCheckbox
+      // assigned (cookie/query/default) so users still see the right
+      // toggle in the gear menu. They can manually tick it to call
+      // activate() via the change-handler.
     } else {
       await this.deactivate();
     }
