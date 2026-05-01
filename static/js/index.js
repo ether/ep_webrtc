@@ -441,22 +441,6 @@ exports.rtc = new class {
   // API HOOKS
 
   async postAceInit(hookName, {pad}) {
-    // BISECT-1: maximum-disable. If this makes embed_value.spec.ts pass in
-    // CI, the cause is somewhere in this method's body below. Diag POST so
-    // we can see in the server log that this branch is being taken (and
-    // confirm location.href shows the embed iframe URL when it fires from
-    // inside the embed).
-    try {
-      $.post('../jserror', {errorInfo: JSON.stringify({
-        type: 'Plugin ep_webrtc',
-        msg: `ep_webrtc DIAG bisect-1 (postAceInit early return) top===window=${window.top === window} href=${window.location.href}`,
-        url: window.location.href,
-        source: 'ep_webrtc-diag',
-        linenumber: -1,
-        userAgent: navigator.userAgent,
-      })}).catch(() => {});
-    } catch (e) {}
-    return;
     const outerWin = document.querySelector('iframe[name="ace_outer"]').contentWindow;
     const innerWin = outerWin.document.querySelector('iframe[name="ace_inner"]').contentWindow;
     this._windows = [window, outerWin, innerWin];
@@ -523,25 +507,23 @@ exports.rtc = new class {
     });
     $(window).on('beforeunload', () => { this.hangupAll(); });
     $(window).on('unload', () => { this.hangupAll(); });
-    // Suppress the sticky "Failed to access camera/microphone" gritter
-    // during the initial auto-activation. Without this, CI runners (and
-    // anyone loading a pad without granting camera/mic permission) would
-    // see an unsolicited error toast on every pad load, which also
-    // contaminated unrelated tests that read gritter content (e.g.
-    // error_sanitization). Errors surfaced AFTER the user explicitly
-    // re-clicks the checkbox / mic / video button still show the toast
-    // as before — see the change-handler above.
-    if ($('#options-enablertc').prop('checked')) {
-      this._suppressMediaErrorToast = true;
-      try {
-        await this.activate();
-      } finally {
-        this._suppressMediaErrorToast = false;
-      }
-    } else {
-      await this.deactivate();
-    }
-    $rtcbox.data('initialized', true); // Help tests determine when initialization is done.
+    // BISECT-d: skip the auto-activate / auto-deactivate block (and the
+    // initialized flag). If embed_value.spec.ts now passes, the cause is
+    // in activate() / deactivate() (most likely the addInterface chain
+    // creating an autoplay <video>). The 71 ep_webrtc-own failures from
+    // bisect-1 should mostly come back here because the rest of init
+    // (checkbox handlers, listeners) is restored — but the 2 embed_value
+    // tests are the metric we care about.
+    try {
+      $.post('../jserror', {errorInfo: JSON.stringify({
+        type: 'Plugin ep_webrtc',
+        msg: `ep_webrtc DIAG bisect-d (skipped auto-activate block) top===window=${window.top === window} href=${window.location.href}`,
+        url: window.location.href,
+        source: 'ep_webrtc-diag',
+        linenumber: -1,
+        userAgent: navigator.userAgent,
+      })}).catch(() => {});
+    } catch (e) {}
   }
 
   userJoinOrUpdate(hookName, {userInfo}) {
