@@ -507,45 +507,21 @@ exports.rtc = new class {
     });
     $(window).on('beforeunload', () => { this.hangupAll(); });
     $(window).on('unload', () => { this.hangupAll(); });
-    // Skip auto-activation if the host has no audio/video devices the
-    // browser can see. Bisecting against ether/ep_webrtc CI proved that
-    // the OUTER pad's activate() chain (when getUserMedia rejects with
-    // NotFoundError) is what holds the embedded pad iframe's `load`
-    // event past Playwright's 90s timeout in
-    // tests/frontend-new/specs/embed_value.spec.ts. Real users with a
-    // camera/mic still get auto-activation because enumerateDevices()
-    // returns at least one device of the appropriate kind. CI runners
-    // (and users on hardware without a camera/mic) skip auto-activation,
-    // which avoids the dead `<video autoplay>` element and the
-    // associated browser-internal media state that blocks subsequent
-    // iframe loads.
-    //
-    // The change-handler on #options-enablertc stays wired up, so a user
-    // who explicitly toggles the WebRTC checkbox still gets the camera
-    // flow with the normal NotFoundError feedback.
-    let hasMediaDevice = true;
-    try {
-      const devices = await navigator.mediaDevices.enumerateDevices();
-      const wantAudio = this._settings.audio.disabled !== 'hard';
-      const wantVideo = this._settings.video.disabled !== 'hard';
-      const hasAudio = devices.some((d) => d.kind === 'audioinput');
-      const hasVideo = devices.some((d) => d.kind === 'videoinput');
-      hasMediaDevice = (wantAudio && hasAudio) || (wantVideo && hasVideo);
-    } catch (err) {
-      debug('enumerateDevices() failed; falling back to auto-activate:', err);
-    }
-    if (hasMediaDevice && $('#options-enablertc').prop('checked')) {
+    // Suppress the sticky "Failed to access camera/microphone" gritter
+    // during the initial auto-activation. Without this, CI runners (and
+    // anyone loading a pad without granting camera/mic permission) would
+    // see an unsolicited error toast on every pad load, which also
+    // contaminated unrelated tests that read gritter content (e.g.
+    // error_sanitization). Errors surfaced AFTER the user explicitly
+    // re-clicks the checkbox / mic / video button still show the toast
+    // as before — see the change-handler above.
+    if ($('#options-enablertc').prop('checked')) {
       this._suppressMediaErrorToast = true;
       try {
         await this.activate();
       } finally {
         this._suppressMediaErrorToast = false;
       }
-    } else if (!hasMediaDevice) {
-      // No camera/mic visible. Reflect a deactivated state in the UI
-      // without ever calling getUserMedia / spawning the autoplay
-      // <video> element. The user can still tick the checkbox to retry.
-      $('#options-enablertc').prop('checked', false);
     } else {
       await this.deactivate();
     }
@@ -895,11 +871,13 @@ exports.rtc = new class {
     const $video = $('<video>')
         .attr({
           id: videoId,
-          // `playsinline` seems to be required on iOS (both Chrome and Safari), but not on any
-          // other platform. `autoplay` might also be needed on iOS, or maybe it's superfluous (it
-          // doesn't hurt to add it).
+          // BISECT: removing `autoplay` to test whether the autoplay
+          // attribute on a <video> with empty srcObject is what holds
+          // the embed iframe's `load` event. playVideo() explicitly
+          // calls $video[0].play() so this shouldn't change runtime
+          // playback behavior on desktop. iOS may regress (per the
+          // original comment) — if so, restore conditionally.
           playsinline: '',
-          autoplay: '',
           muted: isLocal ? '' : null,
         })
         .prop({
