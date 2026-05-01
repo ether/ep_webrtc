@@ -441,26 +441,11 @@ exports.rtc = new class {
   // API HOOKS
 
   async postAceInit(hookName, {pad}) {
-    // BISECT-EARLY: move the embed early-return to the top of the
-    // function. The previous attempt placed the early-return after the
-    // setup (rtcbox div, settingToCheckbox, window listeners) and STILL
-    // hit the 90s timeout in embed_value.spec.ts even though the
-    // embedded=true diag fired correctly. So the offender is somewhere
-    // in the setup, not in activate(). This bisect step skips ALL of
-    // postAceInit when embedded — same as bisect-1 — to confirm we're
-    // back to passing.
-    const embedded = window.top !== window;
-    try {
-      $.post('../jserror', {errorInfo: JSON.stringify({
-        type: 'Plugin ep_webrtc',
-        msg: `ep_webrtc DIAG bisect-early embedded=${embedded} href=${window.location.href}`,
-        url: window.location.href,
-        source: 'ep_webrtc-init',
-        linenumber: -1,
-        userAgent: navigator.userAgent,
-      })}).catch(() => {});
-    } catch (e) {}
-    if (embedded) return;
+    // BISECT-NODIAG: same as bisect-1 (skip ALL of postAceInit when
+    // embedded), but WITHOUT the $.post('/jserror') diagnostic call.
+    // Bisect-early was identical except for the $.post and it failed
+    // embed_value, which suggests $.post itself is the offender.
+    if (window.top !== window) return;
     const outerWin = document.querySelector('iframe[name="ace_outer"]').contentWindow;
     const innerWin = outerWin.document.querySelector('iframe[name="ace_inner"]').contentWindow;
     this._windows = [window, outerWin, innerWin];
