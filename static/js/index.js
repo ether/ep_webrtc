@@ -507,23 +507,56 @@ exports.rtc = new class {
     });
     $(window).on('beforeunload', () => { this.hangupAll(); });
     $(window).on('unload', () => { this.hangupAll(); });
-    // BISECT-d: skip the auto-activate / auto-deactivate block (and the
-    // initialized flag). If embed_value.spec.ts now passes, the cause is
-    // in activate() / deactivate() (most likely the addInterface chain
-    // creating an autoplay <video>). The 71 ep_webrtc-own failures from
-    // bisect-1 should mostly come back here because the rest of init
-    // (checkbox handlers, listeners) is restored — but the 2 embed_value
-    // tests are the metric we care about.
+    // When the pad is rendered inside a third-party iframe (the standard
+    // share-button embed flow), skip auto-activation. Bisecting against
+    // ether/ep_webrtc CI showed that `await this.activate()` here — which
+    // dispatches into setStream → addInterface → creates an autoplay
+    // <video> element + awaits getUserMedia — is what holds the embedded
+    // pad iframe's `load` event past Playwright's 90s timeout in
+    // `tests/frontend-new/specs/embed_value.spec.ts`. Auto-activation in
+    // an embed is also the wrong UX: the user shouldn't get a camera /
+    // mic permission prompt the moment a pad is embedded on a third-party
+    // page. They can still toggle the WebRTC checkbox manually — the
+    // change-handler above stays wired up.
+    //
+    // Diagnostic POST so CI logs can confirm the detection actually
+    // fires inside the embed iframe (Playwright doesn't pipe browser
+    // console.log to test output, but etherpad's server logger captures
+    // /jserror posts).
+    const embedded = window.top !== window;
     try {
       $.post('../jserror', {errorInfo: JSON.stringify({
         type: 'Plugin ep_webrtc',
-        msg: `ep_webrtc DIAG bisect-d (skipped auto-activate block) top===window=${window.top === window} href=${window.location.href}`,
+        msg: `ep_webrtc postAceInit embedded=${embedded} href=${window.location.href}`,
         url: window.location.href,
-        source: 'ep_webrtc-diag',
+        source: 'ep_webrtc-init',
         linenumber: -1,
         userAgent: navigator.userAgent,
       })}).catch(() => {});
     } catch (e) {}
+    if (embedded) {
+      $rtcbox.data('initialized', true);
+      return;
+    }
+    // Suppress the sticky "Failed to access camera/microphone" gritter
+    // during the initial auto-activation. Without this, CI runners (and
+    // anyone loading a pad without granting camera/mic permission) would
+    // see an unsolicited error toast on every pad load, which also
+    // contaminated unrelated tests that read gritter content (e.g.
+    // error_sanitization). Errors surfaced AFTER the user explicitly
+    // re-clicks the checkbox / mic / video button still show the toast
+    // as before — see the change-handler above.
+    if ($('#options-enablertc').prop('checked')) {
+      this._suppressMediaErrorToast = true;
+      try {
+        await this.activate();
+      } finally {
+        this._suppressMediaErrorToast = false;
+      }
+    } else {
+      await this.deactivate();
+    }
+    $rtcbox.data('initialized', true); // Help tests determine when initialization is done.
   }
 
   userJoinOrUpdate(hookName, {userInfo}) {
