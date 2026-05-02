@@ -1,5 +1,11 @@
 name: Node.js Package
-on: [push]
+on:
+  push:
+  # Invoked by automerge.yml after a Dependabot PR is merged. GitHub
+  # Actions doesn't fire on:push when the push is authored by GITHUB_TOKEN
+  # (the automerge action's only available identity), so without this
+  # dispatch trigger the release job never runs after auto-merges.
+  workflow_dispatch:
 
 # id-token: write must be granted here so the reusable npmpublish workflow
 # can request an OIDC token for npm trusted publishing.
