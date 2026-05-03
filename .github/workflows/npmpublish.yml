@@ -53,10 +53,21 @@ jobs:
           fetch-depth: 0
       -
         name: Bump version (patch)
+        id: bump
         run: |
           LATEST_TAG=$(git describe --tags --abbrev=0) || exit 1
           NEW_COMMITS=$(git rev-list --count "${LATEST_TAG}"..) || exit 1
-          [ "${NEW_COMMITS}" -gt 0 ] || exit 0
+          # No new commits since the last tag → nothing to publish.
+          # Setting `bumped=false` lets the publish step below skip
+          # itself instead of trying to republish the existing version
+          # (which fails with "cannot publish over previously published
+          # versions"). Only manual `gh workflow run` invocations on a
+          # tag-current branch hit this path; on:push always sees ≥1
+          # new commit because the push event is what triggered us.
+          if [ "${NEW_COMMITS}" -le 0 ]; then
+            echo "bumped=false" >> "${GITHUB_OUTPUT}"
+            exit 0
+          fi
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           pnpm i --frozen-lockfile
@@ -84,9 +95,11 @@ jobs:
           # rejects the tag push too, and the next workflow tick can retry
           # cleanly against the up-to-date refs.
           git push --atomic origin "${GITHUB_REF_NAME}" "${NEW_TAG}"
+          echo "bumped=true" >> "${GITHUB_OUTPUT}"
       # This is required if the package has a prepare script that uses something
       # in dependencies or devDependencies.
       -
+        if: steps.bump.outputs.bumped == 'true'
         run: pnpm i
       # `npm publish` must come after `git push` otherwise there is a race
       # condition: If two PRs are merged back-to-back then master/main will be
@@ -104,4 +117,5 @@ jobs:
       # whichever `npm` is on PATH; calling `npm` directly avoids any shim
       # ambiguity.
       - name: Publish to npm via OIDC
+        if: steps.bump.outputs.bumped == 'true'
         run: npm publish --provenance --access public
