@@ -1,7 +1,8 @@
 {
 	"@metadata": {
 		"authors": [
-			"Ghose"
+			"Ghose",
+			"Toliño"
 		]
 	},
 	"ep_webrtc_settings_enablertc": "Activar conversa de vídeo/audio",
@@ -16,6 +17,6 @@
 	"ep_webrtc_error_notFound_screen": "Fallou o acceso á súa pantalla.",
 	"ep_webrtc_error_notReadable": "Desculpa, houbo un fallo de hardware que impideu o acceso á túa cámara e/ou micrófono:",
 	"ep_webrtc_error_otherCantAccess": "Desculpa, o navegador non ten acceso á cámara e/ou micrófono. Comproba os permisos nos axustes do navegador. Normalmente esto non se debe a un fallo no hardware:",
-	"ep_webrtc_settings_audioenabledonstart": "Audio ON ao Inicio",
-	"ep_webrtc_settings_videoenabledonstart": "Video ON ao Inicio"
+	"ep_webrtc_settings_audioenabledonstart": "Son activado ao inicio",
+	"ep_webrtc_settings_videoenabledonstart": "Vídeo activado ao inicio"
 }
