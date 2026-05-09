@@ -33,7 +33,7 @@ jobs:
       - uses: pnpm/action-setup@v6
         name: Install pnpm
         with:
-          version: 11
+          package_json_file: ./etherpad-lite/package.json
           run_install: false
       - name: Get pnpm store directory
         shell: bash
