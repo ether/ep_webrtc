@@ -37,12 +37,18 @@ ep_webrtc/
 
 ## Helpers used
 
-_None — `ep_plugin_helpers` is not a dependency. Adoption is part of the helpers-adoption sweep (Phase 4)._
+`ep_plugin_helpers` is a dependency. Adopted in the helpers-adoption sweep:
+
+- **`template()`** — `eejsBlock_mySettings` and `eejsBlock_styles` render their templates via the factory (plugin-qualified paths, e.g. `ep_webrtc/templates/settings.ejs`) instead of hand-rolled `eejs.require(...)`.
+- **`logger()`** — the pre-init fallback logger is a named log4js logger (`logger('ep_webrtc')`), later replaced by the per-plugin logger core supplies in `init_ep_webrtc`.
 
 
 ## Helpers NOT used
 
-_To be audited in the helpers-adoption sweep (Phase 4)._
+The plugin-specific server logic stays hand-rolled because the generic helpers don't fit:
+
+- **`settings()`** — `clientVars` does per-pad ICE-server sharding (HMAC) plus ephemeral TURN credential fetching (coturn / xirsys), and `loadSettings` does a custom `_.mergeWith` array-replace + `disabled` validation. The generic relay only passes settings through verbatim.
+- **`messageRelay()`** — `handleMessage` / `handleRTCMessage` route signalling messages P2P (broadcast vs. targeted unicast to a specific author) and meter STATS errors; the generic relay can't express that.
 
 
 ## Running tests locally
