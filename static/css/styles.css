@@ -194,3 +194,19 @@
     margin-left: 5px;
   }
 }
+
+/*
+ * In-pad history mode (timeslider) renders the read-only pad inside an
+ * absolutely-positioned iframe — core's #history-frame-mount, inset:0,
+ * z-index:4 — that overlays #editorcontainerbox. #rtcbox is a normal
+ * in-flow child of that same container, so without this it paints
+ * *underneath* the history iframe and the live call appears to vanish the
+ * moment you start scrubbing history. The call never actually drops (the
+ * pad page stays alive in history mode); we just lift the video column
+ * above the overlay so it stays visible and usable while a reviewer scrubs
+ * through revisions and gives play-by-play commentary on the same call.
+ */
+body.history-mode #rtcbox {
+  position: relative;
+  z-index: 5;
+}
