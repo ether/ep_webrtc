@@ -507,6 +507,17 @@ exports.rtc = new class {
     });
     $(window).on('beforeunload', () => { this.hangupAll(); });
     $(window).on('unload', () => { this.hangupAll(); });
+    // Core fires userJoinOrUpdate only for *remote* users, so editing your own
+    // name (or colour) in the userlist never reaches the self-view tile. Watch
+    // the userlist's own name field and colour swatch and re-sync the local
+    // tile. Delegated so it survives the userlist re-rendering its controls;
+    // deferred a tick so it runs after core's notifyChangeName/renderMyUserInfo
+    // has updated pad.myUserInfo.
+    const refreshSelfView =
+        () => setTimeout(() => this.updatePeerNameAndColor(this.getUserFromId(this.getUserId())), 0);
+    $(document).on(
+        'change.ep_webrtc blur.ep_webrtc', '#myusernameedit', refreshSelfView);
+    $(document).on('click.ep_webrtc', '#mycolorpickersave', refreshSelfView);
     // Skip auto-activation when the host has no audio/video device the
     // browser can see. Bisecting against ether/ep_webrtc CI proved that
     // the OUTER pad's activate() chain — specifically when getUserMedia
@@ -823,6 +834,19 @@ exports.rtc = new class {
 
   getUserFromId(userId) {
     if (!this._pad || !this._pad.collabClient) return null;
+    // The local user is not part of collabClient's connected-users set, so
+    // resolve their own name/colour from the pad's author fields. Without this
+    // the self-view shows "unnamed" even when the user has a name, and it never
+    // reflects a name change the user makes in the userlist (core does not fire
+    // the userJoinOrUpdate hook for the local user — see postAceInit).
+    if (userId === this.getUserId()) {
+      const myInfo = this._pad.myUserInfo || {};
+      return {
+        userId,
+        name: (this._pad.getUserName && this._pad.getUserName()) || myInfo.name,
+        colorId: myInfo.colorId != null ? myInfo.colorId : clientVars.userColor,
+      };
+    }
     const result = this._pad.collabClient
         .getConnectedUsers()
         .filter((user) => user.userId === userId);
