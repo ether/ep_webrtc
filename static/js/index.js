@@ -15,7 +15,7 @@
  */
 'use strict';
 
-require('./adapter');
+require('webrtc-adapter');
 const padcookie = require('ep_etherpad-lite/static/js/pad_cookie').padcookie;
 
 let enableDebugLogging = false;
