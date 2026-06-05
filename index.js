@@ -17,15 +17,13 @@
 const _ = require('lodash');
 const {Buffer} = require('buffer');
 const crypto = require('crypto');
-const eejs = require('ep_etherpad-lite/node/eejs/');
+const {template, logger: createLogger} = require('ep_plugin_helpers');
 const sessioninfos = require('ep_etherpad-lite/node/handler/PadMessageHandler').sessioninfos;
 const stats = require('ep_etherpad-lite/node/stats');
 const util = require('util');
 
-let logger = {};
-for (const level of ['debug', 'info', 'warn', 'error']) {
-  logger[level] = console[level].bind(console, 'ep_webrtc:');
-}
+// Overwritten with the per-plugin logger supplied by core in init_ep_webrtc.
+let logger = createLogger('ep_webrtc');
 
 const defaultSettings = {
   // The defaults here are overridden by the values in the `ep_webrtc` object from `settings.json`.
@@ -258,16 +256,14 @@ exports.init_ep_webrtc = async (hookName, {logger: l}) => {
 
 exports.setSocketIO = (hookName, {io}) => { socketio = io; };
 
-exports.eejsBlock_mySettings = (hookName, context) => {
-  context.content += eejs.require('./templates/settings.ejs', {
+exports.eejsBlock_mySettings = template('ep_webrtc/templates/settings.ejs', {
+  vars: () => ({
     audio_hard_disabled: settings.audio.disabled === 'hard',
     video_hard_disabled: settings.video.disabled === 'hard',
-  }, module);
-};
+  }),
+});
 
-exports.eejsBlock_styles = (hookName, context) => {
-  context.content += eejs.require('./templates/styles.html', {}, module);
-};
+exports.eejsBlock_styles = template('ep_webrtc/templates/styles.html');
 
 exports.loadSettings = async (hookName, {settings: {ep_webrtc: s = {}}}) => {
   settings = _.mergeWith({}, defaultSettings, s, (objV, srcV, key, obj, src) => {
