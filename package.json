@@ -17,7 +17,7 @@
     "ep_plugin_helpers": "^0.6.7",
     "lodash": "^4.18.1",
     "node-fetch": "^3.3.2",
-    "webrtc-adapter": "^9.0.5"
+    "webrtc-adapter": "^9.0.6"
   },
   "funding": {
     "type": "individual",
