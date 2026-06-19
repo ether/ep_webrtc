@@ -28,7 +28,7 @@ jobs:
       - name: Upgrade npm to >=11.5.1 (required for trusted publishing)
         run: npm install -g npm@latest
       - name: Check out Etherpad core
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           repository: ether/etherpad-lite
       - uses: pnpm/action-setup@v6
@@ -47,7 +47,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-pnpm-store-
       -
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
       -

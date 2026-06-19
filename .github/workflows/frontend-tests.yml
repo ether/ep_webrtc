@@ -12,7 +12,7 @@ jobs:
     steps:
       -
         name: Check out Etherpad core
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           repository: ether/etherpad-lite
           path: etherpad-lite
@@ -38,7 +38,7 @@ jobs:
             ${{ runner.os }}-pnpm-store-
       -
         name: Checkout plugin repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           path: plugin
       -
