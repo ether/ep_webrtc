@@ -31,7 +31,7 @@ jobs:
         uses: actions/checkout@v7
         with:
           repository: ether/etherpad-lite
-      - uses: pnpm/action-setup@v6
+      - uses: pnpm/action-setup@v6.0.9
         name: Install pnpm
         with:
           run_install: false
@@ -73,7 +73,7 @@ jobs:
           # `pnpm version patch` bumps package.json, makes a commit, and creates
           # a `v<new-version>` tag. Capture the new tag name from package.json
           # rather than parsing pnpm's output, which has historically varied.
-          # Bump the patch component directly with Node. pnpm/action-setup@v6
+          # Bump the patch component directly with Node. pnpm/action-setup@v6.0.9
           # sometimes installs pnpm 11 pre-releases even when version: 10.x is
           # requested (pnpm/action-setup#225); those pre-releases either skip
           # the git commit/tag or reject --no-git-tag-version as unknown.

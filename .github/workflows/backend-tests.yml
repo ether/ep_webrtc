@@ -30,7 +30,7 @@ jobs:
         name: Install Node.js
         with:
           node-version: 25
-      - uses: pnpm/action-setup@v6
+      - uses: pnpm/action-setup@v6.0.9
         name: Install pnpm
         with:
           package_json_file: ./etherpad-lite/package.json
