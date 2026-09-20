@@ -243,13 +243,13 @@ exports.init_ep_webrtc = async (hookName, {logger: l}) => {
   // TODO: Remove this once all supported Node.js versions have the fetch API (added in Node.js
   // v17.5.0 behind the --experimental-fetch flag).
   if (!globalThis.fetch) {
-    // eslint-disable-next-line node/no-unsupported-features/es-syntax -- https://github.com/mysticatea/eslint-plugin-node/issues/250
+    // eslint-disable-next-line n/no-unsupported-features/es-syntax -- https://github.com/mysticatea/eslint-plugin-node/issues/250
     const {default: fetch, Headers, Request, Response} = await import('node-fetch');
     Object.assign(globalThis, {fetch, Headers, Request, Response});
   }
   // TODO: Remove this once all supported Node.js versions have AbortController (>= v15.4.0).
   if (!globalThis.AbortController) {
-    // eslint-disable-next-line node/no-unsupported-features/es-syntax -- https://github.com/mysticatea/eslint-plugin-node/issues/250
+    // eslint-disable-next-line n/no-unsupported-features/es-syntax -- https://github.com/mysticatea/eslint-plugin-node/issues/250
     globalThis.AbortController = (await import('abort-controller')).default;
   }
 };
@@ -267,8 +267,8 @@ exports.eejsBlock_styles = template('ep_webrtc/templates/styles.html');
 
 exports.loadSettings = async (hookName, {settings: {ep_webrtc: s = {}}}) => {
   settings = _.mergeWith({}, defaultSettings, s, (objV, srcV, key, obj, src) => {
-    if (Array.isArray(srcV)) return _.cloneDeep(srcV); // Don't merge arrays, replace them.
-    if (src === s.video && key === 'constraints') return _.cloneDeep(srcV);
+    if (Array.isArray(srcV)) return structuredClone(srcV); // Don't merge arrays, replace them.
+    if (src === s.video && key === 'constraints') return structuredClone(srcV);
   });
   settings.configError = (() => {
     for (const k of ['audio', 'video']) {

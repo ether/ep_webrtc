@@ -513,8 +513,8 @@ exports.rtc = new class {
     // tile. Delegated so it survives the userlist re-rendering its controls;
     // deferred a tick so it runs after core's notifyChangeName/renderMyUserInfo
     // has updated pad.myUserInfo.
-    const refreshSelfView =
-        () => setTimeout(() => this.updatePeerNameAndColor(this.getUserFromId(this.getUserId())), 0);
+    const refreshSelfView = () => setTimeout(
+        () => this.updatePeerNameAndColor(this.getUserFromId(this.getUserId())), 0);
     $(document).on(
         'change.ep_webrtc blur.ep_webrtc', '#myusernameedit', refreshSelfView);
     $(document).on('click.ep_webrtc', '#mycolorpickersave', refreshSelfView);
