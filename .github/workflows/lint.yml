@@ -7,6 +7,10 @@ jobs:
   lint:
     name: ESLint
     runs-on: ubuntu-latest
+    # `eslint .` executes .eslintrc.cjs and every installed ESLint plugin, so
+    # don't hand it the caller's contents:write / id-token:write token.
+    permissions:
+      contents: read
     steps:
       - name: Check out plugin repository
         uses: actions/checkout@v7
