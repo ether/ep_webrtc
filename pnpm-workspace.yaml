@@ -1,0 +1,10 @@
+# js-yaml and brace-expansion arrive only as transitive dev dependencies (via
+# eslint and minimatch@3), so `pnpm update` cannot move them. The selectors are
+# scoped to the affected major line: an unbounded range would drag minimatch@3
+# onto brace-expansion 5.x and eslint onto js-yaml 5.x.
+#
+# pnpm 11 no longer reads `pnpm.overrides` from package.json — these must live
+# here or the lockfile and the install disagree (ERR_PNPM_LOCKFILE_CONFIG_MISMATCH).
+overrides:
+  js-yaml@^4: '>=4.3.2 <5'
+  brace-expansion@^1: '>=1.1.16 <2'

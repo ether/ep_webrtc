@@ -33,11 +33,5 @@
     "lint": "eslint .",
     "lint:fix": "eslint --fix .",
     "test": "mocha --recursive static/tests/backend/specs"
-  },
-  "pnpm": {
-    "overrides": {
-      "js-yaml@^4": ">=4.3.2 <5",
-      "brace-expansion@^1": ">=1.1.16 <2"
-    }
   }
 }
