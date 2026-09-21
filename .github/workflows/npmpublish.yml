@@ -20,13 +20,17 @@ jobs:
     steps:
       - uses: actions/setup-node@v7
         with:
-          # OIDC trusted publishing needs npm >= 11.5.1, which requires
-          # Node >= 20.17.0. setup-node's `20` resolves to the latest
-          # 20.x, which satisfies that.
-          node-version: 25
+          # OIDC trusted publishing needs npm >= 11.5.1. Node 24 is an LTS
+          # line that every npm 11.x and 12.x supports; Node 25 is not —
+          # npm 12 requires ^22.22.2 || ^24.15.0 || >=26.0.0, so on Node 25
+          # the upgrade step below died with EBADENGINE and no plugin could
+          # publish.
+          node-version: 24
           registry-url: https://registry.npmjs.org/
+        # Pinned to a range rather than @latest: the next npm major dropping
+        # this Node line would silently break publishing fleet-wide again.
       - name: Upgrade npm to >=11.5.1 (required for trusted publishing)
-        run: npm install -g npm@latest
+        run: npm install -g npm@^11.5.1
       - name: Check out Etherpad core
         uses: actions/checkout@v7
         with:
