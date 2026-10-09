@@ -16,8 +16,8 @@ importers:
         specifier: ^3.0.0
         version: 3.0.0
       ep_plugin_helpers:
-        specifier: ^0.6.8
-        version: 0.6.8(supports-color@8.1.1)
+        specifier: ^0.6.9
+        version: 0.6.9(supports-color@8.1.1)
       lodash:
         specifier: ^4.18.1
         version: 4.18.1
@@ -455,8 +455,8 @@ packages:
     resolution: {integrity: sha512-Qohcme7V1inbAfvjItgw0EaxVX5q2rdVEZHRBrEQdRZTssLDGsL8Lwrznl8oQ/6kuTJONLaDcGjkNP247XEhcA==}
     engines: {node: '>=10.13.0'}
 
-  ep_plugin_helpers@0.6.8:
-    resolution: {integrity: sha512-0lmYho5YCIHEF65NNDty68Ezt2wwzD7Pler3EjSZtkR6qRNUIPKI0IK0RdUBi24Muok6TGuEVo2ViEp/0sEChA==}
+  ep_plugin_helpers@0.6.9:
+    resolution: {integrity: sha512-nRibrlOkZNE1bqvuYlTVV/ndqoBttPrOx9XbwPqs4CeiB5j/jh5TPOkK87YkzeUs2ZNNInrz/2bANVE7J2Zpaw==}
     engines: {node: '>=22.0.0'}
 
   es-abstract@1.24.2:
@@ -1866,7 +1866,7 @@ snapshots:
       graceful-fs: 4.2.11
       tapable: 2.3.2
 
-  ep_plugin_helpers@0.6.8(supports-color@8.1.1):
+  ep_plugin_helpers@0.6.9(supports-color@8.1.1):
     dependencies:
       log4js: 6.9.1(supports-color@8.1.1)
     transitivePeerDependencies:
