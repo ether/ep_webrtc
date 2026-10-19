@@ -1,14 +1,22 @@
 {
 	"@metadata": {
 		"authors": [
-			"Saraiki"
+			"Saraiki",
+			"Tauqeerkhansurani"
 		]
 	},
 	"ep_webrtc_settings_enablertc": "آڈیو/وڈیو ڳالھ مہاڑ فعال کرو",
+	"ep_webrtc_error_ssl": "ویب آر ٹی سی ورتݨ کیتے TLS (https) ضروری ہے",
+	"ep_webrtc_error_permission_cam": "تہاݙے کیمرے تائیں رسائی دی اجازت نئیں مل سڳی",
+	"ep_webrtc_error_permission_mic": "تہاݙے مائیکرو فون تائیں رسائی دی اجازت نئیں مل سڳی",
+	"ep_webrtc_error_permission_cammic": "تہاݙے کیمرے تے مائیکرو فون تائیں رسائی دی اجازت نئیں مل سڳی",
+	"ep_webrtc_error_permission_screen": "تہاݙی سکرین تائیں رسائی دی اجازت نئیں مل سڳی",
 	"ep_webrtc_error_notFound_cam": "تہاݙے کیمرے دی رسائی وچ ناکامی تھئی۔",
 	"ep_webrtc_error_notFound_mic": "تہاݙے مائیکروفون دی رسائی وچ ناکامی تھئی۔",
 	"ep_webrtc_error_notFound_cammic": "تہاݙے کیمرا تے مائیکروفون دی رسائی وچ ناکامی تھئی۔",
 	"ep_webrtc_error_notFound_screen": "تہاݙی سکرین دی رسائی وچ ناکامی تھئی۔",
+	"ep_webrtc_error_notReadable": "معذرت، ہک ہارڈ ویئر نقص پیش آیا جیندی وجہ توں تہاݙے کیمرے تے/یا مائیکرو فون تائیں رسائی رک ڳئی",
+	"ep_webrtc_error_otherCantAccess": "معذرت، براؤزر تہاݙے کیمرے تے/یا مائیکرو فون تائیں رسائی نئیں رکھدا۔ برائے مہربانی اپݨے براؤزر دیاں ترتیباں وچ اجازتاں ݙیکھو۔ ایہ غالباً ہارڈ ویئر نقص نئیں",
 	"ep_webrtc_settings_audioenabledonstart": "شروع وچ آڈیو چالو",
 	"ep_webrtc_settings_videoenabledonstart": "شروع وچ وڈیو چالو"
 }
