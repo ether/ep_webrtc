@@ -510,7 +510,7 @@ exports.rtc = new class {
         text: 'Ep_webrtc: There is an error with the configuration of this plugin. Please ' +
             'inform the administrators of this site. They will see the details in their logs.',
         sticky: true,
-        class_name: 'error',
+        class_name: 'error ep_webrtc-gritter',
       });
       return;
     }
@@ -520,7 +520,7 @@ exports.rtc = new class {
         title: 'Error',
         text: 'Ep_webrtc: Please upgrade to etherpad 1.8.3 for this plugin to work correctly',
         sticky: true,
-        class_name: 'error',
+        class_name: 'error ep_webrtc-gritter',
       });
     }
     const $rtcbox = $('<div>')
@@ -731,7 +731,7 @@ exports.rtc = new class {
           .append($('<p>').text(html10n.get(`ep_webrtc_${msgId}`)))
           .append(extraInfo),
       sticky: true,
-      class_name: 'error',
+      class_name: 'error ep_webrtc-gritter',
     });
     logErrorToServer(err);
   }
