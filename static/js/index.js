@@ -46,6 +46,9 @@ let nextInstanceId = 0;
 
 // How long to collect trickled ICE candidates before sending them to the peer in one message.
 const CANDIDATE_BATCH_MS = 50;
+// Upper bound on candidates per message, both sent and accepted. A browser rarely gathers more than
+// a handful; the cap stops a peer from making us do unbounded work with one oversized message.
+const MAX_CANDIDATES_PER_MESSAGE = 32;
 
 const logErrorToServer = async (err, delay = 10000) => {
   // Sleep to avoid logging benign errors caused by the user leaving the page (e.g., audio/video
@@ -217,6 +220,8 @@ class PeerState extends EventTargetPolyfill {
     // A null candidate marks the end of gathering: nothing more is coming, so send now.
     if (candidate == null) return this._flushCandidates();
     this._pendingCandidates.push(candidate);
+    const full = this._pendingCandidates.length >= MAX_CANDIDATES_PER_MESSAGE;
+    if (full) return this._flushCandidates();
     if (this._candidateTimer == null) {
       this._candidateTimer = setTimeout(() => this._flushCandidates(), CANDIDATE_BATCH_MS);
     }
@@ -402,7 +407,11 @@ class PeerState extends EventTargetPolyfill {
       }
       // `candidate` is the single-candidate format sent by older versions of this plugin.
       if (candidate != null) await this._pc.addIceCandidate(candidate);
-      for (const c of Array.isArray(candidates) ? candidates : []) {
+      const batch = Array.isArray(candidates) ? candidates : [];
+      if (batch.length > MAX_CANDIDATES_PER_MESSAGE) {
+        this._debug(`ignoring ${batch.length - MAX_CANDIDATES_PER_MESSAGE} excess ICE candidates`);
+      }
+      for (const c of batch.slice(0, MAX_CANDIDATES_PER_MESSAGE)) {
         if (c != null) await this._pc.addIceCandidate(c);
       }
     } catch (err) {
