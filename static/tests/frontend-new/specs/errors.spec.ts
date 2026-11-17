@@ -162,4 +162,32 @@ test.describe('error handling', () => {
     if (!innerFrame) throw new Error('ace_inner frame missing');
     await innerFrame.locator('#innerdocbody').first().click({timeout: 5000});
   });
+
+  test('click-through is scoped to ep_webrtc toasts', async () => {
+    // Regression: the click-through rule used to match every gritter on the
+    // page, so core toasts (pad retention notice, privacy banner "Learn
+    // more" link, ...) could not be hovered or clicked with ep_webrtc
+    // installed, and clicks fell through to the editor underneath.
+    await sharedPage.evaluate(() => {
+      const w = window as any;
+      w.$.gritter.add({
+        title: 'Core notice',
+        text: w.$('<p>').append(w.$('<a>').attr('href', '#').text('Learn more')),
+        sticky: true,
+        position: 'bottom',
+        class_name: 'core-test-notice',
+      });
+    });
+    const notice = sharedPage.locator('#gritter-container .gritter-item.core-test-notice');
+    await expect(notice).toHaveCount(1);
+    const pointerEvents = await notice.evaluate((el) => ({
+      item: getComputedStyle(el).pointerEvents,
+      content: getComputedStyle(el.querySelector('.gritter-content')!).pointerEvents,
+      link: getComputedStyle(el.querySelector('a')!).pointerEvents,
+    }));
+    expect(pointerEvents).toMatchObject({item: 'auto', content: 'auto', link: 'auto'});
+    await notice.hover({timeout: 5000});
+    await notice.locator('.gritter-close').click({timeout: 5000});
+    await expect(notice).toHaveCount(0);
+  });
 });

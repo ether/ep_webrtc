@@ -9,21 +9,23 @@
 /*
  * The "Failed to access camera/microphone" gritter notifications spawned by
  * showUserMediaError() are sticky and span the top of the editor. Without
- * this rule, the gritter's container/items intercept pointer events on the
- * editor underneath (Playwright's stability check fails with "subtree
- * intercepts pointer events"), making the pad unusable until the user
- * dismisses each toast. Pass clicks through everything except the close
- * button so the toast stays visible and dismissible without blocking
- * the editor.
+ * these rules, the toast intercepts pointer events on the editor underneath
+ * (Playwright's stability check fails with "subtree intercepts pointer
+ * events"), making the pad unusable until the user dismisses each toast.
+ * Pass clicks through ep_webrtc's own toasts except the close button and
+ * links so they stay visible and dismissible without blocking the editor.
+ *
+ * Scoped to .ep_webrtc-gritter: core's own toasts (pad retention notice,
+ * privacy banner with its "Learn more" link, chat messages, ...) must keep
+ * normal pointer events so they can be hovered, read and clicked.
  */
-#gritter-container,
-#gritter-container .gritter-item-wrapper,
-#gritter-container .gritter-item,
-#gritter-container .popup-content,
-#gritter-container .gritter-content,
-#gritter-container .gritter-title,
-#gritter-container .gritter-image { pointer-events: none; }
-#gritter-container .gritter-close { pointer-events: auto; }
+#gritter-container { pointer-events: none; }
+#gritter-container .gritter-item { pointer-events: auto; }
+#gritter-container .gritter-item.ep_webrtc-gritter,
+#gritter-container .gritter-item.ep_webrtc-gritter * { pointer-events: none; }
+#gritter-container .gritter-item.ep_webrtc-gritter .gritter-close,
+#gritter-container .gritter-item.ep_webrtc-gritter .gritter-close *,
+#gritter-container .gritter-item.ep_webrtc-gritter a { pointer-events: auto; }
 
 #rtcbox {
   align-items: start;
