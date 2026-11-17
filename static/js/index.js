@@ -44,6 +44,12 @@ const sessionId = Date.now();
 // Incremented each time a new RTCPeerConnection is created.
 let nextInstanceId = 0;
 
+// How long to collect trickled ICE candidates before sending them to the peer in one message.
+const CANDIDATE_BATCH_MS = 50;
+// Upper bound on candidates per message, both sent and accepted. A browser rarely gathers more than
+// a handful; the cap stops a peer from making us do unbounded work with one oversized message.
+const MAX_CANDIDATES_PER_MESSAGE = 32;
+
 const logErrorToServer = async (err, delay = 10000) => {
   // Sleep to avoid logging benign errors caused by the user leaving the page (e.g., audio/video
   // stream ended unexpectedly). If the user navigates away during this sleep the error will not
@@ -148,7 +154,18 @@ class PeerState extends EventTargetPolyfill {
     super();
     this._pcConfig = pcConfig;
     this._caller = caller;
-    this._sendMessage = (msg) => sendMessage(Object.assign({ids: this._ids}, msg));
+    this._sendMessageNow = (msg) => sendMessage(Object.assign({ids: this._ids}, msg));
+    // Trickle ICE fires one icecandidate event per local candidate, often several within a few
+    // milliseconds. Sending each as its own pad message multiplies the signalling traffic by the
+    // number of candidates and can trip Etherpad's commitRateLimiting, which disconnects the user.
+    // Candidates are therefore collected for a short window and sent as one message. Any other
+    // message flushes the pending candidates first so the peer sees them in order.
+    this._pendingCandidates = [];
+    this._candidateTimer = null;
+    this._sendMessage = (msg) => {
+      this._flushCandidates();
+      this._sendMessageNow(msg);
+    };
     this._localTracks = localTracks;
     this._failedSLDAttempts = 0;
     this._debug = debug;
@@ -190,6 +207,32 @@ class PeerState extends EventTargetPolyfill {
     }
   }
 
+  _flushCandidates() {
+    if (this._candidateTimer != null) clearTimeout(this._candidateTimer);
+    this._candidateTimer = null;
+    if (this._pendingCandidates.length === 0) return;
+    const candidates = this._pendingCandidates;
+    this._pendingCandidates = [];
+    this._sendMessageNow({candidates});
+  }
+
+  _queueCandidate(candidate) {
+    // A null candidate marks the end of gathering: nothing more is coming, so send now.
+    if (candidate == null) return this._flushCandidates();
+    this._pendingCandidates.push(candidate);
+    const full = this._pendingCandidates.length >= MAX_CANDIDATES_PER_MESSAGE;
+    if (full) return this._flushCandidates();
+    if (this._candidateTimer == null) {
+      this._candidateTimer = setTimeout(() => this._flushCandidates(), CANDIDATE_BATCH_MS);
+    }
+  }
+
+  _dropPendingCandidates() {
+    if (this._candidateTimer != null) clearTimeout(this._candidateTimer);
+    this._candidateTimer = null;
+    this._pendingCandidates = [];
+  }
+
   _setRemoteStream(stream) {
     if (stream === this._remoteStream) return;
     if (this._remoteStream != null) {
@@ -215,6 +258,9 @@ class PeerState extends EventTargetPolyfill {
     this._debug('creating RTCPeerConnection with config', this._pcConfig);
     this._debug('peer IDs:', peerIds);
     this._setRemoteStream(null);
+    // Candidates gathered by the old RTCPeerConnection are useless to the new one, and sending them
+    // later would tag them with the new instance ID.
+    this._dropPendingCandidates();
     this._ids.from.instance = ++nextInstanceId;
     this._ids.to = peerIds;
     const pc = new RTCPeerConnection(this._pcConfig);
@@ -229,7 +275,10 @@ class PeerState extends EventTargetPolyfill {
         await this._sendLocalTrack(track.kind, this._localTracks.getTracks(track.kind)[0]);
       }
     });
-    pc.addEventListener('icecandidate', ({candidate}) => this._sendMessage({candidate}));
+    pc.addEventListener('icecandidate', ({candidate}) => {
+      if (pc !== this._pc) return;
+      this._queueCandidate(candidate);
+    });
     pc.addEventListener('negotiationneeded', async () => {
       try {
         await pc.setLocalDescription();
@@ -318,7 +367,7 @@ class PeerState extends EventTargetPolyfill {
 
   async receiveMessage(msg) {
     if (this._closed) return this._debug('Ignoring message because PeerState is closed');
-    const {ids, candidate, description, hangup} = msg;
+    const {ids, candidate, candidates, description, hangup} = msg;
     if (hangup != null) {
       this.close(true);
       return;
@@ -356,7 +405,15 @@ class PeerState extends EventTargetPolyfill {
           this._sendMessage({description: this._pc.localDescription});
         }
       }
+      // `candidate` is the single-candidate format sent by older versions of this plugin.
       if (candidate != null) await this._pc.addIceCandidate(candidate);
+      const batch = Array.isArray(candidates) ? candidates : [];
+      if (batch.length > MAX_CANDIDATES_PER_MESSAGE) {
+        this._debug(`ignoring ${batch.length - MAX_CANDIDATES_PER_MESSAGE} excess ICE candidates`);
+      }
+      for (const c of batch.slice(0, MAX_CANDIDATES_PER_MESSAGE)) {
+        if (c != null) await this._pc.addIceCandidate(c);
+      }
     } catch (err) {
       err.peerMessage = msg;
       console.error('Error processing message from peer:', err);
@@ -368,6 +425,7 @@ class PeerState extends EventTargetPolyfill {
   close(emitClosedEvent = false) {
     if (this._closed) return;
     this._closed = true;
+    this._dropPendingCandidates();
     this._localTracks.removeEventListener('trackchanged', this._ontrackchanged);
     if (this._pc != null) this._pc.close();
     this._pc = null;
