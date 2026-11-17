@@ -103,4 +103,50 @@ test.describe('screen share button', () => {
     });
     expect(after).toEqual({videoOff: true, screenshareOff: true});
   });
+
+  test('renders a visible icon glyph', async ({page}) => {
+    // Regression: in production mode Etherpad's CSS minifier rewrote the
+    // icon font's relative url() to /static/plugins/.versions/..., which
+    // 404s. The button kept its size but its glyph rendered blank.
+    const btn = page.locator('#rtcbox .screenshare-btn');
+    await expect(btn).toBeVisible();
+    const glyph = await btn.evaluate(async (el) => {
+      const before = getComputedStyle(el, '::before');
+      // Rejects with a NetworkError when the font 404s; the status check below reports it.
+      await document.fonts.load(`${before.fontSize} fontawesome-ep_webrtc`, '\uf109')
+          .catch(() => {});
+      const faces = [...document.fonts].filter((f) => f.family.replace(/"/g, '') === 'fontawesome-ep_webrtc');
+      return {
+        content: before.content,
+        fontFamily: before.fontFamily,
+        faceStatuses: faces.map((f) => f.status),
+      };
+    });
+    expect(glyph.content).toBe('"\uf109"');
+    expect(glyph.fontFamily).toContain('fontawesome-ep_webrtc');
+    expect(glyph.faceStatuses).toContain('loaded');
+    expect(glyph.faceStatuses).not.toContain('error');
+  });
+
+  test('icon font does not depend on a rewritable relative URL', async ({page}) => {
+    // CI serves CSS unminified, where a relative url() still works, so also
+    // pin that the @font-face source is self-contained (a data: URI) and
+    // cannot be broken by the host's minifier or a symlinked install path.
+    const srcs = await page.evaluate(() => {
+      const out: string[] = [];
+      for (const sheet of [...document.styleSheets]) {
+        let rules: CSSRuleList;
+        try { rules = sheet.cssRules; } catch { continue; }
+        for (const r of [...rules]) {
+          if (r instanceof CSSFontFaceRule &&
+              r.style.getPropertyValue('font-family').replace(/"/g, '') === 'fontawesome-ep_webrtc') {
+            out.push(r.style.getPropertyValue('src'));
+          }
+        }
+      }
+      return out;
+    });
+    expect(srcs.length).toBeGreaterThan(0);
+    for (const src of srcs) expect(src).toMatch(/^url\("data:font\/woff2;base64,/);
+  });
 });
