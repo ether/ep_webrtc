@@ -15,15 +15,12 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
-      # Plugin floor is engines.node >=22 but current Etherpad core
-      # requires >=24 (engineStrict). Each cell pairs a Node version
-      # with a core ref that actually allows it: Node 22 against the
-      # last tag whose core floor was 22 (v2.7.3); Node 24 / 26 against
-      # current develop.
+      # Plugin floor stays engines.node >=22, but current Etherpad core
+      # requires >=24 (engineStrict) and this plugin's tests use features
+      # that the last Node 22 core (v2.7.3) lacks, so test Node 24 / 26
+      # against current develop only.
       matrix:
         include:
-          - node: '22'
-            core_ref: 'v2.7.3'
           - node: '24'
             core_ref: ''
           - node: '26'
