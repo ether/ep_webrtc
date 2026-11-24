@@ -100,4 +100,8 @@ jobs:
           done
           cd src
           pnpm exec playwright install chromium --with-deps
-          pnpm run test-ui --project=chromium
+          # On the core v2.7.3 cell run only this plugin's own specs. Core
+          # v2.7.3's specs predate fixes that let them coexist with plugins
+          # that change the pad layout (enter.spec, a11y_dialogs.spec), and
+          # the develop cells already run the full core suite with the plugin.
+          pnpm run test-ui --project=chromium ${{ matrix.core_ref && 'plugin_packages/ --pass-with-no-tests' || '' }}
