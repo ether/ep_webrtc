@@ -7,7 +7,26 @@ on:
 
 jobs:
   test-frontend:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os || 'ubuntu-latest' }}
+    name: Playwright (Node ${{ matrix.node }} / core ${{ matrix.core_ref || 'develop' }})
+    strategy:
+      fail-fast: false
+      # Plugin floor is engines.node >=22 but current Etherpad core
+      # requires >=24 (engineStrict). Each cell pairs a Node version
+      # with a core ref that actually allows it: Node 22 against the
+      # last tag whose core floor was 22 (v2.7.3); Node 24 / 26 against
+      # current develop.
+      matrix:
+        include:
+          - node: '22'
+            core_ref: 'v2.7.3'
+            # ubuntu-latest is now 26.04, and the Playwright pinned by core
+            # v2.7.3 refuses to install chromium there.
+            os: ubuntu-24.04
+          - node: '24'
+            core_ref: ''
+          - node: '26'
+            core_ref: ''
 
     steps:
       -
@@ -15,11 +34,12 @@ jobs:
         uses: actions/checkout@v7
         with:
           repository: ether/etherpad-lite
+          ref: ${{ matrix.core_ref }}
           path: etherpad-lite
       - uses: actions/setup-node@v7
         name: Install Node.js
         with:
-          node-version: 25
+          node-version: ${{ matrix.node }}
       - uses: pnpm/action-setup@v6.1.1
         name: Install pnpm
         with:
@@ -52,6 +72,17 @@ jobs:
       - name: Create settings.json
         working-directory: ./etherpad-lite
         run: cp ./src/tests/settings.json settings.json
+      # Etherpad v2.7.x added a "severely outdated" version-badge that polls
+      # GitHub for the latest release and renders an absolutely-positioned
+      # banner at top-right when the running core is a full major behind.
+      # On the core v2.7.3 matrix cell that banner intercepts pointer
+      # events (e.g. #chaticon) and Playwright clicks time out. Set
+      # updates.tier=off so the badge stays hidden. Harmless no-op on cores
+      # without the updater or with the tier already off.
+      - name: Disable updater poll in test settings
+        working-directory: ./etherpad-lite
+        run: |
+          node -e 'const fs=require("fs");const s=JSON.parse(fs.readFileSync("settings.json","utf8"));s.updates={...(s.updates||{}),tier:"off"};fs.writeFileSync("settings.json",JSON.stringify(s,null,2));'
       - name: Run the frontend tests
         working-directory: ./etherpad-lite
         shell: bash
