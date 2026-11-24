@@ -8,6 +8,19 @@ on:
 jobs:
   test-frontend:
     runs-on: ubuntu-latest
+    name: Playwright (Node ${{ matrix.node }} / core ${{ matrix.core_ref || 'develop' }})
+    strategy:
+      fail-fast: false
+      # Plugin floor stays engines.node >=22, but current Etherpad core
+      # requires >=24 (engineStrict) and this plugin's tests use features
+      # that the last Node 22 core (v2.7.3) lacks, so test Node 24 / 26
+      # against current develop only.
+      matrix:
+        include:
+          - node: '24'
+            core_ref: ''
+          - node: '26'
+            core_ref: ''
 
     steps:
       -
@@ -15,11 +28,12 @@ jobs:
         uses: actions/checkout@v7
         with:
           repository: ether/etherpad-lite
+          ref: ${{ matrix.core_ref }}
           path: etherpad-lite
       - uses: actions/setup-node@v7
         name: Install Node.js
         with:
-          node-version: 25
+          node-version: ${{ matrix.node }}
       - uses: pnpm/action-setup@v6.1.1
         name: Install pnpm
         with:
